@@ -62,8 +62,10 @@ public class MillCulture
 	
 	public VillagerType getVillagerType(String typeIn)
 	{
-		for (VillagerType villagerType : villagerTypes) {
-			if (villagerType.id.equalsIgnoreCase(typeIn)) {
+		for (VillagerType villagerType : villagerTypes) 
+		{
+			if (villagerType.id.equalsIgnoreCase(typeIn)) 
+			{
 				return villagerType;
 			}
 		}
@@ -86,8 +88,10 @@ public class MillCulture
 	
 	public VillageType getVillageType(String typeIn)
 	{
-		for (VillageType villageType : villageTypes) {
-			if (villageType.id.equalsIgnoreCase(typeIn)) {
+		for (VillageType villageType : villageTypes) 
+		{
+			if (villageType.id.equalsIgnoreCase(typeIn)) 
+			{
 				return villageType;
 			}
 		}
