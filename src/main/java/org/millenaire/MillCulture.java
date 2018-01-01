@@ -62,11 +62,9 @@ public class MillCulture
 	
 	public VillagerType getVillagerType(String typeIn)
 	{
-		for(int i = 0; i < villagerTypes.length; i++)
-		{
-			if(villagerTypes[i].id.equalsIgnoreCase(typeIn))
-			{
-				return villagerTypes[i];
+		for (VillagerType villagerType : villagerTypes) {
+			if (villagerType.id.equalsIgnoreCase(typeIn)) {
+				return villagerType;
 			}
 		}
 		
@@ -88,11 +86,9 @@ public class MillCulture
 	
 	public VillageType getVillageType(String typeIn)
 	{
-		for(int i = 0; i < villageTypes.length; i++)
-		{
-			if(villageTypes[i].id.equalsIgnoreCase(typeIn))
-			{
-				return villageTypes[i];
+		for (VillageType villageType : villageTypes) {
+			if (villageType.id.equalsIgnoreCase(typeIn)) {
+				return villageType;
 			}
 		}
 		
@@ -419,7 +415,7 @@ public class MillCulture
 		//public String[] secondaryBuildings;
 		//public String[] playerBuildings;
 		
-		private Map<Integer, BuildingProject[]> tiers = new HashMap<Integer, BuildingProject[]>();
+		private Map<Integer, BuildingProject[]> tiers = new HashMap<>();
 		
 		//First Building in this array should always be the TownHall
 		public BuildingProject[] startingBuildings;
