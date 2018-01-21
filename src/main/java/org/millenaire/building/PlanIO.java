@@ -271,7 +271,7 @@ public class PlanIO {
 		String name = nbt.getString("BuildingName");
 
 		return new BuildingPlan(culture, level)
-				.setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.getHorizontal(2)).setPlan(organized).setLengthWidth(length, width);
+				.setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.EAST).setPlan(organized).setLengthWidth(length, width);
 	}
 
 	public static NBTTagCompound getBuildingTag(final String name, MillCulture culture, final boolean packaged) {

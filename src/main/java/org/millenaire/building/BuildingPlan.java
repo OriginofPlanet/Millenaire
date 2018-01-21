@@ -666,7 +666,7 @@ public class BuildingPlan
 			return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
 		}
 
-		final int altitude = (int) (altitudeTotal * 1.0f / nbPoints);
+		final int altitude = (int) (altitudeTotal / nbPoints);
 
 		final BuildingLocation l = new BuildingLocation(this, new BlockPos(x + vg.mapStartX, altitude, z + vg.mapStartZ), orientation);
 
@@ -938,15 +938,14 @@ public class BuildingPlan
 		for (int i = 0; i < bblocks.size(); i++) 
 		{
 			final BuildingBlock bb = bblocks.get(i);
-			
-			Block block = bb.blockState.getBlock();
-			IBlockState state = bb.blockState;
+			Block block = bb.blockState != null ? bb.blockState.getBlock() : null;
+			IBlockState state = bb.blockState != null ? bb.blockState : null;
 			int special = bb.specialBlock;
 			
 			if (bbmap.containsKey(bb.position)) 
 			{
-				block = bbmap.get(bb.position).blockState.getBlock();
-				state = bbmap.get(bb.position).blockState;
+				block = bbmap.get(bb.position).blockState != null ? bbmap.get(bb.position).blockState.getBlock() : null;
+				state = bbmap.get(bb.position).blockState != null ? bbmap.get(bb.position).blockState : null;
 				special = bbmap.get(bb.position).specialBlock;
 			}
 			else
@@ -956,7 +955,9 @@ public class BuildingPlan
 				special = 0;
 			}
 			
-			if ((state == bb.blockState && special == 0 || block == Blocks.grass && bb.blockState.getBlock() == Blocks.dirt) && bb.specialBlock == 0) 
+			Block bDirt = bb.blockState != null ? bb.blockState.getBlock() : null;
+			
+			if ((state == bb.blockState && special == 0 || block == Blocks.grass && bDirt == Blocks.dirt) && bb.specialBlock == 0) 
 				toDelete[i] = true;
 			else if (bb.specialBlock == BuildingBlock.CLEARTREE && block != Blocks.log && block != Blocks.leaves)
 				toDelete[i] = true;
@@ -973,7 +974,7 @@ public class BuildingPlan
 			}
 		}
 		
-		for (int i = 0; i < toDelete.length; i++) 
+		for (int i = toDelete.length - 1; i >= 0; i--) 
 		{
 			if (toDelete[i])
 				bblocks.remove(i);
