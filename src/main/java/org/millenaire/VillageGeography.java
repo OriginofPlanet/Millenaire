@@ -134,7 +134,7 @@ public class VillageGeography
 				|| block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
 	}
 	
-	private void registerBuildingLocation(final BuildingLocation bl) 
+	public void registerBuildingLocation(final BuildingLocation bl) 
 	{
 		buildingLocations.add(bl);
 
@@ -319,9 +319,9 @@ public class VillageGeography
 										// if starting in water
 				short lastLiquid = -1;
 
-				while (block != null && (isBlockSolid(block) || block instanceof BlockLiquid || !onground)) 
+				while (block != null && (isBlockSolid(block) || block instanceof BlockLiquid || onground)) 
 				{
-					if (block == Blocks.log) 
+					if (!isBlockSolid(block) || block == Blocks.log) 
 					{
 						heightDone = true;
 					} 

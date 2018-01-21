@@ -38,13 +38,15 @@ public class VillageGenerator implements IWorldGenerator {
 		if(world.isRemote) {
 			return false;
 		}
-		if(!VillageTracker.get(world).getNearVillages(pos, MillConfig.minVillageDistance).isEmpty()) {
+		if(VillageTracker.get(world).isCloseToOtherVillage(pos, MillConfig.minVillageDistance)) {
 			return false;
 		}
 		else {
 			EntityPlayer generatingPlayer = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), -1);
 			if(rand.nextInt(50) == 1 && world.getChunkFromBlockCoords(pos).isLoaded()) {
 				world.setBlockState(pos, MillBlocks.villageStone.getDefaultState());
+				VillageTracker.get(world).registerVillagePos(pos);
+				return true;
 			}
 			return false;
 		}
