@@ -38,6 +38,7 @@ public class VillageGenerator implements IWorldGenerator {
 		if(world.isRemote) {
 			return false;
 		}
+		//TODO Need a good way to check for this... it doesn't seem to be working currently
 		if(VillageTracker.get(world).isCloseToOtherVillage(pos, MillConfig.minVillageDistance)) {
 			return false;
 		}

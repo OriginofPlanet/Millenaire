@@ -39,7 +39,7 @@ public class Village {
 		this.type = typeIn;
 		this.culture = cultureIn;
 		this.geo = new VillageGeography();
-		BuildingLocation loc = new BuildingLocation(null, mainBlock, EnumFacing.NORTH);
+		BuildingLocation loc = new BuildingLocation(1, 1, 1, mainBlock, EnumFacing.NORTH);
 		
 		List bl = new ArrayList<BuildingLocation>();
 		bl.add(loc);
