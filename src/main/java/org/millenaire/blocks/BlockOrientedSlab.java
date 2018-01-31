@@ -131,8 +131,7 @@ public class BlockOrientedSlab extends BlockSlab
 	@Override
     public int getMetaFromState(IBlockState state)
     {
-        byte b0 = 0;
-        int i = b0;
+        int i = (byte) 0;
 
         if (this.isDouble())
         {
@@ -152,6 +151,6 @@ public class BlockOrientedSlab extends BlockSlab
 	@Override
     protected BlockState createBlockState()
     {
-        return this.isDouble() ? new BlockState(this, new IProperty[] {SEAMLESS, FACING}): new BlockState(this, new IProperty[] {HALF, FACING});
+        return this.isDouble() ? new BlockState(this, SEAMLESS, FACING): new BlockState(this, HALF, FACING);
     }
 }

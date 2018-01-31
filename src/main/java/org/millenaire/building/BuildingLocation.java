@@ -19,16 +19,16 @@ public class BuildingLocation
 	public EnumFacing orientation;
 	public BlockPos position;
 	
-	public List<BlockPos>chestPos = new ArrayList<BlockPos>();
+	public List<BlockPos>chestPos = new ArrayList<>();
 	public BlockPos tradePos;
-	public List<BlockPos>sourcePos = new ArrayList<BlockPos>();
-	public List<BlockPos>craftPos = new ArrayList<BlockPos>();
-	public List<BlockPos>sleepPos = new ArrayList<BlockPos>();
-	public List<BlockPos>hidePos = new ArrayList<BlockPos>();
-	public List<BlockPos>defendPos = new ArrayList<BlockPos>();
-	
-	List<EntityMillVillager>residents = new ArrayList<EntityMillVillager>();
-	public List<String> subBuildings = new ArrayList<String>();
+	public List<BlockPos>sourcePos = new ArrayList<>();
+	public List<BlockPos>craftPos = new ArrayList<>();
+	public List<BlockPos>sleepPos = new ArrayList<>();
+	public List<BlockPos>hidePos = new ArrayList<>();
+	public List<BlockPos>defendPos = new ArrayList<>();
+
+	List<EntityMillVillager>residents = new ArrayList<>();
+	public List<String> subBuildings = new ArrayList<>();
 	
 	public BuildingLocation(BuildingPlan plan, BlockPos pos, EnumFacing orientIn)
 	{

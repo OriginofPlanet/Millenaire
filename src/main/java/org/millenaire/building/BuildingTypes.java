@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class BuildingTypes {
 	
-	private static Map<ResourceLocation, BuildingType> buildingCache = new HashMap<ResourceLocation, BuildingType>();
+	private static Map<ResourceLocation, BuildingType> buildingCache = new HashMap<>();
 
 	public static void cacheBuildingTypes(MillCulture culture) {
 		
@@ -43,7 +43,7 @@ public class BuildingTypes {
 	public static class BuildingType {
 		
 		private String identifier;
-		protected List<ItemRateWrapper> itemrates = new ArrayList<ItemRateWrapper>();
+		protected List<ItemRateWrapper> itemrates = new ArrayList<>();
 		
 		public BuildingType() {}
 		

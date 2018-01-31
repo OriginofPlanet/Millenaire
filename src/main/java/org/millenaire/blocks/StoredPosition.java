@@ -37,7 +37,7 @@ public class StoredPosition extends Block
     @SideOnly(Side.CLIENT)
     public float getAmbientOcclusionLightValue() { return 1.0F; }
 
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", StoredPosition.EnumType.class);
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
 	private boolean showParticles = false;
 
 	private final int sourceColor = 44820;
@@ -70,7 +70,7 @@ public class StoredPosition extends Block
 			double d0 = (double)(color >> 16 & 255) / 255.0D;
             double d1 = (double)(color >> 8 & 255) / 255.0D;
             double d2 = (double)(color & 255) / 255.0D;
-			worldIn.spawnParticle(EnumParticleTypes.SPELL_MOB, pos.getX() + 0.5D, pos.getY()+ 0.5D, pos.getZ()+ 0.5D, d0, d1, d2, new int[0]);
+			worldIn.spawnParticle(EnumParticleTypes.SPELL_MOB, pos.getX() + 0.5D, pos.getY()+ 0.5D, pos.getZ()+ 0.5D, d0, d1, d2);
 		}
 	}
 	
@@ -120,19 +120,19 @@ public class StoredPosition extends Block
 
     public String getUnlocalizedName(int meta)
     {
-        return super.getUnlocalizedName() + "." + StoredPosition.EnumType.byMetadata(meta).getUnlocalizedName();
+        return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
 	@Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(VARIANT, StoredPosition.EnumType.byMetadata(meta));
+        return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
 	@Override
     public int getMetaFromState(IBlockState state)
     {
-        return ((StoredPosition.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class StoredPosition extends Block
     	DEFENDPOS(4, "defendPos"),
     	SLEEPPOS(5, "sleepPos");
         
-        private static final StoredPosition.EnumType[] META_LOOKUP = new StoredPosition.EnumType[values().length];
+        private static final EnumType[] META_LOOKUP = new EnumType[values().length];
         private final int meta;
         private final String name;
 
@@ -163,7 +163,7 @@ public class StoredPosition extends Block
 
         public String toString() { return this.name; }
 
-        public static StoredPosition.EnumType byMetadata(int meta)
+        public static EnumType byMetadata(int meta)
         {
             if (meta < 0 || meta >= META_LOOKUP.length)
             {
@@ -179,7 +179,7 @@ public class StoredPosition extends Block
 
         static
         {
-        	StoredPosition.EnumType[] var0 = values();
+        	EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;

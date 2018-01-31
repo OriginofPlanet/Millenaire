@@ -65,7 +65,7 @@ public class BlockDecorativeStone extends Block
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public static enum EnumType implements IStringSerializable
+    public enum EnumType implements IStringSerializable
     {
         GOLDORNAMENT(0, "goldOrnament"),
     	COOKEDBRICK(1, "cookedBrick"),

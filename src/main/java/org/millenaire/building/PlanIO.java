@@ -32,7 +32,7 @@ import net.minecraftforge.common.util.Constants;
 
 public class PlanIO {
 
-	public static final String FILE_VERSION = "1";
+	private static final String FILE_VERSION = "1";
 
 	//IBlockState[y][z][x]
 	public static void exportBuilding(EntityPlayer player, BlockPos startPoint) {
@@ -66,7 +66,7 @@ public class PlanIO {
 			}
 			boolean foundEnd = false;
 			int xEnd = startPoint.getX() + 1;
-			while(!foundEnd && xEnd < startPoint.getX() + 257) {
+			while(xEnd < startPoint.getX() + 257) {
 				final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(xEnd, startPoint.getY(), startPoint.getZ()));
 
 				if (block.getBlock() == Blocks.standing_sign) {
@@ -82,7 +82,7 @@ public class PlanIO {
 			}
 			foundEnd = false;
 			int zEnd = startPoint.getZ() + 1;
-			while(!foundEnd && zEnd < startPoint.getZ() + 257) {
+			while(zEnd < startPoint.getZ() + 257) {
 				final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(startPoint.getX(), startPoint.getY(), zEnd));
 
 				if (block.getBlock() == Blocks.standing_sign) {
@@ -102,7 +102,7 @@ public class PlanIO {
 			boolean stop = false;
 			int y = 0;
 
-			final Map<Integer, IBlockState[][]> ex = new HashMap<Integer, IBlockState[][]>();
+			final Map<Integer, IBlockState[][]> ex = new HashMap<>();
 
 			while(!stop) {
 
@@ -218,13 +218,13 @@ public class PlanIO {
 		}
 	}
 
-	public static BuildingPlan loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) throws IOException {
+	public static BuildingPlan loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) {
 		//Convert Stream to NBTTagCompound
 
 		//width = x-axis, height = y-axis, length = z-axis
 		short width, height, length;
-		int[] blocks = {};
-		int[] data = {};
+		int[] blocks;
+		int[] data;
 
 		String version = nbt.getString("Version");
 
@@ -342,7 +342,7 @@ public class PlanIO {
 	 * @return the file that is outputted to disk
 	 * @throws Exception 
 	 */
-	private static File exportToSchem(IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
+	private static File exportToSchem (IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
 		File f1 = getBuildingFile(name);
 
 		NBTTagCompound tag = getBuildingTag(name, null, false);

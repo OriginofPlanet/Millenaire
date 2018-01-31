@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockDecorativeWood extends Block
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockDecorativeWood.EnumType.class);
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
 	
 	BlockDecorativeWood()
 	{
@@ -27,7 +27,7 @@ public class BlockDecorativeWood extends Block
 	@Override
     public int damageDropped(IBlockState state)
     {
-        return ((BlockDecorativeWood.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
 	public IProperty getVariantProperty() { return VARIANT; }
@@ -38,7 +38,7 @@ public class BlockDecorativeWood extends Block
     {
         if (Block.getBlockFromItem(itemIn) == this)
         {
-            BlockDecorativeWood.EnumType[] aenumtype = BlockDecorativeWood.EnumType.values();
+            EnumType[] aenumtype = EnumType.values();
 
             for (EnumType enumtype : aenumtype) {
                 list.add(new ItemStack(itemIn, 1, enumtype.getMetadata()));
@@ -48,19 +48,19 @@ public class BlockDecorativeWood extends Block
 
     public String getUnlocalizedName(int meta)
     {
-        return super.getUnlocalizedName() + "." + BlockDecorativeWood.EnumType.byMetadata(meta).getUnlocalizedName();
+        return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
 	@Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(VARIANT, BlockDecorativeWood.EnumType.byMetadata(meta));
+        return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
 	@Override
     public int getMetaFromState(IBlockState state)
     {
-        return ((BlockDecorativeWood.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class BlockDecorativeWood extends Block
         THATCH(2, "thatch"),
     	SERICULTURE(3, "sericulture");
         
-        private static final BlockDecorativeWood.EnumType[] META_LOOKUP = new BlockDecorativeWood.EnumType[values().length];
+        private static final EnumType[] META_LOOKUP = new EnumType[values().length];
         private final int meta;
         private final String name;
 
@@ -89,7 +89,7 @@ public class BlockDecorativeWood extends Block
 
         public String toString() { return this.name; }
 
-        public static BlockDecorativeWood.EnumType byMetadata(int meta)
+        public static EnumType byMetadata(int meta)
         {
             if (meta < 0 || meta >= META_LOOKUP.length)
             {
@@ -105,7 +105,7 @@ public class BlockDecorativeWood extends Block
 
         static
         {
-        	BlockDecorativeWood.EnumType[] var0 = values();
+        	EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;
