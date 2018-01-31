@@ -22,33 +22,33 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class BuildingBlock 
 {
-	public static byte OAKSPAWN = 1;
-	public static byte SPRUCESPAWN = 2;
-	public static byte BIRCHSPAWN = 3;
-	public static byte JUNGLESPAWN = 4;
-	public static byte ACACIASPAWN = 5;
-	public static byte PRESERVEGROUNDDEPTH = 6;
-	public static byte PRESERVEGROUNDSURFACE = 7;
-	public static byte CLEARTREE = 8;
-	public static byte CLEARGROUND = 9;
-	public static byte SPAWNERSKELETON = 10;
-	public static byte SPAWNERZOMBIE = 11;
-	public static byte SPAWNERSPIDER = 12;
-	public static byte SPAWNERCAVESPIDER = 13;
-	public static byte SPAWNERCREEPER = 14;
-	public static byte SPAWNERBLAZE = 15;
-	public static byte DISPENDERUNKNOWNPOWDER = 16;
-	public static byte TAPESTRY = 17;
-	public static byte BYZANTINEICONSMALL = 18;
-	public static byte BYZANTINEICONMEDIUM = 19;
-	public static byte BYZANTINEICONLARGE = 20;
-	public static byte INDIANSTATUE = 21;
-	public static byte MAYANSTATUE = 22;
-	
+	public static final byte OAKSPAWN = 1;
+	public static final byte SPRUCESPAWN = 2;
+	public static final byte BIRCHSPAWN = 3;
+	public static final byte JUNGLESPAWN = 4;
+	public static final byte ACACIASPAWN = 5;
+	public static final byte PRESERVEGROUNDDEPTH = 6;
+	public static final byte PRESERVEGROUNDSURFACE = 7;
+	public static final byte CLEARTREE = 8;
+	public static final byte CLEARGROUND = 9;
+	public static final byte SPAWNERSKELETON = 10;
+	public static final byte SPAWNERZOMBIE = 11;
+	public static final byte SPAWNERSPIDER = 12;
+	public static final byte SPAWNERCAVESPIDER = 13;
+	public static final byte SPAWNERCREEPER = 14;
+	public static final byte SPAWNERBLAZE = 15;
+	public static final byte DISPENDERUNKNOWNPOWDER = 16;
+	public static final byte TAPESTRY = 17;
+	public static final byte BYZANTINEICONSMALL = 18;
+	public static final byte BYZANTINEICONMEDIUM = 19;
+	public static final byte BYZANTINEICONLARGE = 20;
+	public static final byte INDIANSTATUE = 21;
+	public static final byte MAYANSTATUE = 22;
+
 	public IBlockState blockState;
 	public BlockPos position;
 	public byte specialBlock;
-	
+
 	BuildingBlock(IBlockState state, BlockPos pos, byte special)
 	{
 		blockState = state;
@@ -62,16 +62,18 @@ public class BuildingBlock
 		position = pos;
 		specialBlock = 0;
 	}
-	
+
 	public void build(World worldIn, boolean onGeneration)
 	{
 		if (specialBlock != BuildingBlock.PRESERVEGROUNDDEPTH && specialBlock != BuildingBlock.PRESERVEGROUNDSURFACE && specialBlock != BuildingBlock.CLEARTREE) 
 		{
-			worldIn.setBlockState(position, blockState);
-			String soundName = blockState.getBlock().stepSound.getPlaceSound();
-			worldIn.playSoundEffect(position.getX() + 0.5D, position.getY() + 0.5D, position.getZ() + 0.5D, soundName, 0.3F, 0.6F);
+			if(blockState != null) {
+				worldIn.setBlockState(position, blockState);
+				String soundName = blockState.getBlock().stepSound.getPlaceSound();
+				worldIn.playSoundEffect(position.getX() + 0.5D, position.getY() + 0.5D, position.getZ() + 0.5D, soundName, 0.3F, 0.6F);
+			}
 		}
-		
+
 		if (specialBlock == BuildingBlock.PRESERVEGROUNDDEPTH || specialBlock == BuildingBlock.PRESERVEGROUNDSURFACE) 
 		{
 			Block block = worldIn.getBlockState(position).getBlock();
@@ -155,7 +157,7 @@ public class BuildingBlock
 		else if (specialBlock == BuildingBlock.CLEARGROUND) 
 		{
 			Block block = worldIn.getBlockState(position).getBlock();
-			
+
 			worldIn.setBlockToAir(position);
 			String soundName = block.stepSound.getBreakSound();
 			worldIn.playSoundEffect(position.getX() + 0.5D, position.getY() + 0.5D, position.getZ() + 0.5D, soundName, 0.3F, 0.6F);
@@ -281,7 +283,7 @@ public class BuildingBlock
 			dispenser.addItemStack(new ItemStack(MillItems.unknownPowder, 2));
 		}
 	}
-	
+
 	public void buildPath()
 	{
 		//Make code to build paths

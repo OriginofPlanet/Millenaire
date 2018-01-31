@@ -134,7 +134,7 @@ public class VillageGeography
 				|| block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
 	}
 	
-	private void registerBuildingLocation(final BuildingLocation bl) 
+	public void registerBuildingLocation(final BuildingLocation bl) 
 	{
 		buildingLocations.add(bl);
 
@@ -300,9 +300,7 @@ public class VillageGeography
 
 					tblock = chunk.getBlock(i, y, j);
 				}
-
-				constructionHeight[mx][mz] = y;
-
+				
 				boolean heightDone = false;
 
 				if (y <= maxy && y > 1) 
@@ -313,58 +311,12 @@ public class VillageGeography
 				{
 					block = null;
 				}
-				//System.out.println("y is " + constructionHeight[mx][mz]);
 
-				boolean onground = true;// used to continue looking for surface
-										// if starting in water
-				short lastLiquid = -1;
-
-				while (block != null && (isBlockSolid(block) || block instanceof BlockLiquid || !onground)) 
-				{
-					if (block == Blocks.log) 
-					{
-						heightDone = true;
-					} 
-					else if (!heightDone) // everything solid but wood counts
-					{
-						constructionHeight[mx][mz]++;
-					} 
-					else 
-					{
-						heightDone = true;
-					}
-
-					if (isForbiddenBlockForConstruction(block)) 
-					{
-						buildingForbidden[mx][mz] = true;
-					}
-
-					if (block instanceof BlockLiquid) 
-					{
-						onground = false;
-						lastLiquid = y;
-					} 
-					else if (isBlockSolid(block)) 
-					{
-						onground = true;
-					}
-
-					y++;
-
-					if (y <= maxy && y > 1) 
-					{
-						block = chunk.getBlock(i, y, j);
-					} 
-					else 
-					{
-						block = null;
-					}
-				}
-				//System.out.println("constHeight is now at " + constructionHeight[mx][mz]);
-
-				if (!onground)
-				{
-					y = lastLiquid;
+				BlockPos p = world.getTopSolidOrLiquidBlock(new BlockPos(mx, 0, mz));
+				Block b = world.getBlockState(p).getBlock();
+				constructionHeight[mx][mz] = (short)(p.getY());
+				if(isForbiddenBlockForConstruction(b)) {
+					buildingForbidden[mx][mz] = true;
 				}
 
 				while (y <= maxy && y > 1 && !(!isBlockSolid(chunk.getBlock(i, y, j)) && !isBlockSolid(chunk.getBlock(i, y + 1, j)))) 

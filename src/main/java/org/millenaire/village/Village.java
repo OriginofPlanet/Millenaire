@@ -1,6 +1,7 @@
 package org.millenaire.village;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import org.millenaire.MillCulture;
 import org.millenaire.MillCulture.VillageType;
 import org.millenaire.VillageGeography;
 import org.millenaire.VillageTracker;
+import org.millenaire.building.BuildingBlock;
 import org.millenaire.building.BuildingLocation;
 import org.millenaire.building.BuildingPlan;
 import org.millenaire.building.BuildingProject;
@@ -17,6 +19,7 @@ import org.millenaire.pathing.MillPathNavigate;
 import org.millenaire.util.ResourceLocationUtil;
 
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class Village {
@@ -36,7 +39,12 @@ public class Village {
 		this.type = typeIn;
 		this.culture = cultureIn;
 		this.geo = new VillageGeography();
-		this.geo.update(world, new ArrayList<BuildingLocation>(), null, mainBlock, 64);
+		BuildingLocation loc = new BuildingLocation(1, 1, 1, mainBlock, EnumFacing.NORTH);
+		
+		List bl = new ArrayList<BuildingLocation>();
+		bl.add(loc);
+		
+		this.geo.update(world, bl, null, mainBlock, 64);
 	}
 	
 	/**
@@ -64,11 +72,16 @@ public class Village {
 				
 				EntityMillVillager v = new EntityMillVillager(world, 100100, culture);
 				v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
-				v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 1);
+				v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 0);
 				world.spawnEntityInWorld(v);
 				
 				BuildingLocation loc = p.findBuildingLocation(geo, new MillPathNavigate(v, world), mainBlock, 64, new Random(), p.buildingOrientation);
-				PlanIO.placeBuilding(p, loc, world);
+				this.geo.registerBuildingLocation(loc);
+				BuildingBlock[] points = p.getBuildingPoints(world, loc, true);
+				//System.out.println(points.length);
+				for(BuildingBlock bb : points) {
+					bb.build(world, true);
+				}
 			}
 			return true;
 		}

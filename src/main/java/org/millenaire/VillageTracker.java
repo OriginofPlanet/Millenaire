@@ -20,6 +20,7 @@ public class VillageTracker extends WorldSavedData
 	private final static String IDENTITY = "Millenaire.VillageInfo";
 
 	private Map<UUID, Village> villages = new HashMap<>();
+	private List<BlockPos> VPs = new ArrayList<BlockPos>();
 	
 	public VillageTracker() { super(IDENTITY); }
 	
@@ -54,23 +55,30 @@ public class VillageTracker extends WorldSavedData
 			nbt.setTag(e.getKey().toString(), villageTag);
 		}
 	}
-	
+
 	/**
-	 * @return All Villages within a radius from a Block
+	 * Checks registered Village POSITIONS (not registered villages in case village hasn't been created yet)
+	 * to see if it is too close to another village.
+	 * 
+	 * @param pos Position to check
+	 * @param minDist maximum distance to check
+	 * @return
 	 */
-	public List<Village> getNearVillages(BlockPos pos, int maxDist) {
-		List<Village> nearby = new ArrayList<Village>();
+	public boolean isCloseToOtherVillage(BlockPos pos, int minDist) {
+		boolean tooClose = false;
 		
-		for(Village v : villages.values()) {
-			if(v.getPos().distanceSq(pos) <= maxDist*maxDist) {
-				nearby.add(v);
+		for(BlockPos bp : VPs) {
+			if(bp.distanceSq(pos) <= minDist*minDist) {
+				tooClose = true;
+				break;
 			}
 		}
 		
-		return nearby;
+		return tooClose;
 	}
 	
 	public void registerVillage(UUID id, Village vil) { villages.put(id, vil); }
+	public void registerVillagePos(BlockPos pos) { VPs.add(pos); }
 	
 	public void unregisterVillage(UUID id) { villages.remove(id); }
 	

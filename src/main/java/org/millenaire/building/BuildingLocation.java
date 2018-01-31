@@ -1,12 +1,11 @@
 package org.millenaire.building;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.millenaire.MillConfig;
 import org.millenaire.entities.EntityMillVillager;
-import org.millenaire.util.ResourceLocationUtil;
 
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -15,26 +14,39 @@ public class BuildingLocation
 {
 	public int minx, maxx, minz, maxz, miny, maxy;
 	public int minxMargin, maxxMargin, minyMargin, maxyMargin, minzMargin, maxzMargin;
-	public int length, width;
+	public int length, height, width;
 	
 	public EnumFacing orientation;
 	public BlockPos position;
 	
-	public List<BlockPos>chestPos;
+	public List<BlockPos>chestPos = new ArrayList<BlockPos>();
 	public BlockPos tradePos;
-	public List<BlockPos>sourcePos;
-	public List<BlockPos>craftPos;
-	public List<BlockPos>sleepPos;
-	public List<BlockPos>hidePos;
-	public List<BlockPos>defendPos;
+	public List<BlockPos>sourcePos = new ArrayList<BlockPos>();
+	public List<BlockPos>craftPos = new ArrayList<BlockPos>();
+	public List<BlockPos>sleepPos = new ArrayList<BlockPos>();
+	public List<BlockPos>hidePos = new ArrayList<BlockPos>();
+	public List<BlockPos>defendPos = new ArrayList<BlockPos>();
 	
-	List<EntityMillVillager>residents;
-	public List<String> subBuildings;
+	List<EntityMillVillager>residents = new ArrayList<EntityMillVillager>();
+	public List<String> subBuildings = new ArrayList<String>();
 	
-	BuildingLocation(BuildingPlan plan, BlockPos pos, EnumFacing orientIn)
+	public BuildingLocation(BuildingPlan plan, BlockPos pos, EnumFacing orientIn)
 	{
 		orientation = orientIn;
 		position = pos;
+		length = plan.length;
+		height = plan.height;
+		width = plan.width;
+		this.computeMargins();
+	}
+	
+	public BuildingLocation(int l, int h, int w, BlockPos pos, EnumFacing orientIn)
+	{
+		orientation = orientIn;
+		position = pos;
+		length = l;
+		height = h;
+		width = w;
 		this.computeMargins();
 	}
 	
@@ -44,6 +56,14 @@ public class BuildingLocation
 	
 	public void computeMargins() 
 	{
+		minx = position.getX();
+		miny = position.getY();
+		minz = position.getZ();
+		
+		maxx = position.getX() + width;
+		maxy = position.getY() + height;
+		maxz = position.getZ() + length;
+		
 		minxMargin = minx - MillConfig.minBuildingDistance + 1;
 		minzMargin = minz - MillConfig.minBuildingDistance + 1;
 		minyMargin = miny - 3;
