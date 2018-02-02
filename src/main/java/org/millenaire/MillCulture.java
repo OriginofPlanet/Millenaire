@@ -27,12 +27,9 @@ public class MillCulture
 	private VillageType[] villageTypes;
 	private BuildingPlan[] loneBuildings;
 	private String[] vocalizations;
-	private HashMap<String, String[]> nameLists = new HashMap<String, String[]>();
+	private HashMap<String, String[]> nameLists = new HashMap<>();
 
-	private MillCulture(String nameIn)
-	{
-		cultureName = nameIn;
-	}
+	private MillCulture(String nameIn) { cultureName = nameIn; }
 	
 	private MillCulture addNameList(String title, String[] list)
 	{

@@ -66,10 +66,7 @@ public class TileEntityMillChest extends TileEntityChest
     }
 	
 	@Override
-    public String getGuiID()
-    {
-        return "millenaire:chest";
-    }
+    public String getGuiID() { return "millenaire:chest"; }
     
 	@Override
 	public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)

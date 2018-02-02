@@ -85,10 +85,7 @@ public class EntityMillVillager extends EntityCreature
 	}
 	
 	@Override
-    protected PathNavigate getNewNavigator(World worldIn)
-    {
-        return new MillPathNavigate(this, worldIn);
-    }
+    protected PathNavigate getNewNavigator(World worldIn) { return new MillPathNavigate(this, worldIn); }
 	
 	@Override
     protected void applyEntityAttributes()
@@ -278,10 +275,7 @@ public class EntityMillVillager extends EntityCreature
 	
 	//maybe in other class(if changed to Vanilla Villager)
 	@Override
-	public boolean canDespawn() 
-	{
-		return false;
-	}
+	public boolean canDespawn() { return false; }
 	
 	//Goals need to be a thing
 	

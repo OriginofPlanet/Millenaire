@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockDecorativeSodPlank extends Block
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockDecorativeSodPlank.EnumType.class);
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
 
     BlockDecorativeSodPlank()
 	{
@@ -30,7 +30,7 @@ public class BlockDecorativeSodPlank extends Block
 	@Override
     public int damageDropped(IBlockState state)
     {
-        return ((BlockDecorativeSodPlank.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
 	public IProperty getVariantProperty() { return VARIANT; }
@@ -41,7 +41,7 @@ public class BlockDecorativeSodPlank extends Block
     {
         if (Block.getBlockFromItem(itemIn) == this)
         {
-            BlockDecorativeSodPlank.EnumType[] aenumtype = BlockDecorativeSodPlank.EnumType.values();
+            EnumType[] aenumtype = EnumType.values();
 
             for (EnumType enumtype : aenumtype) {
                 list.add(new ItemStack(itemIn, 1, enumtype.getMetadata()));
@@ -51,19 +51,19 @@ public class BlockDecorativeSodPlank extends Block
 
     public String getUnlocalizedName(int meta)
     {
-        return super.getUnlocalizedName() + "." + BlockDecorativeSodPlank.EnumType.byMetadata(meta).getUnlocalizedName();
+        return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
 	@Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(VARIANT, BlockDecorativeSodPlank.EnumType.byMetadata(meta));
+        return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
 	@Override
     public int getMetaFromState(IBlockState state)
     {
-        return ((BlockDecorativeSodPlank.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class BlockDecorativeSodPlank extends Block
     	ACACIA(4, "acacia"),
     	DARKOAK(5, "darkoak");
         
-        private static final BlockDecorativeSodPlank.EnumType[] META_LOOKUP = new BlockDecorativeSodPlank.EnumType[values().length];
+        private static final EnumType[] META_LOOKUP = new EnumType[values().length];
         private final int meta;
         private final String name;
 
@@ -94,7 +94,7 @@ public class BlockDecorativeSodPlank extends Block
 
         public String toString() { return this.name; }
 
-        public static BlockDecorativeSodPlank.EnumType byMetadata(int meta)
+        public static EnumType byMetadata(int meta)
         {
             if (meta < 0 || meta >= META_LOOKUP.length)
             {
@@ -110,7 +110,7 @@ public class BlockDecorativeSodPlank extends Block
 
         static
         {
-        	BlockDecorativeSodPlank.EnumType[] var0 = values();
+        	EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;

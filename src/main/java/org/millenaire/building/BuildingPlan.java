@@ -35,6 +35,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
+import static org.millenaire.blocks.BlockDecorativeEarth.*;
+
 public class BuildingPlan 
 {
 	public int length;
@@ -258,12 +260,12 @@ public class BuildingPlan
 	private boolean freeBuild(IBlockState state)
 	{
 		return state.getBlock() == Blocks.dirt || state.getBlock() == Blocks.water || state.getBlock() == Blocks.leaves || state.getBlock() == Blocks.leaves2 || state.getBlock() == Blocks.grass || state.getBlock() == Blocks.tallgrass || state.getBlock() == Blocks.red_flower || state.getBlock() == Blocks.yellow_flower || state.getBlock() == Blocks.double_plant || state.getBlock() == Blocks.deadbush
-				|| state.getBlock() == MillBlocks.blockMillPath || state.getBlock() == MillBlocks.blockMillPathSlab || state.equals(MillBlocks.blockDecorativeEarth.getDefaultState().withProperty(BlockDecorativeEarth.VARIANT, BlockDecorativeEarth.EnumType.DIRTWALL));
+				|| state.getBlock() == MillBlocks.blockMillPath || state.getBlock() == MillBlocks.blockMillPathSlab || state.equals(MillBlocks.blockDecorativeEarth.getDefaultState().withProperty(VARIANT, EnumType.DIRTWALL));
 	}
 	
 	private void computeCost()
 	{
-		resCost = new ArrayList<ResourceCost>();
+		resCost = new ArrayList<>();
 		
 		int plankCost = 0, plankOakCost = 0, plankSpruceCost = 0, plankBirchCost = 0, plankJungleCost = 0, plankAcaciaCost = 0, plankDarkCost = 0, glassPaneCost = 0, byzBricksHalf = 0;
 		
@@ -275,183 +277,317 @@ public class BuildingPlan
 				{
 					final IBlockState state = buildingArray[i][j][k];
 
+					Block block = state.getBlock();
+
 					if (state == null) 
 					{
 						System.err.println("BlockState is null at " + i + "/" + j + "/" + k);
 					}
 
-					if (state.getBlock() == Blocks.log && state.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.OAK)
-						plankOakCost += 4;
-					else if (state.getBlock() == Blocks.log && state.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.SPRUCE)
-						plankSpruceCost += 4;
-					else if (state.getBlock() == Blocks.log && state.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.BIRCH)
-						plankBirchCost += 4;
-					else if (state.getBlock() == Blocks.log && state.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.JUNGLE)
-						plankJungleCost += 4;
-					else if (state.getBlock() == Blocks.log && state.getValue(BlockNewLog.VARIANT) == BlockPlanks.EnumType.ACACIA)
-						plankAcaciaCost += 4;
-					else if (state.getBlock() == Blocks.log && state.getValue(BlockNewLog.VARIANT) == BlockPlanks.EnumType.DARK_OAK)
-						plankJungleCost += 4;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.OAK)
-						plankOakCost++;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.SPRUCE)
-						plankSpruceCost++;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.BIRCH)
-						plankBirchCost++;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.JUNGLE)
-						plankJungleCost++;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.ACACIA)
-						plankAcaciaCost++;
-					else if (state.getBlock() == Blocks.planks && state.getValue(BlockPlanks.VARIANT) == BlockPlanks.EnumType.DARK_OAK)
-						plankDarkCost++;
-					else if (state.getBlock() == MillBlocks.byzantineTile)
-						byzBricksHalf += 2;
-					else if (state.getBlock() == MillBlocks.byzantineTileSlab)
-						byzBricksHalf++;
-					else if (state.getBlock() == MillBlocks.byzantineStoneTile) 
+					if (block == Blocks.log)
 					{
-						byzBricksHalf++;
-						addToCost(new ItemStack(Blocks.stone), 1);
+						switch (state.getValue(BlockOldLog.VARIANT))
+                        {
+                            case OAK:
+                                plankOakCost += 4;
+                                break;
+                            case SPRUCE:
+                                plankSpruceCost += 4;
+                                break;
+                            case BIRCH:
+                                plankBirchCost += 4;
+                                break;
+                            case JUNGLE:
+                                plankJungleCost += 4;
+                                break;
+                            case ACACIA:
+                                plankAcaciaCost += 4;
+                                break;
+                            case DARK_OAK:
+                                plankJungleCost += 4;
+                                break;
+                        }
 					}
-					else if (state.getBlock() == Blocks.glass_pane || state.getBlock() == Blocks.stained_glass_pane)
-						glassPaneCost++;
-					else if (state.getBlock() == Blocks.glass || state.getBlock() == Blocks.stained_glass)
-						glassPaneCost += 3;
-					else if (state.getBlock() == Blocks.crafting_table)
-						plankCost += 4;
-					else if (state.getBlock() == Blocks.chest)
-						plankCost += 8;
-					else if (state.getBlock() == Blocks.furnace)
-						addToCost(new ItemStack(Blocks.cobblestone), 8);
-					else if (state.getBlock() == Blocks.torch)
-						plankCost++;
-					else if (state.getBlock() == Blocks.oak_fence)
-						plankOakCost++;
-					else if (state.getBlock() == Blocks.spruce_fence)
-						plankSpruceCost++;
-					else if (state.getBlock() == Blocks.birch_fence)
-						plankBirchCost++;
-					else if (state.getBlock() == Blocks.jungle_fence)
-						plankJungleCost++;
-					else if (state.getBlock() == Blocks.acacia_fence)
-						plankAcaciaCost++;
-					else if (state.getBlock() == Blocks.dark_oak_fence)
-						plankDarkCost++;
-					else if (state.getBlock() == Blocks.oak_fence_gate)
-						plankOakCost += 4;
-					else if (state.getBlock() == Blocks.spruce_fence_gate)
-						plankSpruceCost += 4;
-					else if (state.getBlock() == Blocks.birch_fence_gate)
-						plankBirchCost += 4;
-					else if (state.getBlock() == Blocks.jungle_fence_gate)
-						plankJungleCost += 4;
-					else if (state.getBlock() == Blocks.acacia_fence_gate)
-						plankAcaciaCost += 4;
-					else if (state.getBlock() == Blocks.dark_oak_fence_gate)
-						plankDarkCost += 4;
-					else if (state.getBlock() == Blocks.wooden_pressure_plate)
-						plankCost += 2;
-					else if (state.getBlock() == Blocks.stone_pressure_plate)
-						addToCost(new ItemStack(Blocks.stone), 2);
-					else if (state.getBlock() == Blocks.stonebrick)
-						addToCost(new ItemStack(Blocks.stone), 1);
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.STONE)
-						addToCost(new ItemStack(Blocks.stone), 1);
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.SAND)
-						addToCost(new ItemStack(Blocks.sandstone), 1);
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.WOOD)
-						plankCost++;
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.COBBLESTONE)
-						addToCost(new ItemStack(Blocks.cobblestone), 1);
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.BRICK)
-						addToCost(new ItemStack(Blocks.brick_block), 1);
-					else if (state.getBlock() == Blocks.stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.SMOOTHBRICK)
-						addToCost(new ItemStack(Blocks.stone), 1);
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.OAK)
-						plankOakCost++;
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.SPRUCE)
-						plankSpruceCost++;
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.BIRCH)
-						plankBirchCost++;
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.JUNGLE)
-						plankJungleCost++;
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.ACACIA)
-						plankAcaciaCost++;
-					else if (state.getBlock() == Blocks.wooden_slab && state.getValue(BlockWoodSlab.VARIANT) == BlockPlanks.EnumType.DARK_OAK)
-						plankDarkCost++;
-					else if (state.getBlock() == Blocks.wool)
-						addToCost(new ItemStack (Blocks.wool, 1, OreDictionary.WILDCARD_VALUE), 1);
-					else if (state.getBlock() == Blocks.nether_wart)
-						addToCost(new ItemStack(Items.nether_wart), 1);
-					else if (state.getBlock() == Blocks.double_stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.STONE)
-						addToCost(new ItemStack(Blocks.stone), 1);
-					else if (state.getBlock() == Blocks.iron_block)
-						addToCost(new ItemStack(Items.iron_ingot), 9);
-					else if (state.getBlock() == Blocks.anvil)
-						addToCost(new ItemStack(Items.iron_ingot), 30);
-					else if (state.getBlock() == Blocks.iron_bars)
-						addToCost(new ItemStack(Items.iron_ingot), 1);
-					else if (state.getBlock() == Blocks.gold_block)
-						addToCost(new ItemStack(Items.gold_ingot), 9);
-					else if (state.getBlock() == Blocks.cauldron)
-						addToCost(new ItemStack(Items.iron_ingot), 7);
-					else if (state.getBlock() == Blocks.cobblestone_wall)
-						addToCost(new ItemStack(Blocks.cobblestone), 1);
-					else if (state.getBlock() == MillBlocks.blockMillChest)
-						plankCost += 8;
-					else if (state.getBlock() == Blocks.oak_stairs)
-						plankOakCost += 2;
-					else if (state.getBlock() == Blocks.spruce_stairs)
-						plankSpruceCost += 2;
-					else if (state.getBlock() == Blocks.birch_stairs)
-						plankBirchCost += 2;
-					else if (state.getBlock() == Blocks.jungle_stairs)
-						plankJungleCost += 2;
-					else if (state.getBlock() == Blocks.acacia_stairs)
-						plankAcaciaCost += 2;
-					else if (state.getBlock() == Blocks.dark_oak_stairs)
-						plankDarkCost += 2;
-					else if (state.getBlock() == Blocks.stone_stairs)
-						addToCost(new ItemStack(Blocks.cobblestone), 2);
-					else if (state.getBlock() == Blocks.stone_brick_stairs)
-						addToCost(new ItemStack(Blocks.stone), 2);
-					else if (state.getBlock() == Blocks.sandstone_stairs)
-						addToCost(new ItemStack(Blocks.sandstone), 2);
-					else if (state.getBlock() == Blocks.brick_stairs)
-						addToCost(new ItemStack(Blocks.brick_block), 2);
-					else if (state.getBlock() == Blocks.ladder)
-						plankCost += 2;
-					else if (state.getBlock() == Blocks.standing_sign)
-						plankCost += 7;
-					else if (state.getBlock() == Blocks.wall_sign)
-						plankCost += 7;
-					//else if (state.getBlock() == BlockMillSign.)
-					//	plankCost += 7;
-					else if (state.getBlock() == Blocks.oak_door)
-						plankOakCost += 2;
-					else if (state.getBlock() == Blocks.spruce_door)
-						plankSpruceCost += 2;
-					else if (state.getBlock() == Blocks.birch_door)
-						plankBirchCost += 2;
-					else if (state.getBlock() == Blocks.jungle_door)
-						plankJungleCost += 2;
-					else if (state.getBlock() == Blocks.acacia_door)
-						plankAcaciaCost += 2;
-					else if (state.getBlock() == Blocks.dark_oak_door)
-						plankDarkCost += 2;
-					else if (state.getBlock() == Blocks.trapdoor)
-						plankCost += 6;
-					else if (state.getBlock() == Blocks.bed && state.getValue(BlockBed.PART) == BlockBed.EnumPartType.FOOT)
+					else if (block == Blocks.planks || block == Blocks.wooden_slab)
 					{
-						plankCost += 3;
-						addToCost(new ItemStack(Blocks.wool, 1, OreDictionary.WILDCARD_VALUE), 3);
-					}					
-					else if (state.getBlock() == MillBlocks.emptySericulture)
-						plankCost += 4;
-					else if (state.getBlock() != Blocks.air && !freeBuild(state))
-					{
-						addToCost(new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state)), 1);
-					}
+					    switch (state.getValue(BlockPlanks.VARIANT))
+                        {
+                            case OAK:
+                                plankOakCost++;
+                                break;
+                            case SPRUCE:
+                                plankSpruceCost++;
+                                break;
+                            case BIRCH:
+                                plankBirchCost++;
+                                break;
+                            case JUNGLE:
+                                plankJungleCost++;
+                                break;
+                            case ACACIA:
+                                plankAcaciaCost++;
+                                break;
+                            case DARK_OAK:
+                                plankDarkCost++;
+                                break;
+                        }
+                    }
+                    else if (block == MillBlocks.byzantineTile)
+                    {
+                        byzBricksHalf += 2;
+                    }
+                    else if (block == MillBlocks.byzantineTileSlab)
+                    {
+                        byzBricksHalf++;
+                    } else if (block == MillBlocks.byzantineStoneTile)
+                    {
+                        byzBricksHalf++;
+                        addToCost(new ItemStack(Blocks.stone), 1);
+                    }
+                    else if (block == Blocks.glass_pane || block == Blocks.stained_glass_pane)
+                    {
+                        glassPaneCost++;
+                    }
+                    else if (block == Blocks.glass || block == Blocks.stained_glass)
+                    {
+                        glassPaneCost += 3;
+                    }
+                    else if (block == Blocks.crafting_table)
+                    {
+                        plankCost += 4;
+                    }
+                    else if (block == Blocks.chest)
+                    {
+                        plankCost += 8;
+                    }
+                    else if (block == Blocks.furnace)
+                    {
+                        addToCost(new ItemStack(Blocks.cobblestone), 8);
+                    }
+                    else if (block == Blocks.torch)
+                    {
+                        plankCost++;
+                    }
+                    else if (block == Blocks.oak_fence)
+                    {
+                        plankOakCost++;
+                    }
+                    else if (block == Blocks.spruce_fence)
+                    {
+                        plankSpruceCost++;
+                    }
+                    else if (block == Blocks.birch_fence)
+                    {
+                        plankBirchCost++;
+                    }
+                    else if (block == Blocks.jungle_fence)
+                    {
+                        plankJungleCost++;
+                    }
+                    else if (block == Blocks.acacia_fence)
+                    {
+                        plankAcaciaCost++;
+                    }
+                    else if (block == Blocks.dark_oak_fence)
+                    {
+                        plankDarkCost++;
+                    }
+                    else if (block == Blocks.oak_fence_gate)
+                    {
+                        plankOakCost += 4;
+                    }
+                    else if (block == Blocks.spruce_fence_gate)
+                    {
+                        plankSpruceCost += 4;
+                    }
+                    else if (block == Blocks.birch_fence_gate)
+                    {
+                        plankBirchCost += 4;
+                    }
+                    else if (block == Blocks.jungle_fence_gate)
+                    {
+                        plankJungleCost += 4;
+                    }
+                    else if (block == Blocks.acacia_fence_gate)
+                    {
+                        plankAcaciaCost += 4;
+                    }
+                    else if (block == Blocks.dark_oak_fence_gate)
+                    {
+                        plankDarkCost += 4;
+                    }
+                    else if (block == Blocks.wooden_pressure_plate)
+                    {
+                        plankCost += 2;
+                    }
+                    else if (block == Blocks.stone_pressure_plate)
+                    {
+                        addToCost(new ItemStack(Blocks.stone), 2);
+                    }
+                    else if (block == Blocks.stonebrick)
+                    {
+                        addToCost(new ItemStack(Blocks.stone), 1);
+                    }
+                    else if (block == Blocks.stone_slab)
+                    {
+					    switch (state.getValue(BlockStoneSlab.VARIANT))
+                        {
+                            case STONE:
+                                addToCost(new ItemStack(Blocks.stone), 1);
+                                break;
+                            case SAND:
+                                addToCost(new ItemStack(Blocks.sandstone), 1);
+                                break;
+                            case WOOD:
+                                plankCost++;
+                                break;
+                            case COBBLESTONE:
+                                addToCost(new ItemStack(Blocks.cobblestone), 1);
+                                break;
+                            case BRICK:
+                                addToCost(new ItemStack(Blocks.brick_block), 1);
+                                break;
+                            case SMOOTHBRICK:
+                                addToCost(new ItemStack(Blocks.stone), 1);
+                                break;
+                        }
+                    }
+                    else if (state.getBlock() == Blocks.wool)
+                    {
+                        addToCost(new ItemStack (Blocks.wool, 1, OreDictionary.WILDCARD_VALUE), 1);
+                    }
+                    else if (state.getBlock() == Blocks.nether_wart)
+                    {
+                        addToCost(new ItemStack(Items.nether_wart), 1);
+                    }
+                    else if (state.getBlock() == Blocks.double_stone_slab && state.getValue(BlockStoneSlab.VARIANT) == BlockStoneSlab.EnumType.STONE)
+                    {
+                        addToCost(new ItemStack(Blocks.stone), 1);
+                    }
+                    else if (state.getBlock() == Blocks.iron_block)
+                    {
+                        addToCost(new ItemStack(Items.iron_ingot), 9);
+                    }
+                    else if (state.getBlock() == Blocks.anvil)
+                    {
+                        addToCost(new ItemStack(Items.iron_ingot), 30);
+                    }
+                    else if (state.getBlock() == Blocks.iron_bars)
+                    {
+                        addToCost(new ItemStack(Items.iron_ingot), 1);
+                    }
+                    else if (state.getBlock() == Blocks.gold_block)
+                    {
+                        addToCost(new ItemStack(Items.gold_ingot), 9);
+                    }
+                    else if (state.getBlock() == Blocks.cauldron)
+                    {
+                        addToCost(new ItemStack(Items.iron_ingot), 7);
+                    }
+                    else if (state.getBlock() == Blocks.cobblestone_wall)
+                    {
+                        addToCost(new ItemStack(Blocks.cobblestone), 1);
+                    }
+                    else if (state.getBlock() == MillBlocks.blockMillChest)
+                    {
+                        plankCost += 8;
+                    }
+                    else if (state.getBlock() == Blocks.oak_stairs)
+                    {
+                        plankOakCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.spruce_stairs)
+                    {
+                        plankSpruceCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.birch_stairs)
+                    {
+                        plankBirchCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.jungle_stairs)
+                    {
+                        plankJungleCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.acacia_stairs)
+                    {
+                        plankAcaciaCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.dark_oak_stairs)
+                    {
+                        plankDarkCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.stone_stairs)
+                    {
+                        addToCost(new ItemStack(Blocks.cobblestone), 2);
+                    }
+                    else if (state.getBlock() == Blocks.stone_brick_stairs)
+                    {
+                        addToCost(new ItemStack(Blocks.stone), 2);
+                    }
+                    else if (state.getBlock() == Blocks.sandstone_stairs)
+                    {
+                        addToCost(new ItemStack(Blocks.sandstone), 2);
+                    }
+                    else if (state.getBlock() == Blocks.brick_stairs)
+                    {
+                        addToCost(new ItemStack(Blocks.brick_block), 2);
+                    }
+                    else if (state.getBlock() == Blocks.ladder)
+                    {
+                        plankCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.standing_sign)
+                    {
+                        plankCost += 7;
+                    }
+                    else if (state.getBlock() == Blocks.wall_sign)
+                    {
+                        plankCost += 7;
+                    }
+                    /*else if (state.getBlock() == BlockMillSign.) {
+                        plankCost += 7;
+                    }*/
+                    else if (state.getBlock() == Blocks.oak_door)
+                    {
+                        plankOakCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.spruce_door)
+                    {
+                        plankSpruceCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.birch_door)
+                    {
+                        plankBirchCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.jungle_door)
+                    {
+                        plankJungleCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.acacia_door)
+                    {
+                        plankAcaciaCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.dark_oak_door)
+                    {
+                        plankDarkCost += 2;
+                    }
+                    else if (state.getBlock() == Blocks.trapdoor)
+                    {
+                        plankCost += 6;
+                    }
+                    else if (state.getBlock() == Blocks.bed && state.getValue(BlockBed.PART) == BlockBed.EnumPartType.FOOT)
+                    {
+                        plankCost += 3;
+                        addToCost(new ItemStack(Blocks.wool, 1, OreDictionary.WILDCARD_VALUE), 3);
+                    }
+                    else if (state.getBlock() == MillBlocks.emptySericulture)
+                    {
+                        plankCost += 4;
+                    }
+                    else if (state.getBlock() != Blocks.air && !freeBuild(state))
+                    {
+                        addToCost(new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state)), 1);
+                    }
 				}
 			}
 		}
@@ -610,7 +746,9 @@ public class BuildingPlan
 							return new LocationReturn(LocationReturn.LOCATION_CLASH, p);
 						} 
 						else
-							nbError += 5;
+						    {
+                            nbError += 5;
+                        }
 					} 
 					else if (vg.buildingForbidden[ci][cj]) 
 					{
@@ -621,7 +759,9 @@ public class BuildingPlan
 							return new LocationReturn(LocationReturn.CONSTRUCTION_FORBIDDEN, p);
 						} 
 						else
-							nbError++;
+                        {
+                            nbError++;
+                        }
 					} 
 					else if (vg.danger[ci][cj]) 
 					{
@@ -632,7 +772,9 @@ public class BuildingPlan
 							return new LocationReturn(LocationReturn.DANGER, p);
 						} 
 						else
-							nbError++;
+                        {
+                            nbError++;
+                        }
 					} 
 					else if (!vg.canBuild[ci][cj]) 
 					{
@@ -643,17 +785,12 @@ public class BuildingPlan
 							return new LocationReturn(LocationReturn.WRONG_ALTITUDE, p);
 						} 
 						else
-							nbError++;
+                        {
+                            nbError++;
+                        }
 					}
 
-					if (pathing != null && pathing.tryMoveToXYZ(ci, 64, cj, 0.5D)) 
-					{
-						reachable = false;
-					} 
-					else 
-					{
-						reachable = true;
-					}
+                    reachable = pathing == null || !pathing.tryMoveToXYZ(ci, 64, cj, 0.5D);
 
 					altitudeTotal += vg.constructionHeight[ci][cj];
 					nbPoints++;
@@ -666,7 +803,7 @@ public class BuildingPlan
 			return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
 		}
 
-		final int altitude = (int) (altitudeTotal / nbPoints);
+		final int altitude = (altitudeTotal / nbPoints);
 
 		final BuildingLocation l = new BuildingLocation(this, new BlockPos(x + vg.mapStartX, altitude, z + vg.mapStartZ), orientation);
 
@@ -678,7 +815,7 @@ public class BuildingPlan
 		final int x = location.position.getX();
 		final int y = location.position.getY();
 		final int z = location.position.getZ();
-		List<BuildingBlock> bblocks = new ArrayList<BuildingBlock>();
+		List<BuildingBlock> bblocks = new ArrayList<>();
 		
 		EnumFacing orientation = location.orientation;
 		
@@ -939,13 +1076,13 @@ public class BuildingPlan
 		{
 			final BuildingBlock bb = bblocks.get(i);
 			Block block = bb.blockState != null ? bb.blockState.getBlock() : null;
-			IBlockState state = bb.blockState != null ? bb.blockState : null;
+			IBlockState state = bb.blockState;
 			int special = bb.specialBlock;
 			
 			if (bbmap.containsKey(bb.position)) 
 			{
 				block = bbmap.get(bb.position).blockState != null ? bbmap.get(bb.position).blockState.getBlock() : null;
-				state = bbmap.get(bb.position).blockState != null ? bbmap.get(bb.position).blockState : null;
+				state = bbmap.get(bb.position).blockState;
 				special = bbmap.get(bb.position).specialBlock;
 			}
 			else
@@ -1006,59 +1143,83 @@ public class BuildingPlan
 	}
 	
 	private boolean firstPass(IBlockState state) {
-		return state.getBlock().getCreativeTabToDisplayOn() == CreativeTabs.tabBlock || state.getBlock() instanceof BlockDecorativeEarth || state.getBlock() instanceof BlockDecorativeWood || state.getBlock() instanceof BlockDecorativeStone || state.getBlock() == MillBlocks.byzantineStoneTile || state.getBlock() == MillBlocks.byzantineTile || state.getBlock() == MillBlocks.byzantineTileSlab || state.getBlock() == MillBlocks.byzantineTileSlabDouble;
+		return state.getBlock().getCreativeTabToDisplayOn() == CreativeTabs.tabBlock || state.getBlock() instanceof BlockDecorativeEarth || state.getBlock() instanceof BlockDecorativeWood ||
+                state.getBlock() instanceof BlockDecorativeStone || state.getBlock() == MillBlocks.byzantineStoneTile || state.getBlock() == MillBlocks.byzantineTile ||
+                state.getBlock() == MillBlocks.byzantineTileSlab || state.getBlock() == MillBlocks.byzantineTileSlabDouble;
 	}
 	
 	private void setReferencePositions(IBlockState state, BlockPos pos, BuildingLocation location)
 	{
-		if(state.getBlock() instanceof BlockMillChest)
-			location.chestPos.add(pos);
-		else if(state.getBlock() == MillBlocks.storedPosition && state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.TRADEPOS)
-			location.tradePos = (pos);
-		//else if BlockMillSign add to Sign Positions
-		else if(state.getBlock() instanceof BlockBed && state.getValue(BlockBed.PART) == BlockBed.EnumPartType.HEAD)
-			location.sleepPos.add(pos);
-		else if(state.getBlock() == MillBlocks.storedPosition && state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.SLEEPPOS)
-			location.sleepPos.add(pos);
-		else if(state.getBlock() == MillBlocks.storedPosition && state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.SOURCEPOS)
-			location.sourcePos.add(pos);
+	    Block block = state.getBlock();
+
+	    if (block instanceof BlockMillChest)
+	    {
+            location.chestPos.add(pos);
+        }
+        else if (block == MillBlocks.storedPosition)
+        {
+	        if (state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.TRADEPOS)
+	        {
+                location.tradePos = (pos);
+            }
+            else if (state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.SLEEPPOS)
+            {
+                location.sleepPos.add(pos);
+            }
+            else if (state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.SOURCEPOS)
+            {
+                location.sourcePos.add(pos);
+            }
+            else if (state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.HIDEPOS)
+            {
+                location.hidePos.add(pos);
+            }
+            else if (state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.DEFENDPOS)
+            {
+                location.defendPos.add(pos);
+            }
+        }
 		else if(state.getBlock() == Blocks.furnace)
-			location.craftPos.add(pos);
-		else if(state.getBlock() == Blocks.crafting_table)
-			location.craftPos.add(pos);
-		else if(state.getBlock() == Blocks.iron_block)
-			location.craftPos.add(pos);
-		else if(state.getBlock() == Blocks.anvil)
-			location.craftPos.add(pos);
-		else if(state.getBlock() == MillBlocks.storedPosition && state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.HIDEPOS)
-			location.hidePos.add(pos);
-		else if(state.getBlock() == MillBlocks.storedPosition && state.getValue(StoredPosition.VARIANT) == StoredPosition.EnumType.DEFENDPOS)
-			location.defendPos.add(pos);
+		{
+            location.craftPos.add(pos);
+        }
+        else if(state.getBlock() == Blocks.crafting_table)
+        {
+            location.craftPos.add(pos);
+        }
+        else if(state.getBlock() == Blocks.iron_block)
+        {
+            location.craftPos.add(pos);
+        }
+        else if(state.getBlock() == Blocks.anvil)
+        {
+            location.craftPos.add(pos);
+        }
 	}
 	
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 	
 	public static class LocationReturn 
 	{
-		public static final int OUTSIDE_RADIUS = 1;
-		public static final int LOCATION_CLASH = 2;
-		public static final int CONSTRUCTION_FORBIDDEN = 3;
-		public static final int WRONG_ALTITUDE = 4;
-		public static final int DANGER = 5;
-		public static final int NOT_REACHABLE = 4;
+		static final int OUTSIDE_RADIUS = 1;
+		static final int LOCATION_CLASH = 2;
+		static final int CONSTRUCTION_FORBIDDEN = 3;
+		static final int WRONG_ALTITUDE = 4;
+		static final int DANGER = 5;
+		static final int NOT_REACHABLE = 4;
 
-		public BuildingLocation location;
-		public int errorCode;
-		public BlockPos errorPos;
+		BuildingLocation location;
+		int errorCode;
+		BlockPos errorPos;
 
-		public LocationReturn(final BuildingLocation l) 
+		LocationReturn(final BuildingLocation l)
 		{
 			location = l;
 			errorCode = 0;
 			errorPos = null;
 		}
 
-		public LocationReturn(final int error, final BlockPos pos) 
+		LocationReturn(final int error, final BlockPos pos)
 		{
 			location = null;
 			errorCode = error;
@@ -1066,42 +1227,32 @@ public class BuildingPlan
 		}
 
 	}
-	
-	//
+
 	public static class ResourceCost
 	{
 		int amount;
 		ItemStack stack;
 		String odString;
 		
-		public ResourceCost(ItemStack stackIn, int amountIn)
+		ResourceCost(ItemStack stackIn, int amountIn)
 		{
 			amount = amountIn;
 			stack = stackIn;
 			odString = null;
 		}
 		
-		public ResourceCost(String nameIn, int amountIn)
+		ResourceCost(String nameIn, int amountIn)
 		{
 			amount = amountIn;
 			stack = null;
 			odString = nameIn;
 		}
 		
-		public ItemStack getStack()
-		{
-			return stack;
-		}
+		public ItemStack getStack() { return stack; }
 		
-		public String getString()
-		{
-			return odString;
-		}
+		public String getString() { return odString; }
 		
-		public void add (int amountIn)
-		{
-			amount += amountIn;
-		}
+		public void add (int amountIn) { amount += amountIn; }
 		
 		public int getCost(ItemStack stackIn)
 		{
