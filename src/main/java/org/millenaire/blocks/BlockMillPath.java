@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockMillPath extends Block
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockMillPath.EnumType.class);
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
 
 	BlockMillPath()
 	{
@@ -35,7 +35,7 @@ public class BlockMillPath extends Block
 	@Override
     public int damageDropped(IBlockState state)
     {
-        return ((BlockMillPath.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
 	public IProperty getVariantProperty() { return VARIANT; }
@@ -46,7 +46,7 @@ public class BlockMillPath extends Block
     {
         if (Block.getBlockFromItem(itemIn) == this)
         {
-            BlockMillPath.EnumType[] aenumtype = BlockMillPath.EnumType.values();
+            EnumType[] aenumtype = EnumType.values();
 
             for (EnumType enumtype : aenumtype) {
                 list.add(new ItemStack(itemIn, 1, enumtype.getMetadata()));
@@ -56,19 +56,19 @@ public class BlockMillPath extends Block
 
     public String getUnlocalizedName(int meta)
     {
-        return super.getUnlocalizedName() + "." + BlockMillPath.EnumType.byMetadata(meta).getUnlocalizedName();
+        return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
 	@Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(VARIANT, BlockMillPath.EnumType.byMetadata(meta));
+        return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
 	@Override
     public int getMetaFromState(IBlockState state)
     {
-        return ((BlockMillPath.EnumType)state.getValue(VARIANT)).getMetadata();
+        return ((EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
@@ -85,11 +85,11 @@ public class BlockMillPath extends Block
     	OCHRESLAB(4, "ochreSlab"),
     	SLABANDGRAVEL(5, "slabAndGravel");
         
-        private static final BlockMillPath.EnumType[] META_LOOKUP = new BlockMillPath.EnumType[values().length];
+        private static final EnumType[] META_LOOKUP = new EnumType[values().length];
         private final int meta;
         private final String name;
 
-        private EnumType(int meta, String name)
+        EnumType(int meta, String name)
         {
             this.meta = meta;
             this.name = name;
@@ -99,7 +99,7 @@ public class BlockMillPath extends Block
 
         public String toString() { return this.name; }
 
-        public static BlockMillPath.EnumType byMetadata(int meta)
+        public static EnumType byMetadata(int meta)
         {
             if (meta < 0 || meta >= META_LOOKUP.length)
             {
@@ -118,7 +118,7 @@ public class BlockMillPath extends Block
 
         static
         {
-        	BlockMillPath.EnumType[] var0 = values();
+        	EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;

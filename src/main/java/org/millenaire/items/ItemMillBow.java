@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ItemMillBow extends ItemBow
 {
 	private float speedFactor = 1;
-	private float damageBonus = 0;
+	private float damageBonus;
 
 	private String itemName;
 

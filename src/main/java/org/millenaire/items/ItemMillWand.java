@@ -291,7 +291,7 @@ public class ItemMillWand extends Item
 	{
 		if(stack.getItem() == MillItems.wandCreative)
 		{
-            tooltip.add("�lCreative Mode ONLY");
+            tooltip.add("Creative Mode ONLY");
         }
 	}
 }
