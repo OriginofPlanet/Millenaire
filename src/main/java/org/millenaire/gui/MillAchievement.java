@@ -14,7 +14,7 @@ import net.minecraftforge.common.AchievementPage;
 public class MillAchievement extends Achievement
 {
 	private final static String SETID = Millenaire.MODID + ".achievement.";
-	
+
 	public MillAchievement(String nameIn, int column, int row, ItemStack iconIn, Achievement parentIn)
     {
 		super(SETID + nameIn, nameIn, column, row, iconIn, parentIn);
@@ -61,7 +61,7 @@ public class MillAchievement extends Achievement
 		
 		public static void preinitialize()
 	    {
-			AchievementPage.registerAchievementPage(new AchievementPage("millenaire.achievements", firstContact, cheers, hired, masterFarmer, cresus, summoningWand, villageLeader, theQuest, maitreapenser, 
+			AchievementPage.registerAchievementPage(new AchievementPage("Millénaire", firstContact, cheers, hired, masterFarmer, cresus, summoningWand, villageLeader, theQuest, maitreapenser,
 					forbiddenKnowledge, puja, explorer, marcoPolo, magellan, selfDefense, pantheon, darkside, scipio, attila));
 	    }
 }

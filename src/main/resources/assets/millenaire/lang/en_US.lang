@@ -1,6 +1,60 @@
 #PARSE_ESCAPES
 itemGroup.MillTab=Millénaire
 
+##########################################
+###            Achievements            ###
+##########################################
+
+achievement.firstcontact=First Contact
+achievement.firstcontact.desc=Meet a villager
+
+achievement.cresus=Croesus
+achievement.cresus.desc=Earn a Denier Or
+achievement.summoningwand=Summoning
+achievement.summoningwand.desc=Buy a Wand of Summoning and generate a village with it
+achievement.villageleader=Village Leader
+achievement.villageleader.desc=Become leader in a culture and create a controlled village
+
+achievement.hired=Hired Hand
+achievement.hired.desc=Hire a villager
+
+achievement.masterfarmer=Master Farmer
+achievement.masterfarmer.desc=Plant a Millénaire crop
+
+achievement.thequest=The Quest
+achievement.thequest.desc=Complete a quest given by a villager
+achievement.maitreapenser=Maître à penser
+achievement.maitreapenser.desc=Meet the Sadhu or the Alchemist
+achievement.puja=A little help from the Gods
+achievement.puja.desc=Pay a Pandit to perform a Puja
+achievement.forbiddenknwoledge=Forbidden Knowledge
+achievement.forbiddenknwoledge.desc=Complete the Creation Quest
+
+achievement.cheers=Three Cheers for Minecraft!
+achievement.cheers.desc=Drink a Millénaire alcohol
+
+achievement.darkside=The dark side
+achievement.darkside.desc=Kill a villager
+achievement.scipio=Carthago delenda est
+achievement.scipio.desc=Destroy a village with the Negation Wand
+achievement.attila=Attila
+achievement.attila.desc=Gain the "Scourge of God" reputation in three cultures
+
+achievement.explorer=Explorer
+achievement.explorer.desc=Explore a lone building
+achievement.pantheon=The Panthéon
+achievement.pantheon.desc=Visit the mysterious Panthéon
+achievement.selfdefense=Self Defense
+achievement.selfdefense.desc=Kill a bandit
+achievement.marcopolo=Marco Polo
+achievement.marcopolo.desc=Visit villages of three different cultures in the same world
+achievement.magellan=Ferdinand Magellan
+achievement.magellan.desc=Visit villages of every culture in the same world
+
+##########################################
+###             Containers             ###
+##########################################
+
 container.millChestLocked=Millénaire Chest - Locked
 container.millChestDoubleLocked=Millénaire Large Chest - Locked
 container.millChestUnlocked=Millénaire Chest - Unlocked
