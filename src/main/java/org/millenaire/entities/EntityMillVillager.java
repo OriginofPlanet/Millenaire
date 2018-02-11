@@ -359,7 +359,7 @@ public class EntityMillVillager extends EntityCreature
 	public boolean interact(final EntityPlayer playerIn) 
 	{
 		playerIn.addStat(MillAchievement.firstContact, 1);
-		if(type.hireCost > 0)
+		/*if(type.hireCost > 0)
 		{
 			this.isPlayerInteracting = true;
 			playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
@@ -375,7 +375,7 @@ public class EntityMillVillager extends EntityCreature
 		//Display Quest GUI if appropriate
 		//Display Hire GUI if Appropriate
 		//Display Chief GUI if Chief
-		// Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)
+		// Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)*/
 		return false;
 	}
 	
