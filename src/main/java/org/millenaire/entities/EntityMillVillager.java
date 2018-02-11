@@ -78,15 +78,14 @@ public class EntityMillVillager extends EntityCreature {
         this.tasks.addTask(7, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 0.5F));
         this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityMillVillager.class, 6.0F));
         this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
-    }
-
-    @Override
-    protected PathNavigate getNewNavigator(World worldIn) {
-        return new MillPathNavigate(this, worldIn);
-    }
-
-    @Override
-    protected void applyEntityAttributes() {
+	  }
+	
+	  @Override
+    protected PathNavigate getNewNavigator(World worldIn) { return new MillPathNavigate(this, worldIn); }
+	
+	  @Override
+    protected void applyEntityAttributes()
+    {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.55D);
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
@@ -282,14 +281,12 @@ public class EntityMillVillager extends EntityCreature {
 
 		return b;
 	}*/
-
-    //maybe in other class(if changed to Vanilla Villager)
-    @Override
-    public boolean canDespawn() {
-        return false;
-    }
-
-    //Goals need to be a thing
+	
+	//maybe in other class(if changed to Vanilla Villager)
+	@Override
+	public boolean canDespawn() { return false; }
+	
+	//Goals need to be a thing
 	
 	/*public void detrampleCrops() 
 	{
@@ -362,6 +359,51 @@ public class EntityMillVillager extends EntityCreature {
 	{
 		return firstName + " " + familyName;
 	}*/
+  
+	//handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
+	
+	@Override
+	public boolean interact(final EntityPlayer playerIn) 
+	{
+		playerIn.addStat(MillAchievement.firstContact, 1);
+		/*if(type.hireCost > 0)
+		{
+			this.isPlayerInteracting = true;
+			playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+			return true;
+		}
+		if(type.isChief)
+		{
+			this.isPlayerInteracting = true;
+			playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+			return true;
+		}
+		//for Sadhu and Alchemist maitrepenser achievement
+		//Display Quest GUI if appropriate
+		//Display Hire GUI if Appropriate
+		//Display Chief GUI if Chief
+		// Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)*/
+		return false;
+	}
+	
+	/**
+	 * Dead and sleeping entities cannot move
+	 */
+	@Override
+	protected boolean isMovementBlocked() 
+	{
+		return this.getHealth() <= 0 || this.isVillagerSleeping || this.isPlayerInteracting;
+	}
+	
+	//When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
+	//Why villagerID is important
+	
+	//Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
+	
+	@Override
+	public void onLivingUpdate() 
+	{
+		super.onLivingUpdate();
 
     //handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
 
