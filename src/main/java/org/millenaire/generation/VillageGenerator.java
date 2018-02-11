@@ -3,6 +3,10 @@ package org.millenaire.generation;
 import java.util.HashSet;
 import java.util.Random;
 
+import jdk.nashorn.internal.ir.Block;
+import net.minecraft.util.Vec3i;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenOcean;
 import org.millenaire.MillConfig;
 import org.millenaire.VillageTracker;
 import org.millenaire.blocks.MillBlocks;
@@ -44,7 +48,7 @@ public class VillageGenerator implements IWorldGenerator {
      */
     private boolean generateVillageAt(Random rand, BlockPos pos, World world) {
 
-        BlockPos villagePos = null;
+        BlockPos villageCenter = null;
 
         if (!(MillConfig.generateVillages || MillConfig.generateLoneBuildings)) {
             return false;
@@ -66,37 +70,68 @@ public class VillageGenerator implements IWorldGenerator {
 
         // check that all 11 x 11 chunks are loaded (they seldom are).
         if (areChunksLoaded(world, pos)) {
-            villagePos = pos;
+            villageCenter = pos;
         } else {
             // check surrounding chunks in a 13 x 13 area - this could be optimized I think
-            villagePos = anyAreaCloseByLoaded(world, pos);
-            if (villagePos == null) {
+            villageCenter = anyAreaCloseByLoaded(world, pos);
+            if (villageCenter == null) {
                 return false;
             }
         }
 
-        if (villagePos != null) {
 
-            // this line is for player controlled villages I think
-            EntityPlayer generatingPlayer = world.getClosestPlayer(villagePos.getX(), villagePos.getY(), villagePos.getZ(), -1);
+        //TODO: Use configured radius?
+        int villageRadius = 60;
 
-            // remember that this chunk has been checked for later
-            coordsTried.add(villagePos.getX() + (villagePos.getZ() << 16));
+        BlockPos corner1 = villageCenter.add(villageRadius, 0, 0).subtract(new Vec3i(0, 0, villageRadius));
+        BlockPos corner2 = villageCenter.add(villageRadius, 0, villageRadius);
+        BlockPos corner3 = villageCenter.subtract(new Vec3i(villageRadius, 0, villageRadius));
+        BlockPos corner4 = villageCenter.subtract(new Vec3i(villageRadius, 0, 0)).add(0, 0, villageRadius);
 
-            // check if other villages are too close
-            // TODO - debug and use this instead of my own
-            //if(!VillageTracker.get(world).getNearVillages(villagePos, MillConfig.minVillageDistance).isEmpty()) {
+        if(world.getBiomeGenForCoords(corner1).biomeID == BiomeGenBase.ocean.biomeID
+                || world.getBiomeGenForCoords(corner2).biomeID == BiomeGenBase.ocean.biomeID
+                || world.getBiomeGenForCoords(corner3).biomeID == BiomeGenBase.ocean.biomeID
+                || world.getBiomeGenForCoords(corner4).biomeID == BiomeGenBase.ocean.biomeID
+                || world.getBiomeGenForCoords(villageCenter).biomeID == BiomeGenBase.ocean.biomeID
+                || world.getBiomeGenForCoords(villageCenter).biomeID == BiomeGenBase.river.biomeID) {
+            return false; //Water is a big no-no
+        }
+        int biomeMismatches = 0;
 
-            if (!canAttemptVillageAt(world, generatingPlayer, Integer.MAX_VALUE, villagePos)) {
-                return false;
-            } else {
+        if (world.getBiomeGenForCoords(villageCenter).biomeID != world.getBiomeGenForCoords(corner1).biomeID) {
+            biomeMismatches++;
+        }
+        if (world.getBiomeGenForCoords(villageCenter).biomeID != world.getBiomeGenForCoords(corner2).biomeID) {
+            biomeMismatches++;
+        }
+        if (world.getBiomeGenForCoords(villageCenter).biomeID != world.getBiomeGenForCoords(corner3).biomeID) {
+            biomeMismatches++;
+        }
+        if (world.getBiomeGenForCoords(villageCenter).biomeID != world.getBiomeGenForCoords(corner4).biomeID) {
+            biomeMismatches++;
+        }
 
-                BlockPos nPos = world.getHeight(villagePos);
-                placedVillages.add(nPos); // TODO use Village Tracker instead
-                world.setBlockState(nPos, MillBlocks.villageStone.getDefaultState());
-                return false;
-            }
+        if (biomeMismatches > 2) {
+            return false; //Biome mismatch
+        }
+
+        // this line is for player controlled villages I think
+        EntityPlayer generatingPlayer = world.getClosestPlayer(villageCenter.getX(), villageCenter.getY(), villageCenter.getZ(), -1);
+
+        // remember that this chunk has been checked for later
+        coordsTried.add(villageCenter.getX() + (villageCenter.getZ() << 16));
+
+        // check if other villages are too close
+        // TODO - debug and use this instead of my own
+        //if(!VillageTracker.get(world).getNearVillages(villageCenter, MillConfig.minVillageDistance).isEmpty()) {
+
+        if (VillageTracker.get(world).isCloseToOtherVillage(villageCenter, MillConfig.minVillageDistance)) {
+            return false;
         } else {
+
+            BlockPos nPos = world.getHeight(villageCenter);
+            VillageTracker.get(world).registerVillagePos(nPos);
+            world.setBlockState(nPos, MillBlocks.villageStone.getDefaultState());
             return false;
         }
     }
@@ -134,7 +169,7 @@ public class VillageGenerator implements IWorldGenerator {
         return null;
     }
 
-    // TODO this method should be replaced with a call to VillageTracker when it works
+   /* // TODO this method should be replaced with a call to VillageTracker when it works
     private boolean canAttemptVillageAt(World world, EntityPlayer generatingPlayer, int minDistance, BlockPos villagePos) {
 
         // should use VillageTracker here I think, not sure how though
@@ -145,7 +180,7 @@ public class VillageGenerator implements IWorldGenerator {
         final int minDistanceVillagesSq = minDistanceVillages * minDistanceVillages;
 //        final int minDistanceLoneBuildingsSq = minDistanceLoneBuildings * minDistanceLoneBuildings;
 
-        for (BlockPos vp : placedVillages) {
+        for (BlockPos vp : ) {
             if (VG_TRACE2) System.out.println("There is another village at " + vp.getX() + ", " + vp.getZ());
             double d = villagePos.distanceSq(vp.getX(), vp.getY(), vp.getZ());
             if (VG_TRACE2) System.out.println("Distance is " + d);
@@ -155,6 +190,6 @@ public class VillageGenerator implements IWorldGenerator {
         }
         return true;
 
-    }
+    }*/
 
 }

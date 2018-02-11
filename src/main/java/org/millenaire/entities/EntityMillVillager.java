@@ -105,7 +105,7 @@ public class EntityMillVillager extends EntityCreature {
 
     public EntityMillVillager setTypeAndGender(VillagerType typeIn, int genderIn) {
         this.type = typeIn;
-        System.out.println("Setting type to " + typeIn + "!");
+        System.out.println("Setting type to " + typeIn.id + "!");
         this.dataWatcher.updateObject(GENDER, genderIn);
         this.dataWatcher.updateObject(TEXTURE, type.getTexture());
         return this;
@@ -368,15 +368,20 @@ public class EntityMillVillager extends EntityCreature {
     @Override
     public boolean interact(final EntityPlayer playerIn) {
         playerIn.addStat(MillAchievement.firstContact, 1);
-        if (type.hireCost > 0) {
-            this.isPlayerInteracting = true;
-            playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-            return true;
-        }
-        if (type.isChief) {
-            this.isPlayerInteracting = true;
-            playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-            return true;
+
+        if(!this.worldObj.isRemote) {
+            if (type == null) return false;
+
+            if (type.hireCost > 0) {
+                this.isPlayerInteracting = true;
+                playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+                return true;
+            }
+            if (type.isChief) {
+                this.isPlayerInteracting = true;
+                playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+                return true;
+            }
         }
         //for Sadhu and Alchemist maitrepenser achievement
         //Display Quest GUI if appropriate

@@ -123,7 +123,7 @@ public class VillageGeography {
                 || block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
     }
 
-    private void registerBuildingLocation(final BuildingLocation bl) {
+    public void registerBuildingLocation(final BuildingLocation bl) {
         buildingLocations.add(bl);
 
         final int sx = Math.max(bl.minxMargin - mapStartX, 0);

@@ -24,7 +24,7 @@ public class PlayerTracker implements IExtendedEntityProperties
 	 * Used to register these extended properties for the player during EntityConstructing event
 	 * This method is for convenience only; it will make your code look nicer
 	 */
-	public static  void register(EntityPlayer player)
+	public static void register(EntityPlayer player)
 	{
 		player.registerExtendedProperties(PlayerTracker.IDENTIFIER, new PlayerTracker(player));
 	}

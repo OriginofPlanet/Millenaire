@@ -44,7 +44,7 @@ public class Village {
         List bl = new ArrayList<BuildingLocation>();
         bl.add(loc);
 
-        this.geo.update(world, bl, null, mainBlock, 64);
+        this.geo.update(world, bl, null, mainBlock, world.getHeight(b).getY());
     }
 
     /**
@@ -76,20 +76,26 @@ public class Village {
 
     public boolean setupVillage() {
         try {
+            EntityMillVillager v = new EntityMillVillager(world, 100100, culture);
+            v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
+            v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 1);
+
+            world.spawnEntityInWorld(v);
+
             for (BuildingProject proj : type.startingBuildings) {
                 BuildingPlan p = PlanIO.loadSchematic(PlanIO.getBuildingTag(ResourceLocationUtil.getRL(proj.ID).getResourcePath(), culture, true), culture, proj.lvl);
 
-                EntityMillVillager v = new EntityMillVillager(world, 100100, culture);
-                v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
-                v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 1);
-                world.spawnEntityInWorld(v);
-
                 BuildingLocation loc = p.findBuildingLocation(geo, new MillPathNavigate(v, world), mainBlock, 64, new Random(), p.buildingOrientation);
 
-                System.out.println("Generating " + proj.ID + " at " + loc);
+                if(loc == null) {
+                    System.out.println("Failed to find a suitable location for the " + proj.ID + "!");
+                    return false;
+                }
+
+                System.out.println("Generating " + proj.ID + " at " + loc.position);
 
                 PlanIO.placeBuilding(p, loc, world);
-                VillageTracker.get(world)
+                geo.registerBuildingLocation(loc);
             }
             return true;
         } catch (Exception e) {
@@ -101,7 +107,6 @@ public class Village {
     public static Village createVillage(BlockPos VSPos, World world, VillageType typeIn, MillCulture cultureIn) {
         Village v = new Village(VSPos, world, typeIn, cultureIn);
         VillageTracker.get(world).registerVillage(v.getUUID(), v);
-        ;
         return v;
     }
 }
