@@ -8,11 +8,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class MillenaireEventHandler {
 
-	@SubscribeEvent
-	public void onEntityConstructing(EntityConstructing event) {
-		if (event.entity instanceof EntityPlayer && PlayerTracker.get((EntityPlayer) event.entity) == null)
-		{
-			PlayerTracker.register((EntityPlayer) event.entity);
-		}
-	}
+    @SubscribeEvent
+    public void onEntityConstructing(EntityConstructing event) {
+        if (event.entity.worldObj.isRemote) return;
+
+        if (event.entity instanceof EntityPlayer && PlayerTracker.get((EntityPlayer) event.entity) == null) {
+            PlayerTracker.register((EntityPlayer) event.entity);
+        }
+    }
 }
