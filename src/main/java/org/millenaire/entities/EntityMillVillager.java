@@ -35,69 +35,65 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
-public class EntityMillVillager extends EntityCreature
-{
-	public int villagerID;
-	private MillCulture culture;
-	private VillagerType type;
-	private final static int TEXTURE = 13;
-	private final static int AGE = 14;
-	private final static int GENDER = 16;
-	private final static int NAME = 17;
+public class EntityMillVillager extends EntityCreature {
+    public int villagerID;
+    private MillCulture culture;
+    private VillagerType type;
+    private final static int TEXTURE = 13;
+    private final static int AGE = 14;
+    private final static int GENDER = 16;
+    private final static int NAME = 17;
 
-	private boolean isVillagerSleeping = false;
-	public boolean isPlayerInteracting = false;
-	
-	private InventoryBasic villagerInventory;
-	
-	public EntityMillVillager(World worldIn)
-	{
-		super(worldIn);
-		
-		this.villagerInventory = new InventoryBasic("Items", false, 16);
-		isImmuneToFire = true;
-		this.setSize(0.6F, 1.8F);
-		addTasks();
-	}
+    private boolean isVillagerSleeping = false;
+    public boolean isPlayerInteracting = false;
 
-	public EntityMillVillager(World worldIn, int idIn, MillCulture cultureIn)
-	{
-		super(worldIn);
-		villagerID = idIn;
-		culture = cultureIn;
-		
-		this.villagerInventory = new InventoryBasic("Items", false, 16);
-		isImmuneToFire = true;
-		this.setSize(0.6F, 1.8F);
-		addTasks();
-	}
-	
-	private void addTasks()
-	{
-		//((PathNavigateGround)this.getNavigator()).setBreakDoors(true);
-		//((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
+    private InventoryBasic villagerInventory;
+
+    public EntityMillVillager(World worldIn) {
+        super(worldIn);
+
+        this.villagerInventory = new InventoryBasic("Items", false, 16);
+        isImmuneToFire = true;
+        this.setSize(0.6F, 1.8F);
+        addTasks();
+    }
+
+    public EntityMillVillager(World worldIn, int idIn, MillCulture cultureIn) {
+        super(worldIn);
+        villagerID = idIn;
+        culture = cultureIn;
+
+        this.villagerInventory = new InventoryBasic("Items", false, 16);
+        isImmuneToFire = true;
+        this.setSize(0.6F, 1.8F);
+        addTasks();
+    }
+
+    private void addTasks() {
+        //((PathNavigateGround)this.getNavigator()).setBreakDoors(true);
+        //((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
         this.tasks.addTask(0, new EntityAISwimming(this));
-		this.tasks.addTask(1, new EntityAIOpenDoor(this, true));
-		this.tasks.addTask(1, new EntityAIGateOpen(this, true));
-		this.tasks.addTask(7, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 0.5F));
-		this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityMillVillager.class, 6.0F));
-		this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
-	}
-	
-	@Override
-    protected PathNavigate getNewNavigator(World worldIn) { return new MillPathNavigate(this, worldIn); }
-	
-	@Override
-    protected void applyEntityAttributes()
-    {
+        this.tasks.addTask(1, new EntityAIOpenDoor(this, true));
+        this.tasks.addTask(1, new EntityAIGateOpen(this, true));
+        this.tasks.addTask(7, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 0.5F));
+        this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityMillVillager.class, 6.0F));
+        this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
+    }
+
+    @Override
+    protected PathNavigate getNewNavigator(World worldIn) {
+        return new MillPathNavigate(this, worldIn);
+    }
+
+    @Override
+    protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.55D);
-		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
     }
-	
-	@Override
-	public void entityInit()
-    {
+
+    @Override
+    public void entityInit() {
         super.entityInit();
         this.dataWatcher.addObject(TEXTURE, "texture");
         this.dataWatcher.addObject(NAME, "name");
@@ -106,43 +102,57 @@ public class EntityMillVillager extends EntityCreature
         //0 for male, 1 for female, 2 for Sym Female
         this.dataWatcher.addObject(GENDER, 0);
     }
-	
-	public EntityMillVillager setTypeAndGender(VillagerType typeIn, int genderIn)
-	{
-		this.type = typeIn;
-		this.dataWatcher.updateObject(GENDER, genderIn);
-		this.dataWatcher.updateObject(TEXTURE, type.getTexture());
-		return this;
-	}
-	
-	public void setChild() { this.dataWatcher.updateObject(AGE, 1); }
-	
-	public void setName(String nameIn) { this.dataWatcher.updateObject(NAME, nameIn); }
-	
-	public String getTexture() { return this.dataWatcher.getWatchableObjectString(13); }
-	
-	public int getGender() { return dataWatcher.getWatchableObjectInt(GENDER); }
-	
-	public String getName() { return this.dataWatcher.getWatchableObjectString(NAME); }
 
-	public VillagerType getVillagerType() { return type; }
-	
-	@Override
-	public boolean isChild() { return (this.dataWatcher.getWatchableObjectInt(AGE) > 0); }
-	
-    public boolean allowLeashing() { return false; }
-    
-    @Override
-    public void onDeath(DamageSource cause)
-    {
-    	InventoryHelper.dropInventoryItems(this.worldObj, this.getPosition(), this.villagerInventory);
+    public EntityMillVillager setTypeAndGender(VillagerType typeIn, int genderIn) {
+        this.type = typeIn;
+        System.out.println("Setting type to " + typeIn + "!");
+        this.dataWatcher.updateObject(GENDER, genderIn);
+        this.dataWatcher.updateObject(TEXTURE, type.getTexture());
+        return this;
     }
-    
+
+    public void setChild() {
+        this.dataWatcher.updateObject(AGE, 1);
+    }
+
+    public void setName(String nameIn) {
+        this.dataWatcher.updateObject(NAME, nameIn);
+    }
+
+    public String getTexture() {
+        return this.dataWatcher.getWatchableObjectString(13);
+    }
+
+    public int getGender() {
+        return dataWatcher.getWatchableObjectInt(GENDER);
+    }
+
+    public String getName() {
+        return this.dataWatcher.getWatchableObjectString(NAME);
+    }
+
+    public VillagerType getVillagerType() {
+        return type;
+    }
+
+    @Override
+    public boolean isChild() {
+        return (this.dataWatcher.getWatchableObjectInt(AGE) > 0);
+    }
+
+    public boolean allowLeashing() {
+        return false;
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        InventoryHelper.dropInventoryItems(this.worldObj, this.getPosition(), this.villagerInventory);
+    }
+
     //Controls what happens when Villager encounters an Item on ground
     @Override
-    protected void updateEquipmentIfNeeded(EntityItem itemEntity)
-    {
-    	
+    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
+
     }
 	
 	/*@Override
@@ -272,12 +282,14 @@ public class EntityMillVillager extends EntityCreature
 
 		return b;
 	}*/
-	
-	//maybe in other class(if changed to Vanilla Villager)
-	@Override
-	public boolean canDespawn() { return false; }
-	
-	//Goals need to be a thing
+
+    //maybe in other class(if changed to Vanilla Villager)
+    @Override
+    public boolean canDespawn() {
+        return false;
+    }
+
+    //Goals need to be a thing
 	
 	/*public void detrampleCrops() 
 	{
@@ -291,40 +303,38 @@ public class EntityMillVillager extends EntityCreature
 		previousBlock = getBlock(getPosition());
 		previousBlockMeta = getBlockMeta(getPosition());
 	}*/
-	
-	// emptied to prevent generic code from turning the villagers' heads toward
-	// the player
-	//@Override
-	//public void faceEntity(final Entity par1Entity, final float par2, final float par3) {}
-	
-	public void faceDirection()
-	{
-		//Face an Entity or specific BlockPos when we want then to
-	}
 
-	//Foreign Merchant leaves at night if stock is empty && price goes up by 1.5 if in a different culture
-	
-	//Find function for checking armor equipment, should return the equipment if in inventory
-	
-	//GetBedOrientation()?
-	
-	//Set up where Villagers have an appropriate tool in inventory, tool updates as village expands/building upgrades
-	
-	//Pick up EntityItems???
-	
-	//Remember to use setCurrentItemOrArmor
-	
-	@Override
-	protected int getExperiencePoints(final EntityPlayer playerIn) 
-	{
-		//return villagertype.expgiven;
-		return super.getExperiencePoints(playerIn);
-	}
-	
-	//GetOccupationTitle(EntityPlayer playerIn)
-	
-	//getSpeech/Dialogue(EntityPlayer playerIn)
-	//Make this smart to language learning
+    // emptied to prevent generic code from turning the villagers' heads toward
+    // the player
+    //@Override
+    //public void faceEntity(final Entity par1Entity, final float par2, final float par3) {}
+
+    public void faceDirection() {
+        //Face an Entity or specific BlockPos when we want then to
+    }
+
+    //Foreign Merchant leaves at night if stock is empty && price goes up by 1.5 if in a different culture
+
+    //Find function for checking armor equipment, should return the equipment if in inventory
+
+    //GetBedOrientation()?
+
+    //Set up where Villagers have an appropriate tool in inventory, tool updates as village expands/building upgrades
+
+    //Pick up EntityItems???
+
+    //Remember to use setCurrentItemOrArmor
+
+    @Override
+    protected int getExperiencePoints(final EntityPlayer playerIn) {
+        //return villagertype.expgiven;
+        return super.getExperiencePoints(playerIn);
+    }
+
+    //GetOccupationTitle(EntityPlayer playerIn)
+
+    //getSpeech/Dialogue(EntityPlayer playerIn)
+    //Make this smart to language learning
 	
 	/*public Item[] getGoodsToBringBackHome() 
 	{
@@ -352,85 +362,77 @@ public class EntityMillVillager extends EntityCreature
 	{
 		return firstName + " " + familyName;
 	}*/
-	
-	//handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
-	
-	@Override
-	public boolean interact(final EntityPlayer playerIn) 
-	{
-		playerIn.addStat(MillAchievement.firstContact, 1);
-		if(type.hireCost > 0)
-		{
-			this.isPlayerInteracting = true;
-			playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-			return true;
-		}
-		if(type.isChief)
-		{
-			this.isPlayerInteracting = true;
-			playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-			return true;
-		}
-		//for Sadhu and Alchemist maitrepenser achievement
-		//Display Quest GUI if appropriate
-		//Display Hire GUI if Appropriate
-		//Display Chief GUI if Chief
-		// Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)
-		return false;
-	}
-	
-	/**
-	 * Dead and sleeping entities cannot move
-	 */
-	@Override
-	protected boolean isMovementBlocked() 
-	{
-		return this.getHealth() <= 0 || this.isVillagerSleeping || this.isPlayerInteracting;
-	}
-	
-	//When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
-	//Why villagerID is important
-	
-	//Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
-	
-	@Override
-	public void onLivingUpdate() 
-	{
-		super.onLivingUpdate();
 
-		this.updateArmSwingProgress();
+    //handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
 
-		//setFacingDirection(); Look toward goal (or entity to attack, but I think attacking something is a goal)(entityToAttack also used in raids and against stupid players, may still be possible to use goal)
+    @Override
+    public boolean interact(final EntityPlayer playerIn) {
+        playerIn.addStat(MillAchievement.firstContact, 1);
+        if (type.hireCost > 0) {
+            this.isPlayerInteracting = true;
+            playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+            return true;
+        }
+        if (type.isChief) {
+            this.isPlayerInteracting = true;
+            playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
+            return true;
+        }
+        //for Sadhu and Alchemist maitrepenser achievement
+        //Display Quest GUI if appropriate
+        //Display Hire GUI if Appropriate
+        //Display Chief GUI if Chief
+        // Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)
+        return false;
+    }
 
-		if (isVillagerSleeping) {
-			motionX = 0;
-			motionY = 0;
-			motionZ = 0;
-		}
-	}
-	
-	//teenager leaving to find other village...possibly useful in creating new villages?
-	
-	//be smart with teleportTo, use coordinates or entity, check for surrounding blocks
-	
-	@Override
-	public void onUpdate() 
-	{
-		//Check(isRemote) and do nothing?
-		
-		if (this.isDead) 
-		{
-			super.onUpdate();
-			return;
-		}
-		
-		if(isPlayerInteracting)
-		{
-			List<EntityPlayer> playersNear = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(posX - 5, posY - 1, posZ - 5, posX + 5, posY + 1, posZ + 5));
-			
-			if(playersNear.isEmpty())
-				isPlayerInteracting = false;
-		}
+    /**
+     * Dead and sleeping entities cannot move
+     */
+    @Override
+    protected boolean isMovementBlocked() {
+        return this.getHealth() <= 0 || this.isVillagerSleeping || this.isPlayerInteracting;
+    }
+
+    //When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
+    //Why villagerID is important
+
+    //Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+
+        this.updateArmSwingProgress();
+
+        //setFacingDirection(); Look toward goal (or entity to attack, but I think attacking something is a goal)(entityToAttack also used in raids and against stupid players, may still be possible to use goal)
+
+        if (isVillagerSleeping) {
+            motionX = 0;
+            motionY = 0;
+            motionZ = 0;
+        }
+    }
+
+    //teenager leaving to find other village...possibly useful in creating new villages?
+
+    //be smart with teleportTo, use coordinates or entity, check for surrounding blocks
+
+    @Override
+    public void onUpdate() {
+        //Check(isRemote) and do nothing?
+
+        if (this.isDead) {
+            super.onUpdate();
+            return;
+        }
+
+        if (isPlayerInteracting) {
+            List<EntityPlayer> playersNear = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(posX - 5, posY - 1, posZ - 5, posX + 5, posY + 1, posZ + 5));
+
+            if (playersNear.isEmpty())
+                isPlayerInteracting = false;
+        }
 
 		/*if (hiredBy != null) 
 		{
@@ -438,147 +440,131 @@ public class EntityMillVillager extends EntityCreature
 			super.onUpdate();
 			return;
 		}*/
-		
-		//if(village is under attack)
-		//{
-			//Clear other goals and either hide or defend.
-		//}
-		
-		//Check to Attack something (needs to be more player specific)
-		
-		//Check Time (day or night)
-			//Chance to speak something		SPEAKING SENTENCES AND DIALOGUE CAN BE CLIENT-SIDE!!
-			//pick up items?
-			//updateLocalMerchant()
-			//updateForeignMerchant()
-			//checkGoals()
-		//checkGoals() (sleep...?)
-		
-		//Update path finding
-			//check Long Distance Stuck
-			//check short Distance Stuck
-			//handleDoorsAndFenceGates
-			//setPathing
-		
-		//sendUpdatePacket to client
-		
-		//trigger Mob Attacks on Villagers (currently only spiders, which is odd...villagers will seek out other mobs, but should be targetable).
-		
-		//update Dialogue?
-		
-		//put away weapons (might revise this to check if attacking first)
-		
-		super.onUpdate();
-	}
-	
-	//performNightActions() does not appear to be called in the code anymore...perhaps it has been outdated?  This undoes growChildSize, conception, and ForiegnMerchantNightAction
-	
-	@Override
-	public void writeToNBT(final NBTTagCompound nbt) 
-	{
-		super.writeToNBT(nbt);
-		nbt.setInteger("villagerID", villagerID);
-		nbt.setString("culture", culture.cultureName);
-		nbt.setInteger("gender", this.dataWatcher.getWatchableObjectInt(GENDER));
-		nbt.setString("villagerType", type.id);
-		nbt.setBoolean("sleeping", isVillagerSleeping);
-		
-		nbt.setString("texture", this.dataWatcher.getWatchableObjectString(TEXTURE));
-		nbt.setInteger("age", this.dataWatcher.getWatchableObjectInt(AGE));
-		nbt.setString("name", this.dataWatcher.getWatchableObjectString(NAME));
-		
-		NBTTagList nbttaglist = new NBTTagList();
-        for (int i = 0; i < this.villagerInventory.getSizeInventory(); ++i)
-        {
+
+        //if(village is under attack)
+        //{
+        //Clear other goals and either hide or defend.
+        //}
+
+        //Check to Attack something (needs to be more player specific)
+
+        //Check Time (day or night)
+        //Chance to speak something		SPEAKING SENTENCES AND DIALOGUE CAN BE CLIENT-SIDE!!
+        //pick up items?
+        //updateLocalMerchant()
+        //updateForeignMerchant()
+        //checkGoals()
+        //checkGoals() (sleep...?)
+
+        //Update path finding
+        //check Long Distance Stuck
+        //check short Distance Stuck
+        //handleDoorsAndFenceGates
+        //setPathing
+
+        //sendUpdatePacket to client
+
+        //trigger Mob Attacks on Villagers (currently only spiders, which is odd...villagers will seek out other mobs, but should be targetable).
+
+        //update Dialogue?
+
+        //put away weapons (might revise this to check if attacking first)
+
+        super.onUpdate();
+    }
+
+    //performNightActions() does not appear to be called in the code anymore...perhaps it has been outdated?  This undoes growChildSize, conception, and ForiegnMerchantNightAction
+
+    @Override
+    public void writeToNBT(final NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setInteger("villagerID", villagerID);
+        nbt.setString("culture", culture.cultureName);
+        nbt.setInteger("gender", this.dataWatcher.getWatchableObjectInt(GENDER));
+        nbt.setString("villagerType", type.id);
+        nbt.setBoolean("sleeping", isVillagerSleeping);
+
+        nbt.setString("texture", this.dataWatcher.getWatchableObjectString(TEXTURE));
+        nbt.setInteger("age", this.dataWatcher.getWatchableObjectInt(AGE));
+        nbt.setString("name", this.dataWatcher.getWatchableObjectString(NAME));
+
+        NBTTagList nbttaglist = new NBTTagList();
+        for (int i = 0; i < this.villagerInventory.getSizeInventory(); ++i) {
             ItemStack itemstack = this.villagerInventory.getStackInSlot(i);
 
-            if (itemstack != null)
-            {
+            if (itemstack != null) {
                 nbttaglist.appendTag(itemstack.writeToNBT(new NBTTagCompound()));
             }
         }
         nbt.setTag("Inventory", nbttaglist);
-		//Write in All relevant data
-	}
-	
-	@Override
-	public void readFromNBT(final NBTTagCompound nbt) 
-	{
-		super.readFromNBT(nbt);
-		villagerID = nbt.getInteger("villagerID");
-		try 
-		{
-			culture = MillCulture.getCulture(nbt.getString("culture"));
-		} 
-		catch (Exception ex) 
-		{
-			System.err.println("Villager failed to read from NBT correctly");
-			ex.printStackTrace();
-		}
-		if(culture == null)
-		{
-			System.out.println("Fix this shit!");
-			culture.getChildType(GENDER);
-		}
-		this.dataWatcher.updateObject(GENDER, nbt.getInteger("gender"));
-		type = culture.getVillagerType(nbt.getString("villagerType"));
-		isVillagerSleeping = nbt.getBoolean("sleeping");
-		
-		this.dataWatcher.updateObject(TEXTURE, nbt.getString("texture"));
-		this.dataWatcher.updateObject(AGE, nbt.getInteger("age"));
-		this.dataWatcher.updateObject(NAME, nbt.getString("name"));
-		
-		NBTTagList nbttaglist = nbt.getTagList("Inventory", 10);
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
-        {
+        //Write in All relevant data
+    }
+
+    @Override
+    public void readFromNBT(final NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        villagerID = nbt.getInteger("villagerID");
+        try {
+            culture = MillCulture.getCulture(nbt.getString("culture"));
+        } catch (Exception ex) {
+            System.err.println("Villager failed to read from NBT correctly");
+            ex.printStackTrace();
+        }
+        if (culture == null) {
+            System.out.println("Fix this shit!");
+            culture.getChildType(GENDER);
+        }
+        this.dataWatcher.updateObject(GENDER, nbt.getInteger("gender"));
+        type = culture.getVillagerType(nbt.getString("villagerType"));
+        isVillagerSleeping = nbt.getBoolean("sleeping");
+
+        this.dataWatcher.updateObject(TEXTURE, nbt.getString("texture"));
+        this.dataWatcher.updateObject(AGE, nbt.getInteger("age"));
+        this.dataWatcher.updateObject(NAME, nbt.getString("name"));
+
+        NBTTagList nbttaglist = nbt.getTagList("Inventory", 10);
+        for (int i = 0; i < nbttaglist.tagCount(); ++i) {
             ItemStack itemstack = ItemStack.loadItemStackFromNBT(nbttaglist.getCompoundTagAt(i));
 
-            if (itemstack != null)
-            {
+            if (itemstack != null) {
                 this.villagerInventory.func_174894_a(itemstack);
             }
         }
-		//Read in all relevant data
-	}
-	
-	@Override
-	public String toString() 
-	{
-		return this.getClass().getSimpleName() + "@" + ": " + getName() + "/" + this.villagerID + "/" + worldObj;
-	}
-	
-	//Update Texture for Byzantines with silk clothes, possibly further expand on this
-	
-	private void updateHired() 
-	{
-		//find target (base this on stance, change stance in onInteract)
-		
-		//pathFind to entity you want to attack (or following player)
-		//handledoorsandfencegates
-	}
-	
-	//override onlivingsound?
-	
-	//////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-	
-	public static void preinitialize()
-	{
-		EntityRegistry.registerModEntity(EntityMillVillager.class, "millVillager", 0, Millenaire.instance, 80, 3, false);
-	}
-	
-	public static void prerender()
-	{
-		RenderingRegistry.registerEntityRenderingHandler(EntityMillVillager.class, new millVillagerRenderFactory());
-	}
-	
-	//////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-	
-	public static class millVillagerRenderFactory implements IRenderFactory<EntityMillVillager>
-	{
-		@Override
-		public Render<EntityMillVillager> createRenderFor(RenderManager manager) 
-		{
-			return new RenderMillVillager(manager, new ModelBiped(), 0.5F);
-		}
-	}
+        //Read in all relevant data
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + ": " + getName() + "/" + this.villagerID + "/" + worldObj;
+    }
+
+    //Update Texture for Byzantines with silk clothes, possibly further expand on this
+
+    private void updateHired() {
+        //find target (base this on stance, change stance in onInteract)
+
+        //pathFind to entity you want to attack (or following player)
+        //handledoorsandfencegates
+    }
+
+    //override onlivingsound?
+
+    //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    public static void preinitialize() {
+        EntityRegistry.registerModEntity(EntityMillVillager.class, "millVillager", 0, Millenaire.instance, 80, 3, false);
+    }
+
+    public static void prerender() {
+        RenderingRegistry.registerEntityRenderingHandler(EntityMillVillager.class, new millVillagerRenderFactory());
+    }
+
+    //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    public static class millVillagerRenderFactory implements IRenderFactory<EntityMillVillager> {
+        @Override
+        public Render<EntityMillVillager> createRenderFor(RenderManager manager) {
+            return new RenderMillVillager(manager, new ModelBiped(), 0.5F);
+        }
+    }
 }

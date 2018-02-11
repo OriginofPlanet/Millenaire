@@ -20,7 +20,7 @@ public class VillageTracker extends WorldSavedData
 	private final static String IDENTITY = "Millenaire.VillageInfo";
 
 	private Map<UUID, Village> villages = new HashMap<>();
-	private List<BlockPos> VPs = new ArrayList<BlockPos>();
+	private List<BlockPos> VPs = new ArrayList<>();
 	
 	public VillageTracker() { super(IDENTITY); }
 	

@@ -24,76 +24,84 @@ import net.minecraft.world.World;
 
 public class Village {
 
-	private UUID uuid;
-	private BlockPos mainBlock;
-	private VillageGeography geo;
-	private VillageType type;
-	private MillCulture culture;
-	private World world;
-	private BuildingLocation[] buildings;
-	
-	private Village(BlockPos b, World worldIn, VillageType typeIn, MillCulture cultureIn) {
-		this.setPos(b);
-		this.uuid = UUID.randomUUID();
-		this.world = worldIn;
-		this.type = typeIn;
-		this.culture = cultureIn;
-		this.geo = new VillageGeography();
-		BuildingLocation loc = new BuildingLocation(1, 1, 1, mainBlock, EnumFacing.NORTH);
-		
-		List bl = new ArrayList<BuildingLocation>();
-		bl.add(loc);
-		
-		this.geo.update(world, bl, null, mainBlock, 64);
-	}
-	
-	/**
-	 * FOR USE BY VILLAGE TRACKER ONLY
-	 */
-	@Deprecated()
-	public Village() {}
-	
-	/**
-	 * FOR USE BY VILLAGE TRACKER ONLY
-	 */
-	@Deprecated
-	public void setPos(BlockPos pos) { mainBlock = pos; }
-	
-	public VillageType getType() { return type; }
+    private UUID uuid;
+    private BlockPos mainBlock;
+    private VillageGeography geo;
+    private VillageType type;
+    private MillCulture culture;
+    private World world;
+    private BuildingLocation[] buildings;
 
-	public UUID getUUID() { return uuid; }
-	
-	public BlockPos getPos() { return mainBlock; }
-	
-	public boolean setupVillage() {
-		try {
-			for(BuildingProject proj : type.startingBuildings) {
-				BuildingPlan p = PlanIO.loadSchematic(PlanIO.getBuildingTag(ResourceLocationUtil.getRL(proj.ID).getResourcePath(), culture, true), culture, proj.lvl);
-				
-				EntityMillVillager v = new EntityMillVillager(world, 100100, culture);
-				v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
-				v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 0);
-				world.spawnEntityInWorld(v);
-				
-				BuildingLocation loc = p.findBuildingLocation(geo, new MillPathNavigate(v, world), mainBlock, 64, new Random(), p.buildingOrientation);
-				this.geo.registerBuildingLocation(loc);
-				BuildingBlock[] points = p.getBuildingPoints(world, loc, true);
-				//System.out.println(points.length);
-				for(BuildingBlock bb : points) {
-					bb.build(world, true);
-				}
-			}
-			return true;
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
-	public static Village createVillage(BlockPos VSPos, World world, VillageType typeIn, MillCulture cultureIn) {
-		Village v = new Village(VSPos, world, typeIn, cultureIn);
-		VillageTracker.get(world).registerVillage(v.getUUID(), v);;
-		return v; 
-	}
+    private Village(BlockPos b, World worldIn, VillageType typeIn, MillCulture cultureIn) {
+        this.setPos(b);
+        this.uuid = UUID.randomUUID();
+        this.world = worldIn;
+        this.type = typeIn;
+        this.culture = cultureIn;
+        this.geo = new VillageGeography();
+        BuildingLocation loc = new BuildingLocation(1, 1, 1, mainBlock, EnumFacing.NORTH);
+
+        List bl = new ArrayList<BuildingLocation>();
+        bl.add(loc);
+
+        this.geo.update(world, bl, null, mainBlock, 64);
+    }
+
+    /**
+     * FOR USE BY VILLAGE TRACKER ONLY
+     */
+    @Deprecated()
+    public Village() {
+    }
+
+    /**
+     * FOR USE BY VILLAGE TRACKER ONLY
+     */
+    @Deprecated
+    public void setPos(BlockPos pos) {
+        mainBlock = pos;
+    }
+
+    public VillageType getType() {
+        return type;
+    }
+
+    public UUID getUUID() {
+        return uuid;
+    }
+
+    public BlockPos getPos() {
+        return mainBlock;
+    }
+
+    public boolean setupVillage() {
+        try {
+            for (BuildingProject proj : type.startingBuildings) {
+                BuildingPlan p = PlanIO.loadSchematic(PlanIO.getBuildingTag(ResourceLocationUtil.getRL(proj.ID).getResourcePath(), culture, true), culture, proj.lvl);
+
+                EntityMillVillager v = new EntityMillVillager(world, 100100, culture);
+                v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
+                v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 1);
+                world.spawnEntityInWorld(v);
+
+                BuildingLocation loc = p.findBuildingLocation(geo, new MillPathNavigate(v, world), mainBlock, 64, new Random(), p.buildingOrientation);
+
+                System.out.println("Generating " + proj.ID + " at " + loc);
+
+                PlanIO.placeBuilding(p, loc, world);
+                VillageTracker.get(world)
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static Village createVillage(BlockPos VSPos, World world, VillageType typeIn, MillCulture cultureIn) {
+        Village v = new Village(VSPos, world, typeIn, cultureIn);
+        VillageTracker.get(world).registerVillage(v.getUUID(), v);
+        ;
+        return v;
+    }
 }

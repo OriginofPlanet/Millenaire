@@ -160,72 +160,74 @@ public class BuildingPlan
 		
 		return this;
 	}
-	
-	public BuildingLocation findBuildingLocation(VillageGeography vg, MillPathNavigate pathing, BlockPos center, int maxRadius, Random random, EnumFacing orientation)
-	{
-		final int ci = center.getX() - vg.mapStartX;
-		final int cj = center.getZ() - vg.mapStartZ;
 
-		int radius = (int) (maxRadius * minDistance);
-		maxRadius = (int) (maxRadius * maxDistance);
-		
-		for (int i = 0; i < vg.length; i++) 
-		{
-			for (int j = 0; j < vg.width; j++) 
-			{
-				vg.buildTested[i][j] = false;
-			}
-		}
+    public BuildingLocation findBuildingLocation(VillageGeography vg, MillPathNavigate pathing, BlockPos center, int maxRadius, Random random, EnumFacing orientation)
+    {
+        final int ci = center.getX() - vg.mapStartX;
+        final int cj = center.getZ() - vg.mapStartZ;
 
-		while (radius < maxRadius) 
-		{
-			final int mini = Math.max(0, ci - radius);
-			final int maxi = Math.min(vg.length - 1, ci + radius);
-			final int minj = Math.max(0, cj - radius);
-			final int maxj = Math.min(vg.width - 1, cj + radius);
-			
-			for (int i = mini; i < maxi; i++) 
-			{
-				if (cj - radius == minj) 
-				{
-					final LocationReturn lr = testLocation(vg, center, i, minj, orientation, pathing);
+        int radius = (int) (maxRadius * minDistance);
+        maxRadius = (int) (maxRadius * maxDistance);
 
-					if (lr.location != null) 
-						return lr.location;
-				}
-				if (cj + radius == maxj) 
-				{
-					final LocationReturn lr = testLocation(vg, center, i, minj, orientation, pathing);
+        for (int i = 0; i < vg.length; i++)
+        {
+            for (int j = 0; j < vg.width; j++)
+            {
+                vg.buildTested[i][j] = false;
+            }
+        }
 
-					if (lr.location != null) 
-						return lr.location;
-				}
-			}
-			
-			for (int j = minj; j < maxj; j++) 
-			{
-				if (ci - radius == mini) 
-				{
-					final LocationReturn lr = testLocation(vg, center, j, minj, orientation, pathing);
+        while (radius < maxRadius)
+        {
+            final int mini = Math.max(0, ci - radius);
+            final int maxi = Math.min(vg.length - 1, ci + radius);
+            final int minj = Math.max(0, cj - radius);
+            final int maxj = Math.min(vg.width - 1, cj + radius);
 
-					if (lr.location != null) 
-						return lr.location;
-				}
-				if (ci + radius == maxi) 
-				{
-					final LocationReturn lr = testLocation(vg, center, j, minj, orientation, pathing);
+            //noinspection Duplicates
+            for (int i = mini; i < maxi; i++)
+            {
+                if (cj - radius == minj)
+                {
+                    final LocationReturn lr = testLocation(vg, center, i, minj, orientation, pathing);
 
-					if (lr.location != null) 
-						return lr.location;
-				}
-			}
-			
-			radius++;
-		}
-		
-		System.out.println("building search unsuccessful");
-		return null;
-	}
+                    if (lr.location != null)
+                        return lr.location;
+                }
+                if (cj + radius == maxj)
+                {
+                    final LocationReturn lr = testLocation(vg, center, i, minj, orientation, pathing);
+
+                    if (lr.location != null)
+                        return lr.location;
+                }
+            }
+
+            //noinspection Duplicates
+            for (int j = minj; j < maxj; j++)
+            {
+                if (ci - radius == mini)
+                {
+                    final LocationReturn lr = testLocation(vg, center, j, minj, orientation, pathing);
+
+                    if (lr.location != null)
+                        return lr.location;
+                }
+                if (ci + radius == maxi)
+                {
+                    final LocationReturn lr = testLocation(vg, center, j, minj, orientation, pathing);
+
+                    if (lr.location != null)
+                        return lr.location;
+                }
+            }
+
+            radius++;
+        }
+
+        System.out.println("building search unsuccessful");
+        return null;
+    }
 	
 	private void addToCost(ItemStack stack, int amount)
 	{
@@ -635,180 +637,180 @@ public class BuildingPlan
 			addToCost(new ItemStack(MillBlocks.byzantineTile), (int) Math.max(Math.ceil(byzBricksHalf / 2), 1));
 		}
 	}
-	
-	private LocationReturn testLocation(VillageGeography vg, BlockPos center, int x, int z, EnumFacing facing, MillPathNavigate pathing)
-	{
-		EnumFacing orientation;
-		
-		final int relx = x + vg.mapStartX - center.getX();
-		final int relz = z + vg.mapStartZ - center.getZ();
 
-		vg.buildTested[x][z] = true;
+    private LocationReturn testLocation(VillageGeography vg, BlockPos center, int x, int z, EnumFacing facing, MillPathNavigate pathing)
+    {
+        EnumFacing orientation;
 
-		if (facing == null || facing.getIndex() < 2) 
-		{
-			if (relx * relx > relz * relz) 
-			{
-				if (relx > 0)
-					orientation = EnumFacing.NORTH;
-				else
-					orientation = EnumFacing.SOUTH;
-			} 
-			else 
-			{
-				if (relz > 0)
-					orientation = EnumFacing.EAST;
-				else
-					orientation = EnumFacing.WEST;
-			}
-		} 
-		else 
-		{
-			orientation = facing;
-		}
-		
-		orientation = EnumFacing.getFront((orientation.getHorizontalIndex() + buildingOrientation.getHorizontalIndex()) % 4);
+        final int relx = x + vg.mapStartX - center.getX();
+        final int relz = z + vg.mapStartZ - center.getZ();
 
-		int xwidth;
-		int zwidth;
+        vg.buildTested[x][z] = true;
 
-		if (orientation == EnumFacing.NORTH || orientation == EnumFacing.SOUTH) 
-		{
-			xwidth = length + areaToClear * 2 + 2;
-			zwidth = width + areaToClear * 2 + 2;
-		} 
-		else 
-		{
-			xwidth = width + areaToClear * 2 + 2;
-			zwidth = length + areaToClear * 2 + 2;
-		}
+        if (facing == null || facing.getIndex() < 2)
+        {
+            if (relx * relx > relz * relz)
+            {
+                if (relx > 0)
+                    orientation = EnumFacing.NORTH;
+                else
+                    orientation = EnumFacing.SOUTH;
+            }
+            else
+            {
+                if (relz > 0)
+                    orientation = EnumFacing.EAST;
+                else
+                    orientation = EnumFacing.WEST;
+            }
+        }
+        else
+        {
+            orientation = facing;
+        }
 
-		int altitudeTotal = 0;
-		int nbPoints = 0;
-		int nbError = 0;
+        orientation = EnumFacing.getFront((orientation.getHorizontalIndex() + buildingOrientation.getHorizontalIndex()) % 4);
 
-		int allowedErrors = 10;
-		boolean hugeBuilding = false;
+        int xwidth;
+        int zwidth;
 
-		if (xwidth * zwidth > 6000) 
-		{
-			allowedErrors = 1500;
-			hugeBuilding = true;
-		} 
-		else if (xwidth * zwidth > 200) 
-		{
-			allowedErrors = xwidth * zwidth / 20;
-		}
+        if (orientation == EnumFacing.NORTH || orientation == EnumFacing.SOUTH)
+        {
+            xwidth = length + areaToClear * 2 + 2;
+            zwidth = width + areaToClear * 2 + 2;
+        }
+        else
+        {
+            xwidth = width + areaToClear * 2 + 2;
+            zwidth = length + areaToClear * 2 + 2;
+        }
 
-		boolean reachable = false;
-		
-		for (int i = 0; i <= (int) Math.floor(xwidth / 2); i++) 
-		{
-			for (int j = 0; j <= (int) Math.floor(zwidth / 2); j++) 
-			{
-				for (int k = 0; k < 4; k++) 
-				{
-					int ci, cj;
-					if (k == 0) 
-					{
-						ci = x + i;
-						cj = z + j;
-					} 
-					else if (k == 1) 
-					{
-						ci = x - i;
-						cj = z + j;
-					} 
-					else if (k == 2) 
-					{
-						ci = x - i;
-						cj = z - j;
-					} 
-					else 
-					{
-						ci = x + i;
-						cj = z - j;
-					}
+        int altitudeTotal = 0;
+        int nbPoints = 0;
+        int nbError = 0;
 
-					if (ci < 0 || cj < 0 || ci >= vg.length || cj >= vg.width) 
-					{
-						BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+        int allowedErrors = 10;
+        boolean hugeBuilding = false;
 
-						return new LocationReturn(LocationReturn.OUTSIDE_RADIUS, p);
-					}
+        if (xwidth * zwidth > 6000)
+        {
+            allowedErrors = 1500;
+            hugeBuilding = true;
+        }
+        else if (xwidth * zwidth > 200)
+        {
+            allowedErrors = xwidth * zwidth / 20;
+        }
 
-					if (vg.buildingLoc[ci][cj]) 
-					{
-						if (nbError > allowedErrors) 
-						{
-							final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+        boolean reachable = false;
 
-							return new LocationReturn(LocationReturn.LOCATION_CLASH, p);
-						} 
-						else
-						    {
+        for (int i = 0; i <= (int) Math.floor(xwidth / 2); i++)
+        {
+            for (int j = 0; j <= (int) Math.floor(zwidth / 2); j++)
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int ci, cj;
+                    if (k == 0)
+                    {
+                        ci = x + i;
+                        cj = z + j;
+                    }
+                    else if (k == 1)
+                    {
+                        ci = x - i;
+                        cj = z + j;
+                    }
+                    else if (k == 2)
+                    {
+                        ci = x - i;
+                        cj = z - j;
+                    }
+                    else
+                    {
+                        ci = x + i;
+                        cj = z - j;
+                    }
+
+                    if (ci < 0 || cj < 0 || ci >= vg.length || cj >= vg.width)
+                    {
+                        BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+
+                        return new LocationReturn(LocationReturn.OUTSIDE_RADIUS, p);
+                    }
+
+                    if (vg.buildingLoc[ci][cj])
+                    {
+                        if (nbError > allowedErrors)
+                        {
+                            final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+
+                            return new LocationReturn(LocationReturn.LOCATION_CLASH, p);
+                        }
+                        else
                             nbError += 5;
+                    }
+                    else if (vg.buildingForbidden[ci][cj])
+                    {
+                        if (!hugeBuilding || nbError > allowedErrors) {
+
+                            final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+
+                            return new LocationReturn(LocationReturn.CONSTRUCTION_FORBIDDEN, p);
                         }
-					} 
-					else if (vg.buildingForbidden[ci][cj]) 
-					{
-						if (!hugeBuilding || nbError > allowedErrors) {
-
-							final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
-
-							return new LocationReturn(LocationReturn.CONSTRUCTION_FORBIDDEN, p);
-						} 
-						else
-                        {
+                        else
                             nbError++;
-                        }
-					} 
-					else if (vg.danger[ci][cj]) 
-					{
-						if (nbError > allowedErrors) 
-						{
-							final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
-
-							return new LocationReturn(LocationReturn.DANGER, p);
-						} 
-						else
+                    }
+                    else if (vg.danger[ci][cj])
+                    {
+                        if (nbError > allowedErrors)
                         {
-                            nbError++;
-                        }
-					} 
-					else if (!vg.canBuild[ci][cj]) 
-					{
-						if (nbError > allowedErrors) 
-						{
-							final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+                            final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
 
-							return new LocationReturn(LocationReturn.WRONG_ALTITUDE, p);
-						} 
-						else
+                            return new LocationReturn(LocationReturn.DANGER, p);
+                        }
+                        else
+                            nbError++;
+                    }
+                    else if (!vg.canBuild[ci][cj])
+                    {
+                        if (nbError > allowedErrors)
                         {
-                            nbError++;
+                            final BlockPos p = new BlockPos(ci + vg.mapStartX, 64, cj + vg.mapStartZ);
+
+                            return new LocationReturn(LocationReturn.WRONG_ALTITUDE, p);
                         }
-					}
+                        else
+                            nbError++;
+                    }
 
-                    reachable = pathing == null || !pathing.tryMoveToXYZ(ci, 64, cj, 0.5D);
+                    if (pathing != null && pathing.tryMoveToXYZ(ci, 64, cj, 0.5D))
+                    {
+                        reachable = false;
+                    }
+                    else
+                    {
+                        reachable = true;
+                    }
 
-					altitudeTotal += vg.constructionHeight[ci][cj];
-					nbPoints++;
-				}
-			}
-		}
-		
-		if (pathing != null && !reachable) 
-		{
-			return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
-		}
+                    altitudeTotal += vg.topGround[ci][cj];
+//					altitudeTotal += vg.constructionHeight[ci][cj];
+                    nbPoints++;
+                }
+            }
+        }
 
-		final int altitude = (altitudeTotal / nbPoints);
+        if (pathing != null && !reachable)
+        {
+            return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
+        }
 
-		final BuildingLocation l = new BuildingLocation(this, new BlockPos(x + vg.mapStartX, altitude, z + vg.mapStartZ), orientation);
+        final int altitude = (int) (1 + altitudeTotal * 1.0f / nbPoints);
 
-		return new LocationReturn(l);
-	}
+        final BuildingLocation l = new BuildingLocation(this, new BlockPos(x + vg.mapStartX, altitude, z + vg.mapStartZ), orientation);
+
+        return new LocationReturn(l);
+    }
 	
 	public BuildingBlock[] getBuildingPoints(World worldIn, BuildingLocation location, boolean villageGeneration)
 	{

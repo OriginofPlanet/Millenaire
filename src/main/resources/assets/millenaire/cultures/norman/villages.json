@@ -32,6 +32,18 @@
                 {
                     "ID": "norman:EgyTempleHQ",
                     "lvl": 0
+                },
+                {
+                    "ID": "norman:EgyGrove",
+                    "lvl": 0
+                },
+                {
+                    "ID": "norman:EgyMediumPeasant",
+                    "lvl": 0
+                },
+                {
+                    "ID": "norman:EgyQuarry",
+                    "lvl": 0
                 }
             ]
         }
