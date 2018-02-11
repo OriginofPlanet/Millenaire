@@ -1,30 +1,18 @@
 package org.millenaire.items;
 
-import org.millenaire.Millenaire;
-import org.millenaire.blocks.BlockMillCrops;
-import org.millenaire.blocks.MillBlocks;
-import org.millenaire.items.ItemMillArmor.mayanQuestCrown;
-import org.millenaire.items.ItemMillTool.ItemMillAxe;
-import org.millenaire.items.ItemMillTool.ItemMillHoe;
-import org.millenaire.items.ItemMillTool.ItemMillMace;
-import org.millenaire.items.ItemMillTool.ItemMillPickaxe;
-import org.millenaire.items.ItemMillTool.ItemMillShovel;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.potion.Potion;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.millenaire.Millenaire;
+import org.millenaire.blocks.BlockMillCrops;
+import org.millenaire.blocks.MillBlocks;
+import org.millenaire.items.ItemMillArmor.mayanQuestCrown;
+import org.millenaire.items.ItemMillTool.*;
 
 public class MillItems 
 {
@@ -409,153 +397,6 @@ public class MillItems
     	GameRegistry.addShapelessRecipe(new ItemStack(wine, 1), new ItemStack(MillItems.grapes), new ItemStack(MillItems.grapes), new ItemStack(MillItems.grapes), new ItemStack(MillItems.grapes), 
     			new ItemStack(MillItems.grapes), new ItemStack(MillItems.grapes));
 	}
-	
-	@SideOnly(Side.CLIENT)
-	public static void prerender() {
-		//Tools
-		//ModelBakery.addVariantName(japaneseBow_pulling_1, Millenaire.MODID + ":japaneseBow", Millenaire.MODID + ":japaneseBow_pulling_1", Millenaire.MODID + ":japaneseBow_pulling_2", Millenaire.MODID + ":japaneseBow_pulling_3");
-		ModelBakery.registerItemVariants(japaneseBow, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow", "inventory"), new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_1", "inventory"),
-				new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_2", "inventory"), new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_3", "inventory"));
-		ModelLoader.setCustomModelResourceLocation(japaneseBow, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow", "inventory"));
-		/*ModelLoader.setCustomModelResourceLocation(japaneseBow, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_1", "inventory"));
-    	ModelLoader.setCustomModelResourceLocation(japaneseBow, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_2", "inventory"));
-    	ModelLoader.setCustomModelResourceLocation(japaneseBow, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_3", "inventory"));*/
-		
-		//Amulets
-		ModelLoader.setCustomModelResourceLocation(amuletSkollHati,0, new ModelResourceLocation(Millenaire.MODID + ":amuletSkollHati"));
-		ModelLoader.setCustomModelResourceLocation(amuletAlchemist, 0, new ModelResourceLocation(Millenaire.MODID + ":amuletAlchemist"));
-		ModelLoader.setCustomModelResourceLocation(amuletVishnu, 0, new ModelResourceLocation(Millenaire.MODID + ":amuletVishnu"));
-		ModelLoader.setCustomModelResourceLocation(amuletYggdrasil, 0, new ModelResourceLocation(Millenaire.MODID + ":amuletYggdrasil"));
-		
-		//Parchments
-		ModelLoader.setCustomModelResourceLocation(normanVillagerParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentVillager"));
-    	ModelLoader.setCustomModelResourceLocation(normanBuildingParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentBuilding"));
-    	ModelLoader.setCustomModelResourceLocation(normanItemParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentItem"));
-    	ModelLoader.setCustomModelResourceLocation(normanAllParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentAll"));
-    	
-    	ModelLoader.setCustomModelResourceLocation(byzantineVillagerParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentVillager"));
-    	ModelLoader.setCustomModelResourceLocation(byzantineBuildingParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentBuilding"));
-    	ModelLoader.setCustomModelResourceLocation(byzantineItemParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentItem"));
-    	ModelLoader.setCustomModelResourceLocation(byzantineAllParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentAll"));
-    	
-    	ModelLoader.setCustomModelResourceLocation(hindiVillagerParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentVillager"));
-    	ModelLoader.setCustomModelResourceLocation(hindiBuildingParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentBuilding"));
-    	ModelLoader.setCustomModelResourceLocation(hindiItemParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentItem"));
-    	ModelLoader.setCustomModelResourceLocation(hindiAllParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentAll"));
-    	
-    	ModelLoader.setCustomModelResourceLocation(mayanVillagerParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentVillager"));
-    	ModelLoader.setCustomModelResourceLocation(mayanBuildingParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentBuilding"));
-    	ModelLoader.setCustomModelResourceLocation(mayanItemParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentItem"));
-    	ModelLoader.setCustomModelResourceLocation(mayanAllParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentAll"));
-    	
-    	ModelLoader.setCustomModelResourceLocation(japaneseVillagerParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentVillager"));
-    	ModelLoader.setCustomModelResourceLocation(japaneseBuildingParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentBuilding"));
-    	ModelLoader.setCustomModelResourceLocation(japaneseItemParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentItem"));
-    	ModelLoader.setCustomModelResourceLocation(japaneseAllParchment, 0, new ModelResourceLocation(Millenaire.MODID + ":parchmentAll"));
-	}
-	
-	@SideOnly(Side.CLIENT)
-	public static void render()
-	{
-		RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-		
-		renderItem.getItemModelMesher().register(denier, 0, new ModelResourceLocation(Millenaire.MODID + ":denier", "inventory"));
-		renderItem.getItemModelMesher().register(denierOr, 0, new ModelResourceLocation(Millenaire.MODID + ":denierOr", "inventory"));
-		renderItem.getItemModelMesher().register(denierArgent, 0, new ModelResourceLocation(Millenaire.MODID + ":denierArgent", "inventory"));
-		
-		renderItem.getItemModelMesher().register(silk, 0, new ModelResourceLocation(Millenaire.MODID + ":silk", "inventory"));
-		renderItem.getItemModelMesher().register(obsidianFlake, 0, new ModelResourceLocation(Millenaire.MODID + ":obsidianFlake", "inventory"));
-		renderItem.getItemModelMesher().register(unknownPowder, 0, new ModelResourceLocation(Millenaire.MODID + ":unknownPowder", "inventory"));
-		
-		renderItem.getItemModelMesher().register(woolClothes, 0, new ModelResourceLocation(Millenaire.MODID + ":woolClothes", "inventory"));
-		renderItem.getItemModelMesher().register(silkClothes, 0, new ModelResourceLocation(Millenaire.MODID + ":silkClothes", "inventory"));
-		renderItem.getItemModelMesher().register(galianiteDust, 0, new ModelResourceLocation(Millenaire.MODID + ":galianiteDust", "inventory"));
-		
-		//Crops
-		renderItem.getItemModelMesher().register(turmeric, 0, new ModelResourceLocation(Millenaire.MODID + ":turmeric", "inventory"));
-		renderItem.getItemModelMesher().register(rice, 0, new ModelResourceLocation(Millenaire.MODID + ":rice", "inventory"));
-		renderItem.getItemModelMesher().register(maize, 0, new ModelResourceLocation(Millenaire.MODID + ":maize", "inventory"));
-		renderItem.getItemModelMesher().register(grapes, 0, new ModelResourceLocation(Millenaire.MODID + ":grapes", "inventory"));
 
-		renderItem.getItemModelMesher().register(ciderApple, 0, new ModelResourceLocation(Millenaire.MODID + ":ciderApple", "inventory"));
-		renderItem.getItemModelMesher().register(cider, 0, new ModelResourceLocation(Millenaire.MODID + ":cider", "inventory"));
-		renderItem.getItemModelMesher().register(calva, 0, new ModelResourceLocation(Millenaire.MODID + ":calva", "inventory"));
-		renderItem.getItemModelMesher().register(tripes, 0, new ModelResourceLocation(Millenaire.MODID + ":tripes", "inventory"));
-		renderItem.getItemModelMesher().register(boudinNoir, 0, new ModelResourceLocation(Millenaire.MODID + ":boudinNoir", "inventory"));
-		
-		renderItem.getItemModelMesher().register(vegCurry, 0, new ModelResourceLocation(Millenaire.MODID + ":vegCurry", "inventory"));
-		renderItem.getItemModelMesher().register(murghCurry, 0, new ModelResourceLocation(Millenaire.MODID + ":murghCurry", "inventory"));
-		renderItem.getItemModelMesher().register(rasgulla, 0, new ModelResourceLocation(Millenaire.MODID + ":rasgulla", "inventory"));
-		
-		renderItem.getItemModelMesher().register(cacauhaa, 0, new ModelResourceLocation(Millenaire.MODID + ":cacauhaa", "inventory"));
-		renderItem.getItemModelMesher().register(masa, 0, new ModelResourceLocation(Millenaire.MODID + ":masa", "inventory"));
-		renderItem.getItemModelMesher().register(wah, 0, new ModelResourceLocation(Millenaire.MODID + ":wah", "inventory"));
-		
-		renderItem.getItemModelMesher().register(wine, 0, new ModelResourceLocation(Millenaire.MODID + ":wine", "inventory"));
-		renderItem.getItemModelMesher().register(malvasiaWine, 0, new ModelResourceLocation(Millenaire.MODID + ":malvasiaWine", "inventory"));
-		renderItem.getItemModelMesher().register(feta, 0, new ModelResourceLocation(Millenaire.MODID + ":feta", "inventory"));
-		renderItem.getItemModelMesher().register(souvlaki, 0, new ModelResourceLocation(Millenaire.MODID + ":souvlaki", "inventory"));
-		
-		renderItem.getItemModelMesher().register(sake, 0, new ModelResourceLocation(Millenaire.MODID + ":sake", "inventory"));
-		renderItem.getItemModelMesher().register(udon, 0, new ModelResourceLocation(Millenaire.MODID + ":udon", "inventory"));
-		renderItem.getItemModelMesher().register(ikayaki, 0, new ModelResourceLocation(Millenaire.MODID + ":ikayaki", "inventory"));
-		
-		//Armour
-		renderItem.getItemModelMesher().register(normanHelmet, 0, new ModelResourceLocation(Millenaire.MODID + ":normanHelmet", "inventory"));
-		renderItem.getItemModelMesher().register(normanChestplate, 0, new ModelResourceLocation(Millenaire.MODID + ":normanChestplate", "inventory"));
-		renderItem.getItemModelMesher().register(normanLeggings, 0, new ModelResourceLocation(Millenaire.MODID + ":normanLeggings", "inventory"));
-		renderItem.getItemModelMesher().register(normanBoots, 0, new ModelResourceLocation(Millenaire.MODID + ":normanBoots", "inventory"));
-		
-		renderItem.getItemModelMesher().register(byzantineHelmet, 0, new ModelResourceLocation(Millenaire.MODID + ":byzantineHelmet", "inventory"));
-		renderItem.getItemModelMesher().register(byzantineChestplate, 0, new ModelResourceLocation(Millenaire.MODID + ":byzantineChestplate", "inventory"));
-		renderItem.getItemModelMesher().register(byzantineLeggings, 0, new ModelResourceLocation(Millenaire.MODID + ":byzantineLeggings", "inventory"));
-		renderItem.getItemModelMesher().register(byzantineBoots, 0, new ModelResourceLocation(Millenaire.MODID + ":byzantineBoots", "inventory"));
-		
-		renderItem.getItemModelMesher().register(japaneseGuardHelmet, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseGuardHelmet", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseGuardChestplate, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseGuardChestplate", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseGuardLeggings, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseGuardLeggings", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseGuardBoots, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseGuardBoots", "inventory"));
-		
-		renderItem.getItemModelMesher().register(japaneseBlueHelmet, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBlueHelmet", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseBlueChestplate, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBlueChestplate", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseBlueLeggings, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBlueLeggings", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseBlueBoots, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBlueBoots", "inventory"));
-		
-		renderItem.getItemModelMesher().register(japaneseRedHelmet, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseRedHelmet", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseRedChestplate, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseRedChestplate", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseRedLeggings, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseRedLeggings", "inventory"));
-		renderItem.getItemModelMesher().register(japaneseRedBoots, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseRedBoots", "inventory"));
-		
-		renderItem.getItemModelMesher().register(mayanQuestCrown, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanQuestCrown", "inventory"));
 
-		//Wands
-		renderItem.getItemModelMesher().register(wandSummoning, 0, new ModelResourceLocation(Millenaire.MODID + ":wandSummoning", "inventory"));
-		renderItem.getItemModelMesher().register(wandNegation, 0, new ModelResourceLocation(Millenaire.MODID + ":wandNegation", "inventory"));
-		renderItem.getItemModelMesher().register(wandCreative, 0, new ModelResourceLocation(Millenaire.MODID + ":wandCreative", "inventory"));
-		renderItem.getItemModelMesher().register(tuningFork, 0, new ModelResourceLocation(Millenaire.MODID + ":tuningFork", "inventory"));
-
-		//Tools
-		renderItem.getItemModelMesher().register(normanAxe, 0, new ModelResourceLocation(Millenaire.MODID + ":normanAxe", "inventory"));
-		renderItem.getItemModelMesher().register(normanShovel, 0, new ModelResourceLocation(Millenaire.MODID + ":normanShovel", "inventory"));
-		renderItem.getItemModelMesher().register(normanPickaxe, 0, new ModelResourceLocation(Millenaire.MODID + ":normanPickaxe", "inventory"));
-		renderItem.getItemModelMesher().register(normanHoe, 0, new ModelResourceLocation(Millenaire.MODID + ":normanHoe", "inventory"));
-		renderItem.getItemModelMesher().register(normanSword, 0, new ModelResourceLocation(Millenaire.MODID + ":normanSword", "inventory"));
-		
-		renderItem.getItemModelMesher().register(mayanAxe, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanAxe", "inventory"));
-		renderItem.getItemModelMesher().register(mayanShovel, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanShovel", "inventory"));
-		renderItem.getItemModelMesher().register(mayanPickaxe, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanPickaxe", "inventory"));
-		renderItem.getItemModelMesher().register(mayanHoe, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanHoe", "inventory"));
-		renderItem.getItemModelMesher().register(mayanMace, 0, new ModelResourceLocation(Millenaire.MODID + ":mayanMace", "inventory"));
-		
-		renderItem.getItemModelMesher().register(byzantineMace, 0, new ModelResourceLocation(Millenaire.MODID + ":byzantineMace", "inventory"));
-		
-		renderItem.getItemModelMesher().register(japaneseSword, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseSword", "inventory"));
-		//renderItem.getItemModelMesher().register(japaneseBow_pulling_1, 0, new ModelResourceLocation(Millenaire.MODID + ":japaneseBow_pulling_1", "inventory"));
-		
-		//Wallet
-		renderItem.getItemModelMesher().register(itemMillPurse, 0, new ModelResourceLocation(Millenaire.MODID + ":itemMillPurse", "inventory"));
-		
-		//Sign
-		renderItem.getItemModelMesher().register(itemMillSign, 0, new ModelResourceLocation(Millenaire.MODID + ":blockMillSign", "inventory"));
-	}
 }

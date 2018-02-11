@@ -1143,7 +1143,9 @@ public class BuildingPlan
 	}
 	
 	private boolean firstPass(IBlockState state) {
-		return state.getBlock().getCreativeTabToDisplayOn() == CreativeTabs.tabBlock || state.getBlock() instanceof BlockDecorativeEarth || state.getBlock() instanceof BlockDecorativeWood ||
+	    //TODO: This cannot ever work on servers - creative tabs don't exist, so I've replaced with if it's a cube
+        //TODO: But do fences fall into this category? Probably not. Need an alternative.
+		return /*state.getBlock().getCreativeTabToDisplayOn() == CreativeTabs.tabBlock*/ state.getBlock().isNormalCube() || state.getBlock() instanceof BlockDecorativeEarth || state.getBlock() instanceof BlockDecorativeWood ||
                 state.getBlock() instanceof BlockDecorativeStone || state.getBlock() == MillBlocks.byzantineStoneTile || state.getBlock() == MillBlocks.byzantineTile ||
                 state.getBlock() == MillBlocks.byzantineTileSlab || state.getBlock() == MillBlocks.byzantineTileSlabDouble;
 	}

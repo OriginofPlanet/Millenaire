@@ -3,6 +3,7 @@ package org.millenaire;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraftforge.fml.common.SidedProxy;
 import org.millenaire.blocks.MillBlocks;
 import org.millenaire.entities.EntityMillVillager;
 import org.millenaire.generation.VillageGenerator;
@@ -30,6 +31,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import org.millenaire.proxy.CommonProxy;
 
 @Mod(modid = Millenaire.MODID, name = Millenaire.NAME, version = Millenaire.VERSION, guiFactory = Millenaire.GUIFACTORY)
 public class Millenaire 
@@ -46,6 +48,9 @@ public class Millenaire
 	@Instance
 	public static Millenaire instance = new Millenaire();
 	public static SimpleNetworkWrapper simpleNetworkWrapper;
+
+	@SidedProxy(modId = MODID, clientSide = "org.millenaire.proxy.ClientProxy", serverSide = "org.millenaire.proxy.CommonProxy")
+	public static CommonProxy proxy;
 	
 	public static final CreativeTabs tabMillenaire = new CreativeTabs("MillTab")
 	{
@@ -73,8 +78,8 @@ public class Millenaire
 		
 		if(event.getSide() == Side.CLIENT)
 		{
-			MillBlocks.prerender();
-			MillItems.prerender();
+			proxy.prerenderBlocks();
+			proxy.prerenderItems();
 			
 			EntityMillVillager.prerender();
 			
@@ -98,8 +103,8 @@ public class Millenaire
 		
 		if(event.getSide() == Side.CLIENT)
     	{	
-			MillBlocks.render();
-			MillItems.render();
+			proxy.renderBlocks();
+			proxy.renderItems();
     	}
     }
 	
