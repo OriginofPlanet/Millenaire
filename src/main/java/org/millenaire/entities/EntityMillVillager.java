@@ -359,51 +359,11 @@ public class EntityMillVillager extends EntityCreature {
 	{
 		return firstName + " " + familyName;
 	}*/
-  
-	//handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
-	
-	@Override
-	public boolean interact(final EntityPlayer playerIn) 
-	{
-		playerIn.addStat(MillAchievement.firstContact, 1);
-		/*if(type.hireCost > 0)
-		{
-			this.isPlayerInteracting = true;
-			playerIn.openGui(Millenaire.instance, 5, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-			return true;
-		}
-		if(type.isChief)
-		{
-			this.isPlayerInteracting = true;
-			playerIn.openGui(Millenaire.instance, 4, playerIn.worldObj, this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ());
-			return true;
-		}
-		//for Sadhu and Alchemist maitrepenser achievement
-		//Display Quest GUI if appropriate
-		//Display Hire GUI if Appropriate
-		//Display Chief GUI if Chief
-		// Display Trade Window if Trading (Foreign Merchant, trading for Townhall or local shop)*/
-		return false;
-	}
-	
-	/**
-	 * Dead and sleeping entities cannot move
-	 */
-	@Override
-	protected boolean isMovementBlocked() 
-	{
-		return this.getHealth() <= 0 || this.isVillagerSleeping || this.isPlayerInteracting;
-	}
 	
 	//When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
 	//Why villagerID is important
 	
 	//Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
-	
-	@Override
-	public void onLivingUpdate() 
-	{
-		super.onLivingUpdate();
 
     //handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
 

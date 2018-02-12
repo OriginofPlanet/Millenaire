@@ -3,17 +3,15 @@ package org.millenaire.generation;
 import java.util.HashSet;
 import java.util.Random;
 
-import jdk.nashorn.internal.ir.Block;
-import net.minecraft.util.Vec3i;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.BiomeGenOcean;
 import org.millenaire.MillConfig;
 import org.millenaire.VillageTracker;
 import org.millenaire.blocks.MillBlocks;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
