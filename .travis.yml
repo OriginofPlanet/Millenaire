@@ -12,3 +12,6 @@ before_install:
 cache:
   directories:
   - $HOME/.gradle
+
+notifications:
+  email: false
