@@ -240,6 +240,9 @@ option.negateVillage.text=Do you really want to erase this village from the worl
 message.notimplemented=This hasn't been implemented yet!
 message.completed=The operation has been completed!
 message.notcompleted=The operation could not be completed.
+message.export.start.read=Export Started...
+message.export.start.save=Saving File...
+message.export.finish=Export Complete
 message.error.unknown=An unknown error occurred :(
 message.error.exporting.zaxis=No end of the building found on the Z-Axis. Make sure the signs are <=256 blocks apart
 message.error.exporting.xaxis=No end of the building found on the X-Axis. Make sure the signs are <=256 blocks apart

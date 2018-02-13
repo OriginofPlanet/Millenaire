@@ -7,7 +7,13 @@ import net.minecraft.world.World;
 
 public class MillPathNavigate extends PathNavigateGround
 {
-	public MillPathNavigate(EntityLiving entitylivingIn, World worldIn) 
+    @Override
+    public float getPathSearchRange()
+    {
+        return 64;
+    }
+
+    public MillPathNavigate(EntityLiving entitylivingIn, World worldIn)
 	{
 		super(entitylivingIn, worldIn);
 		this.setBreakDoors(true);

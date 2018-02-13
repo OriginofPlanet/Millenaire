@@ -44,6 +44,7 @@ public class BuildingTypes {
 		
 		private String identifier;
 		protected List<ItemRateWrapper> itemrates = new ArrayList<>();
+		public boolean isTownHall = false;
 		
 		public BuildingType() {}
 		

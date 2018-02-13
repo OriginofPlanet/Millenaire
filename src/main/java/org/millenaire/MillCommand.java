@@ -1,11 +1,15 @@
 package org.millenaire;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.minecraft.util.EnumFacing;
 import org.millenaire.blocks.MillBlocks;
 import org.millenaire.blocks.StoredPosition;
+import org.millenaire.building.BuildingLocation;
+import org.millenaire.building.BuildingPlan;
 import org.millenaire.building.BuildingTypes;
 
 import net.minecraft.command.CommandBase;
@@ -15,6 +19,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.millenaire.building.PlanIO;
 
 public class MillCommand extends CommandBase
 {
@@ -33,7 +38,7 @@ public class MillCommand extends CommandBase
 	@Override
 	public void processCommand(ICommandSender sender, String[] args)
 	{
-		if(args.length != 1)
+		if(args.length < 1)
 		{
 			sender.addChatMessage(new ChatComponentText("invalid argument: use villages, loneBuildings, or showBuildPoints"));
 			return;
@@ -61,6 +66,20 @@ public class MillCommand extends CommandBase
 			else
 			{
 				((StoredPosition) MillBlocks.storedPosition).setShowParticles(true);
+			}
+		} else if(args[0].equalsIgnoreCase("spawn")) {
+			if(args.length < 3) return;
+
+			try {
+				String culture = args[1].split(":")[0];
+				String buildingID = args[1].split(":")[1];
+				int level = Integer.parseInt(args[2]);
+
+				BuildingPlan buildingPlan = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
+
+				PlanIO.placeBuilding(buildingPlan, new BuildingLocation(buildingPlan, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
+			} catch(Exception ignored) {
+
 			}
 		}
 	}

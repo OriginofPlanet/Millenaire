@@ -1,4 +1,5 @@
 {
   "identifier": "norman:EgyTempleHQ",
-  "itemrates": []
+  "itemrates": [],
+  "isTownHall": true
 }

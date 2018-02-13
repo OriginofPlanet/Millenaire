@@ -1,21 +1,16 @@
 package org.millenaire;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.millenaire.blocks.MillBlocks;
-import org.millenaire.building.BuildingLocation;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.BlockSlab;
-import net.minecraft.block.BlockStairs;
-import net.minecraft.block.BlockWall;
+import net.minecraft.block.*;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import org.millenaire.blocks.MillBlocks;
+import org.millenaire.building.BuildingLocation;
+import org.millenaire.building.BuildingPlan;
+
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class VillageGeography 
 {
@@ -49,7 +44,7 @@ public class VillageGeography
     public boolean[][] path;
 
     private int frequency = 10;
-    private List<BuildingLocation> buildingLocations = new ArrayList<BuildingLocation>();
+    public LinkedHashMap<BuildingLocation, BuildingPlan> buildingLocations = new LinkedHashMap<>();
     private BuildingLocation locationIP;
 
     public int nbLoc = 0;
@@ -65,7 +60,7 @@ public class VillageGeography
 
     }
 
-    private void createWorldInfo(final List<BuildingLocation> locations, final BuildingLocation blIP, final int pstartX, final int pstartZ, final int endX, final int endZ) 
+    private void createWorldInfo(final int pstartX, final int pstartZ, final int endX, final int endZ)
     {
         chunkStartX = pstartX >> 4;
         chunkStartZ = pstartZ >> 4;
@@ -95,8 +90,6 @@ public class VillageGeography
         path = new boolean[length][width];
         topAdjusted = new boolean[length][width];
 
-        buildingLocations = new ArrayList<>();
-
         for (int i = 0; i < length; i++) 
         {
             for (int j = 0; j < width; j++) 
@@ -104,17 +97,6 @@ public class VillageGeography
                 buildingLoc[i][j] = false;
                 canBuild[i][j] = false;
             }
-        }
-
-        for (final BuildingLocation location : locations) 
-        {
-            registerBuildingLocation(location);
-        }
-
-        locationIP = blIP;
-        if (locationIP != null) 
-        {
-            registerBuildingLocation(locationIP);
         }
 
         for (int i = 0; i < length; i += 16) 
@@ -134,9 +116,9 @@ public class VillageGeography
                 || block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
     }
 
-    public void registerBuildingLocation(final BuildingLocation bl) 
+    public void registerBuilding(BuildingPlan p, final BuildingLocation bl)
     {
-        buildingLocations.add(bl);
+        buildingLocations.put(bl, p);
 
         final int sx = Math.max(bl.minxMargin - mapStartX, 0);
         final int sz = Math.max(bl.minzMargin - mapStartZ, 0);
@@ -157,13 +139,6 @@ public class VillageGeography
         this.world = world;
         this.yBaseline = center.getY();
         locationIP = blIP;
-
-        if (buildingLocations != null && buildingLocations.size() > 0 && buildingLocations.size() == locations.size()) 
-        {
-            buildingLocations = locations;
-            updateNextChunk();
-            return false;
-        }
 
         int startX = center.getX(), startZ = center.getZ(), endX = center.getX(), endZ = center.getZ();
 
@@ -224,17 +199,11 @@ public class VillageGeography
 
         if (lengthTemp != length || widthTemp != width) 
         {
-            createWorldInfo(locations, blIP, startX, startZ, endX, endZ);
+            createWorldInfo(startX, startZ, endX, endZ);
             return true;
         } 
         else 
         {
-            buildingLocations = new ArrayList<>();
-            for (final BuildingLocation location : locations) 
-            {
-                registerBuildingLocation(location);
-            }
-
             updateNextChunk();
             return false;
         }

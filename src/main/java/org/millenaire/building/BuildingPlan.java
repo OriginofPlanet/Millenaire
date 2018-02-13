@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.util.Vec3i;
 import org.millenaire.CommonUtilities;
 import org.millenaire.MillCulture;
 import org.millenaire.VillageGeography;
@@ -813,7 +814,20 @@ public class BuildingPlan
 
         final int altitude = (int) (1 + altitudeTotal * 1.0f / nbPoints);
 
-        final BuildingLocation l = new BuildingLocation(this, new BlockPos(x + geography.mapStartX, altitude, z + geography.mapStartZ), orientation);
+
+        //Adjust for trees + plants
+        World world = geography.world;
+        BlockPos highestY = new BlockPos(x + geography.mapStartX, altitude, z + geography.mapStartZ);
+
+        Block b = world.getBlockState(highestY).getBlock();
+        while (b == Blocks.leaves || b == Blocks.leaves2 || b == Blocks.log || b == Blocks.log2 || b == Blocks.vine
+                || b == Blocks.brown_mushroom_block || b == Blocks.red_mushroom_block || b == Blocks.tallgrass
+                || b == Blocks.double_plant) {
+            highestY = highestY.subtract(new Vec3i(0, 1, 0));
+            b = world.getBlockState(highestY).getBlock();
+        }
+
+        final BuildingLocation l = new BuildingLocation(this, highestY, orientation);
 
         return new LocationReturn(l);
     }
