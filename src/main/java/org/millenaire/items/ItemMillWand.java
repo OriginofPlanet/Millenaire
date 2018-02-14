@@ -31,78 +31,63 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemMillWand extends Item
-{
-	ItemMillWand() { this.setMaxStackSize(1); }
+public class ItemMillWand extends Item {
+    ItemMillWand () { this.setMaxStackSize(1); }
 
-	@Override
-	public boolean onItemUseFirst(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
-	{
-		if(worldIn.getBlockState(pos).getBlock() == Blocks.standing_sign && worldIn.isRemote && this == MillItems.wandNegation) {
-			PacketExportBuilding packet = new PacketExportBuilding(pos);
-			Millenaire.simpleNetworkWrapper.sendToServer(packet);
-			return true;
-		}
-		else if(worldIn.getBlockState(pos).getBlock() == Blocks.standing_sign && worldIn.isRemote && this == MillItems.wandSummoning) {
-			PacketImportBuilding packet =  new PacketImportBuilding(pos);
-			Millenaire.simpleNetworkWrapper.sendToServer(packet);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean onItemUseFirst (ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+        if (worldIn.getBlockState(pos).getBlock() == Blocks.standing_sign && worldIn.isRemote && this == MillItems.wandNegation) {
+            PacketExportBuilding packet = new PacketExportBuilding(pos);
+            Millenaire.simpleNetworkWrapper.sendToServer(packet);
+            return true;
+        } else if (worldIn.getBlockState(pos).getBlock() == Blocks.standing_sign && worldIn.isRemote && this == MillItems.wandSummoning) {
+            PacketImportBuilding packet = new PacketImportBuilding(pos);
+            Millenaire.simpleNetworkWrapper.sendToServer(packet);
+            return true;
+        }
 
-	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
-	{
-		if(this == MillItems.wandNegation)
-		{
-			if(worldIn.getBlockState(pos).getBlock() == MillBlocks.villageStone)
-			{
-				NBTTagCompound nbt = new NBTTagCompound();
-				stack.setTagCompound(nbt);
-				nbt.setInteger("X", pos.getX());
-				nbt.setInteger("Y", pos.getY());
-				nbt.setInteger("Z", pos.getZ());
+        return false;
+    }
 
-				if(worldIn.isRemote)
-				{
-					playerIn.openGui(Millenaire.instance, 2, worldIn, playerIn.getPosition().getX(), playerIn.getPosition().getY(), playerIn.getPosition().getZ());
-				}
-			}
-		}
+    @Override
+    public boolean onItemUse (ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+        if (this == MillItems.wandNegation) {
+            if (worldIn.getBlockState(pos).getBlock() == MillBlocks.villageStone) {
+                NBTTagCompound nbt = new NBTTagCompound();
+                stack.setTagCompound(nbt);
+                nbt.setInteger("X", pos.getX());
+                nbt.setInteger("Y", pos.getY());
+                nbt.setInteger("Z", pos.getZ());
 
-		if(this == MillItems.wandSummoning)
-		{
-			if(worldIn.getBlockState(pos).getBlock() == Blocks.gold_block)
-			{
-				if(!worldIn.isRemote)
-				{	
-					System.out.println("Gold Creation");
-					Millenaire.simpleNetworkWrapper.sendTo(new PacketSayTranslatedMessage("message.notimplemented"), (EntityPlayerMP)playerIn);
-					//Gui confirming action and desired village, then villageStone block is made and villageType assigned
-				}
-			}
-			else if(worldIn.getBlockState(pos).getBlock() == Blocks.obsidian)
-			{	
-				System.out.println("Obsidian Creation");
+                if (worldIn.isRemote) {
+                    playerIn.openGui(Millenaire.instance, 2, worldIn, playerIn.getPosition().getX(), playerIn.getPosition().getY(), playerIn.getPosition().getZ());
+                }
+            }
+        }
 
-				NBTTagCompound nbt = new NBTTagCompound();
-				stack.setTagCompound(nbt);
-				nbt.setInteger("X", pos.getX());
-				nbt.setInteger("Y", pos.getY());
-				nbt.setInteger("Z", pos.getZ());
+        if (this == MillItems.wandSummoning) {
+            if (worldIn.getBlockState(pos).getBlock() == Blocks.gold_block) {
+                if (!worldIn.isRemote) {
+                    System.out.println("Gold Creation");
+                    Millenaire.simpleNetworkWrapper.sendTo(new PacketSayTranslatedMessage("message.notimplemented"), (EntityPlayerMP) playerIn);
+                    //Gui confirming action and desired village, then villageStone block is made and villageType assigned
+                }
+            } else if (worldIn.getBlockState(pos).getBlock() == Blocks.obsidian) {
+                System.out.println("Obsidian Creation");
 
-				if(!worldIn.isRemote)
-				{
-					Millenaire.simpleNetworkWrapper.sendTo(new PacketSayTranslatedMessage("message.notimplemented"), (EntityPlayerMP)playerIn);
+                NBTTagCompound nbt = new NBTTagCompound();
+                stack.setTagCompound(nbt);
+                nbt.setInteger("X", pos.getX());
+                nbt.setInteger("Y", pos.getY());
+                nbt.setInteger("Z", pos.getZ());
+
+                if (!worldIn.isRemote) {
+                    Millenaire.simpleNetworkWrapper.sendTo(new PacketSayTranslatedMessage("message.notimplemented"), (EntityPlayerMP) playerIn);
 //					playerIn.openGui(Millenaire.instance, 4, worldIn, playerIn.getPosition().getX(), playerIn.getPosition().getY(), playerIn.getPosition().getZ());
-				} 
-
-			}
-//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.emerald_block)
-//			{
-//				if(!worldIn.isRemote)
-//				{	
+                }
+            }
+//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.emerald_block) {
+//				if (!worldIn.isRemote) {
 //					System.out.println("Emerald Creation");
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100100, MillCulture.normanCulture);
@@ -115,11 +100,8 @@ public class ItemMillWand extends Item
 //				}
 //				stack.stackSize--;
 //				return true;
-//			}
-//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.diamond_block)
-//			{
-//				if(!worldIn.isRemote)
-//				{	
+//			} else if (worldIn.getBlockState(pos).getBlock() == Blocks.diamond_block) {
+//				if (!worldIn.isRemote) {
 //					System.out.println("Diamond Creation");
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100101, MillCulture.normanCulture);
@@ -132,166 +114,121 @@ public class ItemMillWand extends Item
 //				stack.stackSize--;
 //				return true;
 //			}
-		}
+        }
 
-		if(this == MillItems.wandCreative)
-		{
-			//Control whether or not you can plant crops
-			if(worldIn.getBlockState(pos).getBlock() instanceof BlockMillCrops)
-			{
-				if(playerIn.isSneaking())
-				{
-					boolean hasCrop;
+        if (this == MillItems.wandCreative) {
+            //Control whether or not you can plant crops
+            if (worldIn.getBlockState(pos).getBlock() instanceof BlockMillCrops) {
+                if (playerIn.isSneaking()) {
+                    boolean hasCrop;
 
-					//hasCrop = VillageTracker.get(worldIn).removePlayerUseCrop(playerIn, ((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos));
-					hasCrop = PlayerTracker.get(playerIn).canPlayerUseCrop(((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getSeed());
-					System.out.println((worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos).toString());
+                    //hasCrop = VillageTracker.get(worldIn).removePlayerUseCrop(playerIn, ((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos));
+                    hasCrop = PlayerTracker.get(playerIn).canPlayerUseCrop(((BlockMillCrops) worldIn.getBlockState(pos).getBlock()).getSeed());
+                    System.out.println((worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos).toString());
 
-					if(worldIn.isRemote)
-					{
-						if(hasCrop)
-						{
-							playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can no longer plant " + worldIn.getBlockState(pos).getBlock().getLocalizedName()));
-						}
-						else
-						{
+                    if (worldIn.isRemote) {
+                        if (hasCrop) {
+                            playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can no longer plant " + worldIn.getBlockState(pos).getBlock().getLocalizedName()));
+                        } else {
                             playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " already could not plant " + worldIn.getBlockState(pos).getBlock().getLocalizedName()));
                         }
-					}
-				}
-				else
-				{
-					boolean succeeded = false;
-					if(!PlayerTracker.get(playerIn).canPlayerUseCrop(((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getSeed()))
-					{
-						//VillageTracker.get(worldIn).setPlayerUseCrop(playerIn, ((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos));
-						PlayerTracker.get(playerIn).setCanUseCrop(((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getSeed(), true);
-						succeeded = true;
-					}
+                    }
+                } else {
+                    boolean succeeded = false;
+                    if (!PlayerTracker.get(playerIn).canPlayerUseCrop(((BlockMillCrops) worldIn.getBlockState(pos).getBlock()).getSeed())) {
+                        //VillageTracker.get(worldIn).setPlayerUseCrop(playerIn, ((BlockMillCrops)worldIn.getBlockState(pos).getBlock()).getItem(worldIn, pos));
+                        PlayerTracker.get(playerIn).setCanUseCrop(((BlockMillCrops) worldIn.getBlockState(pos).getBlock()).getSeed(), true);
+                        succeeded = true;
+                    }
 
-					if(worldIn.isRemote)
-					{
-						if(succeeded)
-						{
+                    if (worldIn.isRemote) {
+                        if (succeeded) {
                             playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can now plant " + worldIn.getBlockState(pos).getBlock().getLocalizedName()));
-                        }
-						else
-						{
+                        } else {
                             playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can already plant " + worldIn.getBlockState(pos).getBlock().getLocalizedName()));
                         }
-					}
-				}
-			}
-			//Allow you to plant all Crops
-			else if(worldIn.getBlockState(pos).getBlock() == Blocks.cake)
-			{
-				if(!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.grapes))
-				{
+                    }
+                }
+            } else if (worldIn.getBlockState(pos).getBlock() == Blocks.cake) { //Allow you to plant all Crops
+                if (!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.grapes)) {
                     PlayerTracker.get(playerIn).setCanUseCrop(MillItems.grapes, true);
                 }
 
-				if(!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.maize))
-				{
+                if (!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.maize)) {
                     PlayerTracker.get(playerIn).setCanUseCrop(MillItems.maize, true);
                 }
 
-				if(!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.rice))
-				{
+                if (!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.rice)) {
                     PlayerTracker.get(playerIn).setCanUseCrop(MillItems.rice, true);
                 }
 
-				if(!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.turmeric))
-				{
+                if (!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.turmeric)) {
                     PlayerTracker.get(playerIn).setCanUseCrop(MillItems.turmeric, true);
                 }
 
-				if(worldIn.isRemote)
-				{
-					playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can now plant everything"));
-				}
-			}
-			//Lock and Unlock Chests
-			else if(worldIn.getBlockState(pos).getBlock() instanceof BlockMillChest)
-			{
-				boolean isLocked = ((TileEntityMillChest)worldIn.getTileEntity(pos)).setLock();
+                if (worldIn.isRemote) {
+                    playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can now plant everything"));
+                }
+            } else if (worldIn.getBlockState(pos).getBlock() instanceof BlockMillChest) { //Lock and Unlock Chests
+                boolean isLocked = ((TileEntityMillChest) worldIn.getTileEntity(pos)).setLock();
 
-				if(worldIn.isRemote)
-				{
-					if(isLocked)
-					{
+                if (worldIn.isRemote) {
+                    if (isLocked) {
                         playerIn.addChatMessage(new ChatComponentText("Chest is now Locked"));
-                    }
-					else
-					{
+                    } else {
                         playerIn.addChatMessage(new ChatComponentText("Chest is now Unlocked"));
                     }
-				}
-			}
-			else if(worldIn.getBlockState(pos).getBlock() instanceof StoredPosition)
-			{
-				if(playerIn.isSneaking())
-				{
-                    worldIn.setBlockToAir(pos);
                 }
-				else
-				{
+            } else if (worldIn.getBlockState(pos).getBlock() instanceof StoredPosition) {
+                if (playerIn.isSneaking()) {
+                    worldIn.setBlockToAir(pos);
+                } else {
                     worldIn.setBlockState(pos, worldIn.getBlockState(pos).cycleProperty(StoredPosition.VARIANT));
                 }
-			}
-			//Fixes All Denier in your inventory (if no specific block/entity is clicked)
-			else
-			{
-				CommonUtilities.changeMoney(playerIn);
-				if(worldIn.isRemote)
-				{
+            } else { //Fixes All Denier in your inventory (if no specific block/entity is clicked)
+                CommonUtilities.changeMoney(playerIn);
+                if (worldIn.isRemote) {
                     playerIn.addChatMessage(new ChatComponentText("Fixing Denier in " + playerIn.getDisplayNameString() + "'s Inventory"));
                 }
-			}
-		}
+            }
+        }
 
-		if(this == MillItems.tuningFork)
-		{
-			IBlockState state = worldIn.getBlockState(pos);
-			String output = state.getBlock().getUnlocalizedName() + " -";
+        if (this == MillItems.tuningFork) {
+            IBlockState state = worldIn.getBlockState(pos);
+            String output = state.getBlock().getUnlocalizedName() + " -";
 
-			for(IProperty prop : state.getProperties().keySet())
-			{
-				//System.out.println(prop.getName());
-				output = output.concat(" " + prop.getName() + ":" + state.getValue(prop).toString());
-			}
+            for (IProperty prop : state.getProperties().keySet()) {
+                //System.out.println(prop.getName());
+                output = output.concat(" " + prop.getName() + ":" + state.getValue(prop).toString());
+            }
 
-			playerIn.addChatMessage(new ChatComponentText(output));
-		}
+            playerIn.addChatMessage(new ChatComponentText(output));
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	public boolean itemInteractionForEntity(ItemStack stack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity)
-	{
-		if(stack.getItem() == MillItems.wandNegation && entity instanceof EntityMillVillager)
-		{
-			((EntityMillVillager)entity).isPlayerInteracting = true;
+    @Override
+    public boolean itemInteractionForEntity (ItemStack stack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity) {
+        if (stack.getItem() == MillItems.wandNegation && entity instanceof EntityMillVillager) {
+            ((EntityMillVillager) entity).isPlayerInteracting = true;
 
-			NBTTagCompound nbt = new NBTTagCompound();
-			player.getHeldItem().setTagCompound(nbt); 
-			nbt.setInteger("ID", entity.getEntityId());
+            NBTTagCompound nbt = new NBTTagCompound();
+            player.getHeldItem().setTagCompound(nbt);
+            nbt.setInteger("ID", entity.getEntityId());
 
-			if(player.worldObj.isRemote)
-			{
-				player.openGui(Millenaire.instance, 3, player.worldObj, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
-			}
-		}
-		return false;
-	}
+            if (player.worldObj.isRemote) {
+                player.openGui(Millenaire.instance, 3, player.worldObj, player.getPosition().getX(), player.getPosition().getY(), player.getPosition().getZ());
+            }
+        }
+        return false;
+    }
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
-	{
-		if(stack.getItem() == MillItems.wandCreative)
-		{
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation (ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+        if (stack.getItem() == MillItems.wandCreative) {
             tooltip.add("Creative Mode ONLY");
         }
-	}
+    }
 }

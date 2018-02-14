@@ -1,6 +1,5 @@
 package org.millenaire;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -21,90 +20,78 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.millenaire.building.PlanIO;
 
-public class MillCommand extends CommandBase
-{
-	@Override
-	public int compareTo(ICommand arg0) { return 0; }
+public class MillCommand extends CommandBase {
+    @Override
+    public int compareTo (ICommand arg0) { return 0; }
 
-	@Override
-	public String getCommandName() { return "mill"; }
+    @Override
+    public String getCommandName () { return "mill"; }
 
-	@Override
-	public String getCommandUsage(ICommandSender sender) { return "mill <villages, loneBuildings, showBuildPoints>"; }
+    @Override
+    public String getCommandUsage (ICommandSender sender) { return "mill <villages, loneBuildings, showBuildPoints>"; }
 
-	@Override
-	public List<String> getCommandAliases() { return new ArrayList<String>() {{ add("mill"); }}; }
+    @Override
+    public List<String> getCommandAliases () {
+        return new ArrayList<String>() {{
+            add("mill");
+        }};
+    }
 
-	@Override
-	public void processCommand(ICommandSender sender, String[] args)
-	{
-		if(args.length < 1)
-		{
-			sender.addChatMessage(new ChatComponentText("invalid argument: use villages, loneBuildings, or showBuildPoints"));
-			return;
-		}
-		
-		if(args[0].equalsIgnoreCase("village"))
-		{
-			//Spit out direction and distance to all villages
-			
-			//test code. remove before command use.
-			for(Entry ent : BuildingTypes.getCache().entrySet()) {
-				sender.addChatMessage(new ChatComponentText(ent.getKey() + " - " + ent.getValue()));
-			}
-		}
-		else if(args[0].equalsIgnoreCase("loneBuildings"))
-		{
-			//Spit out Distance and direction to all lone buildings
-		}
-		else if(args[0].equalsIgnoreCase("showBuildPoints"))
-		{
-			if(((StoredPosition)MillBlocks.storedPosition).getShowParticles())
-			{
-				((StoredPosition) MillBlocks.storedPosition).setShowParticles(false);
-			}
-			else
-			{
-				((StoredPosition) MillBlocks.storedPosition).setShowParticles(true);
-			}
-		} else if(args[0].equalsIgnoreCase("spawn")) {
-			if(args.length < 3) return;
+    @Override
+    public void processCommand (ICommandSender sender, String[] args) {
+        if (args.length < 1) {
+            sender.addChatMessage(new ChatComponentText("invalid argument: use villages, loneBuildings, or showBuildPoints"));
+            return;
+        }
 
-			try {
-				String culture = args[1].split(":")[0];
-				String buildingID = args[1].split(":")[1];
-				int level = Integer.parseInt(args[2]);
+        if (args[0].equalsIgnoreCase("village")) {
+            //Spit out direction and distance to all villages
 
-				BuildingPlan buildingPlan = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
+            //test code. remove before command use.
+            for (Entry ent : BuildingTypes.getCache().entrySet()) {
+                sender.addChatMessage(new ChatComponentText(ent.getKey() + " - " + ent.getValue()));
+            }
+        } else if (args[0].equalsIgnoreCase("loneBuildings")) {
+            //Spit out Distance and direction to all lone buildings
+        } else if (args[0].equalsIgnoreCase("showBuildPoints")) {
+            if (((StoredPosition) MillBlocks.storedPosition).getShowParticles()) {
+                ((StoredPosition) MillBlocks.storedPosition).setShowParticles(false);
+            } else {
+                ((StoredPosition) MillBlocks.storedPosition).setShowParticles(true);
+            }
+        } else if (args[0].equalsIgnoreCase("spawn")) {
+            if (args.length < 3) return;
 
-				PlanIO.placeBuilding(buildingPlan, new BuildingLocation(buildingPlan, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
-			} catch(Exception ignored) {
+            try {
+                String culture = args[1].split(":")[0];
+                String buildingID = args[1].split(":")[1];
+                int level = Integer.parseInt(args[2]);
 
-			}
-		}
-	}
+                BuildingPlan buildingPlan = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
 
-	@Override
-	public boolean canCommandSenderUseCommand(ICommandSender sender) 
-	{
-		if(sender.getCommandSenderEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) sender.getCommandSenderEntity();
+                PlanIO.placeBuilding(buildingPlan, new BuildingLocation(buildingPlan, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
+            } catch (Exception ignored) {
 
-			return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands((player).getGameProfile());
-		}
+            }
+        }
+    }
 
-		return false;
-	}
+    @Override
+    public boolean canCommandSenderUseCommand (ICommandSender sender) {
+        if (sender.getCommandSenderEntity() instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) sender.getCommandSenderEntity();
 
-	@Override
-	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) 
-	{
-		return getListOfStringsMatchingLastWord(args, "village", "loneBuildings", "showBuildPoints");
-	}
+            return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands((player).getGameProfile());
+        }
 
-	@Override
-	public boolean isUsernameIndex(String[] args, int index) 
-	{
-		return false;
-	}
+        return false;
+    }
+
+    @Override
+    public List<String> addTabCompletionOptions (ICommandSender sender, String[] args, BlockPos pos) {
+        return getListOfStringsMatchingLastWord(args, "village", "loneBuildings", "showBuildPoints");
+    }
+
+    @Override
+    public boolean isUsernameIndex (String[] args, int index) { return false; }
 }

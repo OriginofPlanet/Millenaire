@@ -24,24 +24,22 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockMillSign extends BlockWallSign
-{
-	BlockMillSign()
-	{
-		super();
+public class BlockMillSign extends BlockWallSign {
+    BlockMillSign () {
+        super();
 
-		this.setBlockUnbreakable();
-	}
+        this.setBlockUnbreakable();
+    }
 
-	@Override
-	public Item getItemDropped(IBlockState state, Random rand, int fortune) { return null; }
-	
-	@Override
-	public boolean isOpaqueCube() { return false; }
-	
-	@Override
-	public int getRenderType() { return -1; }
+    @Override
+    public Item getItemDropped (IBlockState state, Random rand, int fortune) { return null; }
 
-	@Override
-	public TileEntity createNewTileEntity(World worldIn, int meta) { return new TileEntityMillSign(); }
+    @Override
+    public boolean isOpaqueCube () { return false; }
+
+    @Override
+    public int getRenderType () { return -1; }
+
+    @Override
+    public TileEntity createNewTileEntity (World worldIn, int meta) { return new TileEntityMillSign(); }
 }

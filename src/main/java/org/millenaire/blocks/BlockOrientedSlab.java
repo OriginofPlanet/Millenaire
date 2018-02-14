@@ -20,88 +20,72 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockOrientedSlab extends BlockSlab
-{
+public class BlockOrientedSlab extends BlockSlab {
     private static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
     private static final PropertyBool SEAMLESS = PropertyBool.create("seamless");
-	
-	private Block singleSlab;
 
-    BlockOrientedSlab(Material materialIn, Block singleSlabIn)
-	{
-		super(materialIn);
-		singleSlab = singleSlabIn;
-		
-		this.useNeighborBrightness = true;
-	}
+    private Block singleSlab;
 
-	@Override
-	public boolean isDouble() 
-	{
-		return false;
-	}
-	
+    BlockOrientedSlab (Material materialIn, Block singleSlabIn) {
+        super(materialIn);
+        singleSlab = singleSlabIn;
+
+        this.useNeighborBrightness = true;
+    }
+
     @Override
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
-    	if(singleSlab != null)
-    		return Item.getItemFromBlock(singleSlab);
-    	else
-    		return super.getItemDropped(state, rand, fortune);
+    public boolean isDouble () {
+        return false;
+    }
+
+    @Override
+    public Item getItemDropped (IBlockState state, Random rand, int fortune) {
+        if (singleSlab != null)
+            return Item.getItemFromBlock(singleSlab);
+        else
+            return super.getItemDropped(state, rand, fortune);
     }
 
     @SideOnly(Side.CLIENT)
-    public Item getItem(World worldIn, BlockPos pos)
-    {
-    	if(singleSlab != null)
-    		return Item.getItemFromBlock(singleSlab);
-    	else
-    		return super.getItem(worldIn, pos);
+    public Item getItem (World worldIn, BlockPos pos) {
+        if (singleSlab != null)
+            return Item.getItemFromBlock(singleSlab);
+        else
+            return super.getItem(worldIn, pos);
     }
 
-    public String getUnlocalizedName(int meta)
-    {
+    public String getUnlocalizedName (int meta) {
         return super.getUnlocalizedName();
     }
-    
+
     @Override
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
+    public IBlockState onBlockPlaced (World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         IBlockState iblockstate = super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer).withProperty(HALF, BlockSlab.EnumBlockHalf.BOTTOM);
-        return this.isDouble() ? iblockstate : (facing != EnumFacing.DOWN && (facing == EnumFacing.UP || (double)hitY <= 0.5D) ? iblockstate : iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.TOP));
+        return this.isDouble() ? iblockstate : (facing != EnumFacing.DOWN && (facing == EnumFacing.UP || (double) hitY <= 0.5D) ? iblockstate : iblockstate.withProperty(HALF, BlockSlab.EnumBlockHalf.TOP));
     }
-    
-	@Override
-    public IProperty getVariantProperty()
-    {
+
+    @Override
+    public IProperty getVariantProperty () {
         return FACING;
     }
 
     @Override
-    public Object getVariant(ItemStack stack)
-    {
+    public Object getVariant (ItemStack stack) {
         return EnumFacing.getHorizontal(3);//Boolean.valueOf((stack.getMetadata() & 8) != 0);
     }
-    
+
     @SideOnly(Side.CLIENT)
-    private static boolean isSlabX(Block blockIn)
-    {
+    private static boolean isSlabX (Block blockIn) {
         return blockIn instanceof BlockSlab;
     }
-    
+
     @Override
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
-    {
-        if (this.isDouble())
-        {
+    public boolean shouldSideBeRendered (IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
+        if (this.isDouble()) {
             return super.shouldSideBeRendered(worldIn, pos, side);
-        }
-    	else if (side != EnumFacing.UP && side != EnumFacing.DOWN && !super.shouldSideBeRendered(worldIn, pos, side))
-        {
+        } else if (side != EnumFacing.UP && side != EnumFacing.DOWN && !super.shouldSideBeRendered(worldIn, pos, side)) {
             return false;
-        }
-        else
-        {
+        } else {
             BlockPos blockpos1 = pos.offset(side.getOpposite());
             IBlockState iblockstate = worldIn.getBlockState(pos);
             IBlockState iblockstate1 = worldIn.getBlockState(blockpos1);
@@ -111,46 +95,36 @@ public class BlockOrientedSlab extends BlockSlab
         }
     }
 
-	@Override
-    public IBlockState getStateFromMeta(int meta)
-    {
+    @Override
+    public IBlockState getStateFromMeta (int meta) {
         IBlockState iblockstate = this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(3));
 
-        if (this.isDouble())
-        {
+        if (this.isDouble()) {
             iblockstate = iblockstate.withProperty(SEAMLESS, (meta & 8) != 0);
-        }
-        else
-        {
+        } else {
             iblockstate = iblockstate.withProperty(HALF, (meta & 8) == 0 ? BlockSlab.EnumBlockHalf.BOTTOM : BlockSlab.EnumBlockHalf.TOP);
         }
 
         return iblockstate;
     }
 
-	@Override
-    public int getMetaFromState(IBlockState state)
-    {
+    @Override
+    public int getMetaFromState (IBlockState state) {
         int i = (byte) 0;
 
-        if (this.isDouble())
-        {
-            if (state.getValue(SEAMLESS))
-            {
+        if (this.isDouble()) {
+            if (state.getValue(SEAMLESS)) {
                 i |= 8;
             }
-        }
-        else if (state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP)
-        {
+        } else if (state.getValue(HALF) == BlockSlab.EnumBlockHalf.TOP) {
             i |= 8;
         }
 
         return i;
     }
-	
-	@Override
-    protected BlockState createBlockState()
-    {
-        return this.isDouble() ? new BlockState(this, SEAMLESS, FACING): new BlockState(this, HALF, FACING);
+
+    @Override
+    protected BlockState createBlockState () {
+        return this.isDouble() ? new BlockState(this, SEAMLESS, FACING) : new BlockState(this, HALF, FACING);
     }
 }

@@ -15,29 +15,24 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockDecorativeWood extends Block
-{
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
-	
-	BlockDecorativeWood()
-	{
-		super(Material.wood);
-	}
-	
-	@Override
-    public int damageDropped(IBlockState state)
-    {
-        return ((EnumType)state.getValue(VARIANT)).getMetadata();
+public class BlockDecorativeWood extends Block {
+    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
+
+    BlockDecorativeWood () {
+        super(Material.wood);
     }
 
-	public IProperty getVariantProperty() { return VARIANT; }
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
-    {
-        if (Block.getBlockFromItem(itemIn) == this)
-        {
+    @Override
+    public int damageDropped (IBlockState state) {
+        return ((EnumType) state.getValue(VARIANT)).getMetadata();
+    }
+
+    public IProperty getVariantProperty () { return VARIANT; }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks (Item itemIn, CreativeTabs tab, List list) {
+        if (Block.getBlockFromItem(itemIn) == this) {
             EnumType[] aenumtype = EnumType.values();
 
             for (EnumType enumtype : aenumtype) {
@@ -46,66 +41,58 @@ public class BlockDecorativeWood extends Block
         }
     }
 
-    public String getUnlocalizedName(int meta)
-    {
+    public String getUnlocalizedName (int meta) {
         return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
-	@Override
-    public IBlockState getStateFromMeta(int meta)
-    {
+    @Override
+    public IBlockState getStateFromMeta (int meta) {
         return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
-	@Override
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((EnumType)state.getValue(VARIANT)).getMetadata();
+    @Override
+    public int getMetaFromState (IBlockState state) {
+        return ((EnumType) state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
-    protected BlockState createBlockState() { return new BlockState(this, VARIANT); }
+    protected BlockState createBlockState () { return new BlockState(this, VARIANT); }
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public enum EnumType implements IStringSerializable
-    {
+    public enum EnumType implements IStringSerializable {
         PLAINTIMBERFRAME(0, "plainTimberFrame"),
         CROSSTIMBERFRAME(1, "crossTimberFrame"),
         THATCH(2, "thatch"),
-    	SERICULTURE(3, "sericulture");
-        
+        SERICULTURE(3, "sericulture");
+
         private static final EnumType[] META_LOOKUP = new EnumType[values().length];
         private final int meta;
         private final String name;
 
-        EnumType(int meta, String name)
-        {
+        EnumType (int meta, String name) {
             this.meta = meta;
             this.name = name;
         }
 
-        public int getMetadata() { return this.meta; }
+        public int getMetadata () { return this.meta; }
 
-        public String toString() { return this.name; }
+        public String toString () { return this.name; }
 
-        public static EnumType byMetadata(int meta)
-        {
-            if (meta < 0 || meta >= META_LOOKUP.length)
-            {
+        public static EnumType byMetadata (int meta) {
+            if (meta < 0 || meta >= META_LOOKUP.length) {
                 meta = 0;
             }
 
             return META_LOOKUP[meta];
         }
 
-        public String getName() { return this.name; }
+        public String getName () { return this.name; }
 
-        public String getUnlocalizedName() { return this.name; }
+        public String getUnlocalizedName () { return this.name; }
 
-        static
-        {
-        	EnumType[] var0 = values();
+        static {
+            EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;

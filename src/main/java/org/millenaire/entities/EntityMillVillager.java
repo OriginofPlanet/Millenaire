@@ -49,7 +49,7 @@ public class EntityMillVillager extends EntityCreature {
 
     private InventoryBasic villagerInventory;
 
-    public EntityMillVillager(World worldIn) {
+    public EntityMillVillager (World worldIn) {
         super(worldIn);
 
         this.villagerInventory = new InventoryBasic("Items", false, 16);
@@ -58,7 +58,7 @@ public class EntityMillVillager extends EntityCreature {
         addTasks();
     }
 
-    public EntityMillVillager(World worldIn, int idIn, MillCulture cultureIn) {
+    public EntityMillVillager (World worldIn, int idIn, MillCulture cultureIn) {
         super(worldIn);
         villagerID = idIn;
         culture = cultureIn;
@@ -69,7 +69,7 @@ public class EntityMillVillager extends EntityCreature {
         addTasks();
     }
 
-    private void addTasks() {
+    private void addTasks () {
         //((PathNavigateGround)this.getNavigator()).setBreakDoors(true);
         //((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
         this.tasks.addTask(0, new EntityAISwimming(this));
@@ -78,21 +78,20 @@ public class EntityMillVillager extends EntityCreature {
         this.tasks.addTask(7, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 0.5F));
         this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityMillVillager.class, 6.0F));
         this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
-	  }
-	
-	  @Override
-    protected PathNavigate getNewNavigator(World worldIn) { return new MillPathNavigate(this, worldIn); }
-	
-	  @Override
-    protected void applyEntityAttributes()
-    {
+    }
+
+    @Override
+    protected PathNavigate getNewNavigator (World worldIn) { return new MillPathNavigate(this, worldIn); }
+
+    @Override
+    protected void applyEntityAttributes () {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.55D);
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
     }
 
     @Override
-    public void entityInit() {
+    public void entityInit () {
         super.entityInit();
         this.dataWatcher.addObject(TEXTURE, "texture");
         this.dataWatcher.addObject(NAME, "name");
@@ -102,7 +101,7 @@ public class EntityMillVillager extends EntityCreature {
         this.dataWatcher.addObject(GENDER, 0);
     }
 
-    public EntityMillVillager setTypeAndGender(VillagerType typeIn, int genderIn) {
+    public EntityMillVillager setTypeAndGender (VillagerType typeIn, int genderIn) {
         this.type = typeIn;
         System.out.println("Setting type to " + typeIn.id + "!");
         this.dataWatcher.updateObject(GENDER, genderIn);
@@ -110,47 +109,47 @@ public class EntityMillVillager extends EntityCreature {
         return this;
     }
 
-    public void setChild() {
+    public void setChild () {
         this.dataWatcher.updateObject(AGE, 1);
     }
 
-    public void setName(String nameIn) {
+    public void setName (String nameIn) {
         this.dataWatcher.updateObject(NAME, nameIn);
     }
 
-    public String getTexture() {
+    public String getTexture () {
         return this.dataWatcher.getWatchableObjectString(13);
     }
 
-    public int getGender() {
+    public int getGender () {
         return dataWatcher.getWatchableObjectInt(GENDER);
     }
 
-    public String getName() {
+    public String getName () {
         return this.dataWatcher.getWatchableObjectString(NAME);
     }
 
-    public VillagerType getVillagerType() {
+    public VillagerType getVillagerType () {
         return type;
     }
 
     @Override
-    public boolean isChild() {
+    public boolean isChild () {
         return (this.dataWatcher.getWatchableObjectInt(AGE) > 0);
     }
 
-    public boolean allowLeashing() {
+    public boolean allowLeashing () {
         return false;
     }
 
     @Override
-    public void onDeath(DamageSource cause) {
+    public void onDeath (DamageSource cause) {
         InventoryHelper.dropInventoryItems(this.worldObj, this.getPosition(), this.villagerInventory);
     }
 
     //Controls what happens when Villager encounters an Item on ground
     @Override
-    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
+    protected void updateEquipmentIfNeeded (EntityItem itemEntity) {
 
     }
 	
@@ -281,12 +280,12 @@ public class EntityMillVillager extends EntityCreature {
 
 		return b;
 	}*/
-	
-	//maybe in other class(if changed to Vanilla Villager)
-	@Override
-	public boolean canDespawn() { return false; }
-	
-	//Goals need to be a thing
+
+    //maybe in other class(if changed to Vanilla Villager)
+    @Override
+    public boolean canDespawn () { return false; }
+
+    //Goals need to be a thing
 	
 	/*public void detrampleCrops() 
 	{
@@ -306,7 +305,7 @@ public class EntityMillVillager extends EntityCreature {
     //@Override
     //public void faceEntity(final Entity par1Entity, final float par2, final float par3) {}
 
-    public void faceDirection() {
+    public void faceDirection () {
         //Face an Entity or specific BlockPos when we want then to
     }
 
@@ -323,7 +322,7 @@ public class EntityMillVillager extends EntityCreature {
     //Remember to use setCurrentItemOrArmor
 
     @Override
-    protected int getExperiencePoints(final EntityPlayer playerIn) {
+    protected int getExperiencePoints (final EntityPlayer playerIn) {
         //return villagertype.expgiven;
         return super.getExperiencePoints(playerIn);
     }
@@ -359,19 +358,19 @@ public class EntityMillVillager extends EntityCreature {
 	{
 		return firstName + " " + familyName;
 	}*/
-	
-	//When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
-	//Why villagerID is important
-	
-	//Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
+
+    //When Villager dies, the entity is dead, per normal.  Drop stuff and display messages. Respawn must just create another instance of the same villager (reason to store culture info in V. Stone)
+    //Why villagerID is important
+
+    //Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
 
     //handleDoorsAndFenceGates() needs to be malisis-compatible(dummy player with villagers rotationYaw)
 
     @Override
-    public boolean interact(final EntityPlayer playerIn) {
+    public boolean interact (final EntityPlayer playerIn) {
         playerIn.addStat(MillAchievement.firstContact, 1);
 
-        if(!this.worldObj.isRemote) {
+        if (!this.worldObj.isRemote) {
             if (type == null) return false;
 
             if (type.hireCost > 0) {
@@ -397,7 +396,7 @@ public class EntityMillVillager extends EntityCreature {
      * Dead and sleeping entities cannot move
      */
     @Override
-    protected boolean isMovementBlocked() {
+    protected boolean isMovementBlocked () {
         return this.getHealth() <= 0 || this.isVillagerSleeping || this.isPlayerInteracting;
     }
 
@@ -407,7 +406,7 @@ public class EntityMillVillager extends EntityCreature {
     //Local merchants have inn or townhall as 'house', handle moving them, taking items from townhall, and what happens if inn is full
 
     @Override
-    public void onLivingUpdate() {
+    public void onLivingUpdate () {
         super.onLivingUpdate();
 
         this.updateArmSwingProgress();
@@ -426,7 +425,7 @@ public class EntityMillVillager extends EntityCreature {
     //be smart with teleportTo, use coordinates or entity, check for surrounding blocks
 
     @Override
-    public void onUpdate() {
+    public void onUpdate () {
         //Check(isRemote) and do nothing?
 
         if (this.isDead) {
@@ -483,7 +482,7 @@ public class EntityMillVillager extends EntityCreature {
     //performNightActions() does not appear to be called in the code anymore...perhaps it has been outdated?  This undoes growChildSize, conception, and ForiegnMerchantNightAction
 
     @Override
-    public void writeToNBT(final NBTTagCompound nbt) {
+    public void writeToNBT (final NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setInteger("villagerID", villagerID);
         nbt.setString("culture", culture.cultureName);
@@ -508,7 +507,7 @@ public class EntityMillVillager extends EntityCreature {
     }
 
     @Override
-    public void readFromNBT(final NBTTagCompound nbt) {
+    public void readFromNBT (final NBTTagCompound nbt) {
         super.readFromNBT(nbt);
         villagerID = nbt.getInteger("villagerID");
         try {
@@ -541,13 +540,13 @@ public class EntityMillVillager extends EntityCreature {
     }
 
     @Override
-    public String toString() {
+    public String toString () {
         return this.getClass().getSimpleName() + "@" + ": " + getName() + "/" + this.villagerID + "/" + worldObj;
     }
 
     //Update Texture for Byzantines with silk clothes, possibly further expand on this
 
-    private void updateHired() {
+    private void updateHired () {
         //find target (base this on stance, change stance in onInteract)
 
         //pathFind to entity you want to attack (or following player)
@@ -558,11 +557,11 @@ public class EntityMillVillager extends EntityCreature {
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public static void preinitialize() {
+    public static void preinitialize () {
         EntityRegistry.registerModEntity(EntityMillVillager.class, "millVillager", 0, Millenaire.instance, 80, 3, false);
     }
 
-    public static void prerender() {
+    public static void prerender () {
         RenderingRegistry.registerEntityRenderingHandler(EntityMillVillager.class, new millVillagerRenderFactory());
     }
 
@@ -570,7 +569,7 @@ public class EntityMillVillager extends EntityCreature {
 
     public static class millVillagerRenderFactory implements IRenderFactory<EntityMillVillager> {
         @Override
-        public Render<EntityMillVillager> createRenderFor(RenderManager manager) {
+        public Render<EntityMillVillager> createRenderFor (RenderManager manager) {
             return new RenderMillVillager(manager, new ModelBiped(), 0.5F);
         }
     }

@@ -5,63 +5,60 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 
 
-public class ModelFemaleAsym extends ModelBiped 
-{
-	public ModelRenderer bipedHips;
-	public ModelRenderer bipedBreast;
+public class ModelFemaleAsym extends ModelBiped {
+    public ModelRenderer bipedHips;
+    public ModelRenderer bipedBreast;
 
-	public boolean heldItemLeft;
-	public boolean heldItemRight;
+    public boolean heldItemLeft;
+    public boolean heldItemRight;
 
-	public ModelFemaleAsym() { this(0.0F); }
+    public ModelFemaleAsym () { this(0.0F); }
 
-	public ModelFemaleAsym(final float f) { this(f, 0.0F); }
+    public ModelFemaleAsym (final float f) { this(f, 0.0F); }
 
-	public ModelFemaleAsym(final float f, final float f1) 
-	{
-		heldItemLeft = false;
-		heldItemRight = false;
-		isSneak = false;
-		bipedHead = new ModelRenderer(this, 0, 0);
-		bipedHead.addBox(-4F, -8F, -4F, 8, 8, 8, f);
-		bipedHead.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-		bipedHeadwear = new ModelRenderer(this, 32, 0);
-		bipedHeadwear.addBox(-4F, -8F, -4F, 8, 8, 8, f + 0.5F);
-		bipedHeadwear.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-		bipedBody = new ModelRenderer(this, 16, 17);
-		bipedBody.addBox(-3.5F, 0.0F, -1.5F, 7, 12, 3, f);
-		bipedBody.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-		bipedBreast = new ModelRenderer(this, 17, 18);
-		bipedBreast.addBox(-3.5F, 0.75F, -3F, 7, 4, 2, f);
-		bipedBreast.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-		bipedRightArm = new ModelRenderer(this, 36, 17);
-		bipedRightArm.addBox(-1.5F, -2F, -1.5F, 3, 12, 3, f);
-		bipedRightArm.setRotationPoint(-5F, 2.0F + f1, 0.0F);
-		bipedLeftArm = new ModelRenderer(this, 36, 17);
-		bipedLeftArm.mirror = true;
-		bipedLeftArm.addBox(-1.5F, -2F, -1.5F, 3, 12, 3, f);
-		bipedLeftArm.setRotationPoint(5F, 2.0F + f1, 0.0F);
-		bipedRightLeg = new ModelRenderer(this, 0, 16);
-		bipedRightLeg.addBox(-2F, 0.0F, -2F, 4, 12, 4, f);
-		bipedRightLeg.setRotationPoint(-2F, 12F + f1, 0.0F);
-		bipedLeftLeg = new ModelRenderer(this, 48, 16);
-		bipedLeftLeg.addBox(-2F, 0.0F, -2F, 4, 12, 4, f);
-		bipedLeftLeg.setRotationPoint(2.0F, 12F + f1, 0.0F);
-	}
+    public ModelFemaleAsym (final float f, final float f1) {
+        heldItemLeft = false;
+        heldItemRight = false;
+        isSneak = false;
+        bipedHead = new ModelRenderer(this, 0, 0);
+        bipedHead.addBox(-4F, -8F, -4F, 8, 8, 8, f);
+        bipedHead.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        bipedHeadwear = new ModelRenderer(this, 32, 0);
+        bipedHeadwear.addBox(-4F, -8F, -4F, 8, 8, 8, f + 0.5F);
+        bipedHeadwear.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        bipedBody = new ModelRenderer(this, 16, 17);
+        bipedBody.addBox(-3.5F, 0.0F, -1.5F, 7, 12, 3, f);
+        bipedBody.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        bipedBreast = new ModelRenderer(this, 17, 18);
+        bipedBreast.addBox(-3.5F, 0.75F, -3F, 7, 4, 2, f);
+        bipedBreast.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        bipedRightArm = new ModelRenderer(this, 36, 17);
+        bipedRightArm.addBox(-1.5F, -2F, -1.5F, 3, 12, 3, f);
+        bipedRightArm.setRotationPoint(-5F, 2.0F + f1, 0.0F);
+        bipedLeftArm = new ModelRenderer(this, 36, 17);
+        bipedLeftArm.mirror = true;
+        bipedLeftArm.addBox(-1.5F, -2F, -1.5F, 3, 12, 3, f);
+        bipedLeftArm.setRotationPoint(5F, 2.0F + f1, 0.0F);
+        bipedRightLeg = new ModelRenderer(this, 0, 16);
+        bipedRightLeg.addBox(-2F, 0.0F, -2F, 4, 12, 4, f);
+        bipedRightLeg.setRotationPoint(-2F, 12F + f1, 0.0F);
+        bipedLeftLeg = new ModelRenderer(this, 48, 16);
+        bipedLeftLeg.addBox(-2F, 0.0F, -2F, 4, 12, 4, f);
+        bipedLeftLeg.setRotationPoint(2.0F, 12F + f1, 0.0F);
+    }
 
-	@Override
-	public void render(final Entity par1Entity, final float f, final float f1, final float f2, final float f3, final float f4, final float f5) 
-	{
-		setRotationAngles(f, f1, f2, f3, f4, f5, par1Entity);
-		bipedHead.render(f5);
-		bipedBody.render(f5);
-		bipedRightArm.render(f5);
-		bipedLeftArm.render(f5);
-		bipedRightLeg.render(f5);
-		bipedLeftLeg.render(f5);
-		bipedHeadwear.render(f5);
-		bipedBreast.render(f5);
-	}
+    @Override
+    public void render (final Entity par1Entity, final float f, final float f1, final float f2, final float f3, final float f4, final float f5) {
+        setRotationAngles(f, f1, f2, f3, f4, f5, par1Entity);
+        bipedHead.render(f5);
+        bipedBody.render(f5);
+        bipedRightArm.render(f5);
+        bipedLeftArm.render(f5);
+        bipedRightLeg.render(f5);
+        bipedLeftLeg.render(f5);
+        bipedHeadwear.render(f5);
+        bipedBreast.render(f5);
+    }
 
 	/*@Override
 	public void setRotationAngles(final float f, final float f1, final float f2, final float f3, final float f4, final float f5, final Entity par7Entity) {

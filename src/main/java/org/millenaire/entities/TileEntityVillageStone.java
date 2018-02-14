@@ -36,7 +36,7 @@ public class TileEntityVillageStone extends TileEntity {
     public int testVar = 0;
 
     @Override
-    public void onLoad() {
+    public void onLoad () {
         World world = this.getWorld();
         BlockPos pos = this.getPos();
         if (!world.isRemote) { //server only
@@ -91,7 +91,7 @@ public class TileEntityVillageStone extends TileEntity {
     }
 
     //@SideOnly(Side.SERVER)
-    public EntityMillVillager createVillager(World worldIn, MillCulture cultureIn, int villagerID) {
+    public EntityMillVillager createVillager (World worldIn, MillCulture cultureIn, int villagerID) {
         VillagerType currentVillagerType;
         int currentGender;
 
@@ -150,12 +150,12 @@ public class TileEntityVillageStone extends TileEntity {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
+    public void readFromNBT (NBTTagCompound compound) {
 
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound compound) {
+    public void writeToNBT (NBTTagCompound compound) {
 
     }
 }

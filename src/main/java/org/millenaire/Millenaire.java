@@ -33,100 +33,86 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.millenaire.proxy.CommonProxy;
 
-@Mod(modid = Millenaire.MODID, name = Millenaire.NAME, version = Millenaire.VERSION, guiFactory = Millenaire.GUIFACTORY)
-public class Millenaire 
-{
-	public static final String MODID = "millenaire";
-	public static final String NAME = "Mill\u00e9naire";
-	public static final String VERSION = "7.0.0";
-	public static final String GUIFACTORY = "org.millenaire.gui.MillGuiFactory";
+@Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, guiFactory = Reference.GUIFACTORY)
+public class Millenaire {
+    public static boolean isServer = true;
 
-	public static boolean isServer = true;
-	
-	public List<Block> forbiddenBlocks;
-	
-	@Instance
-	public static Millenaire instance = new Millenaire();
-	public static SimpleNetworkWrapper simpleNetworkWrapper;
+    public List<Block> forbiddenBlocks;
 
-	@SidedProxy(modId = MODID, clientSide = "org.millenaire.proxy.ClientProxy", serverSide = "org.millenaire.proxy.CommonProxy")
-	public static CommonProxy proxy;
-	
-	public static final CreativeTabs tabMillenaire = new CreativeTabs("MillTab")
-	{
-		public Item getTabIconItem() { return MillItems.denierOr; }
-	};
-	
-	@EventHandler
-    public void preinit(FMLPreInitializationEvent event)
-    {
-		MillConfig.preinitialize();
-		MinecraftForge.EVENT_BUS.register(new RaidEvent.RaidEventHandler());
-		
-		setForbiddenBlocks();
-		
-		MillBlocks.preinitialize();
-		MillBlocks.recipes();
-		
-		MillItems.preinitialize();
-		MillItems.recipies();
-		EntityMillVillager.preinitialize();
-		
-		MillCulture.preinitialize();
-		
-		MillAchievement.preinitialize();
-		
-		if(event.getSide() == Side.CLIENT)
-		{
-			proxy.prerenderBlocks();
-			proxy.prerenderItems();
-			
-			EntityMillVillager.prerender();
-			
-			MillConfig.eventRegister();
-			
-			isServer = false;
-		}
-		
-		simpleNetworkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel("MillChannel");
-		simpleNetworkWrapper.registerMessage(MillPacket.PacketHandlerOnServer.class, MillPacket.class, 0, Side.SERVER);
-		simpleNetworkWrapper.registerMessage(PacketImportBuilding.Handler.class, PacketImportBuilding.class, 1, Side.SERVER);
-		simpleNetworkWrapper.registerMessage(PacketSayTranslatedMessage.Handler.class, PacketSayTranslatedMessage.class, 2, Side.CLIENT);
-		simpleNetworkWrapper.registerMessage(PacketExportBuilding.Handler.class, PacketExportBuilding.class, 3, Side.SERVER);
+    @Instance
+    public static Millenaire instance = new Millenaire();
+    public static SimpleNetworkWrapper simpleNetworkWrapper;
+
+    @SidedProxy(modId = Reference.MODID, clientSide = "org.millenaire.proxy.ClientProxy", serverSide = "org.millenaire.proxy.CommonProxy")
+    public static CommonProxy proxy;
+
+    public static final CreativeTabs tabMillenaire = new CreativeTabs("MillTab") {
+        public Item getTabIconItem () { return MillItems.denierOr; }
+    };
+
+    @EventHandler
+    public void preinit (FMLPreInitializationEvent event) {
+        MillConfig.preinitialize();
+        MinecraftForge.EVENT_BUS.register(new RaidEvent.RaidEventHandler());
+
+        setForbiddenBlocks();
+
+        MillBlocks.preinitialize();
+        MillBlocks.recipes();
+
+        MillItems.preinitialize();
+        MillItems.recipies();
+        EntityMillVillager.preinitialize();
+
+        MillCulture.preinitialize();
+
+        MillAchievement.preinitialize();
+
+        if (event.getSide() == Side.CLIENT) {
+            proxy.prerenderBlocks();
+            proxy.prerenderItems();
+
+            EntityMillVillager.prerender();
+
+            MillConfig.eventRegister();
+
+            isServer = false;
+        }
+
+        simpleNetworkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel("MillChannel");
+        simpleNetworkWrapper.registerMessage(MillPacket.PacketHandlerOnServer.class, MillPacket.class, 0, Side.SERVER);
+        simpleNetworkWrapper.registerMessage(PacketImportBuilding.Handler.class, PacketImportBuilding.class, 1, Side.SERVER);
+        simpleNetworkWrapper.registerMessage(PacketSayTranslatedMessage.Handler.class, PacketSayTranslatedMessage.class, 2, Side.CLIENT);
+        simpleNetworkWrapper.registerMessage(PacketExportBuilding.Handler.class, PacketExportBuilding.class, 3, Side.SERVER);
     }
-	
-	@EventHandler
-    public void init(FMLInitializationEvent event)
-    {
-		NetworkRegistry.INSTANCE.registerGuiHandler(instance, new MillGuiHandler());
-		GameRegistry.registerWorldGenerator(new VillageGenerator(), 1000);
-		
-		if(event.getSide() == Side.CLIENT)
-    	{	
-			proxy.renderBlocks();
-			proxy.renderItems();
-    	}
+
+    @EventHandler
+    public void init (FMLInitializationEvent event) {
+        NetworkRegistry.INSTANCE.registerGuiHandler(instance, new MillGuiHandler());
+        GameRegistry.registerWorldGenerator(new VillageGenerator(), 1000);
+
+        if (event.getSide() == Side.CLIENT) {
+            proxy.renderBlocks();
+            proxy.renderItems();
+        }
     }
-	
-	@EventHandler
-    public void postinit(FMLPostInitializationEvent event)
-    {
-		
+
+    @EventHandler
+    public void postinit (FMLPostInitializationEvent event) {
+
     }
-	
-	private void setForbiddenBlocks()
-	{
-		String parsing = MillConfig.forbiddenBlocks.substring(11);
-		forbiddenBlocks = new ArrayList<Block>();
-		for (final String name : parsing.split(", |,"))
-		{
-			if(Block.blockRegistry.containsKey(new ResourceLocation(name)))
-			{
-				forbiddenBlocks.add(Block.blockRegistry.getObject(new ResourceLocation(name)));
-			}
-		}
-	}
-	
-	@EventHandler
-	public void serverLoad(FMLServerStartingEvent event) { event.registerServerCommand(new MillCommand()); }
+
+    private void setForbiddenBlocks () {
+        String parsing = MillConfig.forbiddenBlocks.substring(11);
+        forbiddenBlocks = new ArrayList<>();
+
+        for (final String name : parsing.split(", |,")) {
+            if (Block.blockRegistry.containsKey(new ResourceLocation(name))) {
+                forbiddenBlocks.add(Block.blockRegistry.getObject(new ResourceLocation(name)));
+            }
+        }
+    }
+
+    @EventHandler
+    public void serverLoad (FMLServerStartingEvent event) { event.registerServerCommand(new MillCommand()); }
 }

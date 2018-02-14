@@ -5,25 +5,19 @@ import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.world.World;
 
-public class MillPathNavigate extends PathNavigateGround
-{
+public class MillPathNavigate extends PathNavigateGround {
     @Override
-    public float getPathSearchRange()
-    {
-        return 64;
+    public float getPathSearchRange () { return 64; }
+
+    public MillPathNavigate (EntityLiving entitylivingIn, World worldIn) {
+        super(entitylivingIn, worldIn);
+        this.setBreakDoors(true);
+        this.setAvoidsWater(true);
+        this.setAvoidSun(false);
     }
 
-    public MillPathNavigate(EntityLiving entitylivingIn, World worldIn)
-	{
-		super(entitylivingIn, worldIn);
-		this.setBreakDoors(true);
-		this.setAvoidsWater(true);
-		this.setAvoidSun(false);
-	}
-	
-	@Override
-	protected PathFinder getPathFinder()
-    {
+    @Override
+    protected PathFinder getPathFinder () {
         this.nodeProcessor = new MillWalkNodeProcessor();
         this.nodeProcessor.setEnterDoors(true);
         this.nodeProcessor.setBreakDoors(true);

@@ -9,33 +9,29 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
-public class BlockDecorativeOriented extends BlockDirectional
-{
+public class BlockDecorativeOriented extends BlockDirectional {
 
-	BlockDecorativeOriented(Material materialIn) { super(materialIn); }
-	
-	@Override
-	public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
+    BlockDecorativeOriented (Material materialIn) { super(materialIn); }
+
+    @Override
+    public IBlockState onBlockPlaced (World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }
 
-	@Override
-	public IBlockState getStateFromMeta(int meta)
-    {
+    @Override
+    public IBlockState getStateFromMeta (int meta) {
         EnumFacing enumfacing = EnumFacing.getFront(meta);
 
-        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
-        {
+        if (enumfacing.getAxis() == EnumFacing.Axis.Y) {
             enumfacing = EnumFacing.NORTH;
         }
 
         return this.getDefaultState().withProperty(FACING, enumfacing);
     }
-	
-	@Override
-    public int getMetaFromState(IBlockState state) { return (state.getValue(FACING)).getIndex(); }
-	
-	@Override
-	protected BlockState createBlockState() { return new BlockState(this, FACING); }
+
+    @Override
+    public int getMetaFromState (IBlockState state) { return (state.getValue(FACING)).getIndex(); }
+
+    @Override
+    protected BlockState createBlockState () { return new BlockState(this, FACING); }
 }

@@ -15,26 +15,22 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockDecorativeEarth extends Block
-{
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockDecorativeEarth.EnumType.class);
+public class BlockDecorativeEarth extends Block {
+    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockDecorativeEarth.EnumType.class);
 
-    BlockDecorativeEarth() { super(Material.ground); }
-	
-	@Override
-    public int damageDropped(IBlockState state)
-    {
-        return ((BlockDecorativeEarth.EnumType)state.getValue(VARIANT)).getMetadata();
+    BlockDecorativeEarth () { super(Material.ground); }
+
+    @Override
+    public int damageDropped (IBlockState state) {
+        return ((BlockDecorativeEarth.EnumType) state.getValue(VARIANT)).getMetadata();
     }
 
-	public IProperty getVariantProperty() { return VARIANT; }
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
-    {
-        if (Block.getBlockFromItem(itemIn) == this)
-        {
+    public IProperty getVariantProperty () { return VARIANT; }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks (Item itemIn, CreativeTabs tab, List list) {
+        if (Block.getBlockFromItem(itemIn) == this) {
             BlockDecorativeEarth.EnumType[] aenumtype = BlockDecorativeEarth.EnumType.values();
 
             for (EnumType enumtype : aenumtype) {
@@ -43,67 +39,58 @@ public class BlockDecorativeEarth extends Block
         }
     }
 
-    public String getUnlocalizedName(int meta)
-    {
+    public String getUnlocalizedName (int meta) {
         return super.getUnlocalizedName() + "." + BlockDecorativeEarth.EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
-	@Override
-    public IBlockState getStateFromMeta(int meta)
-    {
+    @Override
+    public IBlockState getStateFromMeta (int meta) {
         return this.getDefaultState().withProperty(VARIANT, BlockDecorativeEarth.EnumType.byMetadata(meta));
     }
 
-	@Override
-    public int getMetaFromState(IBlockState state)
-    {
-        return ((BlockDecorativeEarth.EnumType)state.getValue(VARIANT)).getMetadata();
+    @Override
+    public int getMetaFromState (IBlockState state) {
+        return ((BlockDecorativeEarth.EnumType) state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
-    protected BlockState createBlockState()
-    {
+    protected BlockState createBlockState () {
         return new BlockState(this, VARIANT);
     }
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public static enum EnumType implements IStringSerializable
-    {
-    	DIRTWALL(0, "dirtWall"),
-    	DRIEDBRICK(1, "driedBrick");
-        
+    public static enum EnumType implements IStringSerializable {
+        DIRTWALL(0, "dirtWall"),
+        DRIEDBRICK(1, "driedBrick");
+
         private static final BlockDecorativeEarth.EnumType[] META_LOOKUP = new BlockDecorativeEarth.EnumType[values().length];
         private final int meta;
         private final String name;
 
-        EnumType(int meta, String name)
-        {
+        EnumType (int meta, String name) {
             this.meta = meta;
             this.name = name;
         }
 
-        public int getMetadata() { return this.meta; }
+        public int getMetadata () { return this.meta; }
 
-        public String toString() { return this.name; }
+        public String toString () { return this.name; }
 
-        public static BlockDecorativeEarth.EnumType byMetadata(int meta)
-        {
-            if (meta < 0 || meta >= META_LOOKUP.length)
-            {
+        public static BlockDecorativeEarth.EnumType byMetadata (int meta) {
+            if (meta < 0 || meta >= META_LOOKUP.length) {
                 meta = 0;
             }
 
             return META_LOOKUP[meta];
         }
 
-        public String getName() { return this.name; }
+        public String getName () { return this.name; }
 
-        public String getUnlocalizedName() { return this.name; }
+        public String getUnlocalizedName () { return this.name; }
 
-        static
-        {
-        	BlockDecorativeEarth.EnumType[] var0 = values();
+        static {
+            BlockDecorativeEarth.EnumType[] var0 = values();
 
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;
