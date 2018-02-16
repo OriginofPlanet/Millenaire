@@ -1,7 +1,5 @@
 package org.millenaire.items;
 
-import org.millenaire.gui.MillAchievement;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemFood;
@@ -9,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.World;
+import org.millenaire.gui.MillAchievement;
 
 public class ItemMillFood extends ItemFood {
     private boolean isDrink;
@@ -16,7 +15,7 @@ public class ItemMillFood extends ItemFood {
     private int drunkDuration;
     private int regDuration;
 
-    ItemMillFood (int healIn, int regIn, int drunkIn, int hungerIn, float saturationIn, boolean drinkIn) {
+    ItemMillFood(int healIn, int regIn, int drunkIn, int hungerIn, float saturationIn, boolean drinkIn) {
         super(hungerIn, saturationIn, false);
 
         healAmount = healIn;
@@ -30,10 +29,12 @@ public class ItemMillFood extends ItemFood {
     }
 
     @Override
-    public EnumAction getItemUseAction (ItemStack stack) { return isDrink ? EnumAction.DRINK : EnumAction.EAT; }
+    public EnumAction getItemUseAction(ItemStack stack) {
+        return isDrink ? EnumAction.DRINK : EnumAction.EAT;
+    }
 
     @Override
-    protected void onFoodEaten (ItemStack stack, World worldIn, EntityPlayer player) {
+    protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player) {
         player.heal(healAmount);
 
         if (isDrink) {

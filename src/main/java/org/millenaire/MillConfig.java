@@ -1,11 +1,5 @@
 package org.millenaire;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.millenaire.events.MillenaireEventHandler;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -15,21 +9,27 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.millenaire.events.MillenaireEventHandler;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MillConfig {
+    public static final String CATEGORYUIOPTIONS = "ctgy_uioptions";
+    public static final String CATEGORYWORLDGEN = "ctgy_worldgen";
+    public static final String CATEGORYVILLAGEBEV = "ctgy_villagebehavior";
     public static boolean learnLanguages;
     public static boolean villageAnnouncement;
     public static boolean displayNames;
     public static int nameDistance;
     public static int dialogueDistance;
-
     public static boolean generateVillages;
     public static boolean generateLoneBuildings;
     public static int minVillageDistance;
     public static int minLoneDistance;
     public static int minVillageLoneDistance;
     public static int spawnDistance;
-
     public static int loadedRadius;
     public static int minBuildingDistance;
     public static int maxChildren;
@@ -38,12 +38,9 @@ public class MillConfig {
     public static int banditRaidDistance;
     public static int raidPercentChance;
     public static String forbiddenBlocks;
+    private static Configuration config = null;
 
-    public static final String CATEGORYUIOPTIONS = "ctgy_uioptions";
-    public static final String CATEGORYWORLDGEN = "ctgy_worldgen";
-    public static final String CATEGORYVILLAGEBEV = "ctgy_villagebehavior";
-
-    public static void preinitialize () {
+    public static void preinitialize() {
         File configFile = new File(Loader.instance().getConfigDir(), "Millenaire.cfg");
         config = new Configuration(configFile);
 
@@ -51,20 +48,28 @@ public class MillConfig {
     }
 
     @SideOnly(Side.CLIENT)
-    public static void eventRegister () {
+    public static void eventRegister() {
         MinecraftForge.EVENT_BUS.register(new ConfigEventHandler());
         MinecraftForge.EVENT_BUS.register(new MillenaireEventHandler());
     }
 
-    public static Configuration getConfig () { return config; }
+    public static Configuration getConfig() {
+        return config;
+    }
 
-    public static void syncFromFile () { syncConfig(true, true); }
+    public static void syncFromFile() {
+        syncConfig(true, true);
+    }
 
-    public static void syncFromGui () { syncConfig(false, true); }
+    public static void syncFromGui() {
+        syncConfig(false, true);
+    }
 
-    public static void syncFromFields () { syncConfig(false, false); }
+    public static void syncFromFields() {
+        syncConfig(false, false);
+    }
 
-    private static void syncConfig (boolean loadConfigFromFile, boolean readFieldsFromConfig) {
+    private static void syncConfig(boolean loadConfigFromFile, boolean readFieldsFromConfig) {
         //Load
         if (loadConfigFromFile) {
             config.load();
@@ -197,12 +202,10 @@ public class MillConfig {
         }
     }
 
-    private static Configuration config = null;
-
     public static class ConfigEventHandler {
         @SubscribeEvent(priority = EventPriority.NORMAL)
-        public void onEvent (ConfigChangedEvent.OnConfigChangedEvent event) {
-            if (event.modID.equals(Reference.MODID) && !event.isWorldRunning) {
+        public void onEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
+            if (event.modID.equals(Millenaire.MODID) && !event.isWorldRunning) {
                 syncFromGui();
                 System.out.println("Reloaded Config");
             }

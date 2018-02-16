@@ -36,7 +36,7 @@ public class EntityAIGateOpen extends EntityAIBase {
      */
     private int closeGateTemporisation;
 
-    public EntityAIGateOpen (EntityLiving entityIn, boolean shouldClose) {
+    public EntityAIGateOpen(EntityLiving entityIn, boolean shouldClose) {
         this.theEntity = entityIn;
 
         if (!(entityIn.getNavigator() instanceof PathNavigateGround)) {
@@ -51,7 +51,7 @@ public class EntityAIGateOpen extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     @Override
-    public boolean shouldExecute () {
+    public boolean shouldExecute() {
         //System.out.println("AI called - should execute");
         if (!this.theEntity.isCollidedHorizontally) {
             return false;
@@ -88,7 +88,7 @@ public class EntityAIGateOpen extends EntityAIBase {
      * Returns whether an in-progress EntityAIBase should continue executing
      */
     @Override
-    public boolean continueExecuting () {
+    public boolean continueExecuting() {
         return this.closeGate && this.closeGateTemporisation > 0 && super.continueExecuting();
     }
 
@@ -96,7 +96,7 @@ public class EntityAIGateOpen extends EntityAIBase {
      * Execute a one shot task or start executing a continuous task
      */
     @Override
-    public void startExecuting () {
+    public void startExecuting() {
         this.closeGateTemporisation = 20;
         this.toggleGate(gateBlock, this.theEntity.worldObj, this.gatePosition, true);
     }
@@ -105,7 +105,7 @@ public class EntityAIGateOpen extends EntityAIBase {
      * Updates the task
      */
     @Override
-    public void updateTask () {
+    public void updateTask() {
         --this.closeGateTemporisation;
 
         float f = (float) ((double) ((float) this.gatePosition.getX() + 0.5F) - this.theEntity.posX);
@@ -118,18 +118,18 @@ public class EntityAIGateOpen extends EntityAIBase {
     }
 
     @Override
-    public void resetTask () {
+    public void resetTask() {
         if (this.closeGate) {
             this.toggleGate(gateBlock, this.theEntity.worldObj, this.gatePosition, false);
         }
     }
 
-    private BlockFenceGate getBlockGate (BlockPos pos) {
+    private BlockFenceGate getBlockGate(BlockPos pos) {
         Block block = this.theEntity.worldObj.getBlockState(pos).getBlock();
         return block instanceof BlockFenceGate && block.getMaterial() == Material.wood ? (BlockFenceGate) block : null;
     }
 
-    private void toggleGate (BlockFenceGate gateIn, World worldIn, BlockPos pos, boolean open) {
+    private void toggleGate(BlockFenceGate gateIn, World worldIn, BlockPos pos, boolean open) {
         if (gateIn == null) {
             return;
         }

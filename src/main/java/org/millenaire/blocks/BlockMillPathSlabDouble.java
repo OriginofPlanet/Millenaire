@@ -1,8 +1,12 @@
 package org.millenaire.blocks;
 
 public class BlockMillPathSlabDouble extends BlockMillPathSlab {
-    BlockMillPathSlabDouble () { super(); }
+    BlockMillPathSlabDouble() {
+        super();
+    }
 
     @Override
-    public boolean isDouble () { return true; }
+    public boolean isDouble() {
+        return true;
+    }
 }

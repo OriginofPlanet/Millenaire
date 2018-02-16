@@ -1,42 +1,29 @@
 package org.millenaire.building;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
-import net.minecraft.util.Vec3i;
-import org.millenaire.CommonUtilities;
-import org.millenaire.MillCulture;
-import org.millenaire.VillageGeography;
-import org.millenaire.blocks.BlockDecorativeEarth;
-import org.millenaire.blocks.BlockDecorativeStone;
-import org.millenaire.blocks.BlockDecorativeWood;
-import org.millenaire.blocks.BlockMillChest;
-import org.millenaire.blocks.MillBlocks;
-import org.millenaire.blocks.StoredPosition;
-import org.millenaire.pathing.MillPathNavigate;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockBed;
-import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockNewLog;
-import net.minecraft.block.BlockOldLog;
-import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockStoneSlab;
-import net.minecraft.block.BlockWoodSlab;
+import net.minecraft.block.*;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import org.millenaire.CommonUtilities;
+import org.millenaire.MillCulture;
+import org.millenaire.VillageGeography;
+import org.millenaire.blocks.*;
+import org.millenaire.pathing.MillPathNavigate;
 
-import static org.millenaire.blocks.BlockDecorativeEarth.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
+import static org.millenaire.blocks.BlockDecorativeEarth.EnumType;
+import static org.millenaire.blocks.BlockDecorativeEarth.VARIANT;
 
 public class BuildingPlan {
     public int length;
@@ -49,6 +36,7 @@ public class BuildingPlan {
 
     public float minDistance, maxDistance;
 
+    public boolean isCenter = false;
     public boolean isUpdate = false;
     public boolean isSubBuilding = false;
 
@@ -57,18 +45,17 @@ public class BuildingPlan {
     public String nativeName;
     public String[] maleVillagerType;
     public String[] femaleVillagerType;
-
-    IBlockState[][][] buildingArray;
     public List<String> subBuildings;
     public int pathLevel = 0;
     public int pathWidth = 2;
     public boolean rebuildPath = false;
+    IBlockState[][][] buildingArray;
 
-    public BuildingPlan (MillCulture cultureIn, int level) {
+    public BuildingPlan(MillCulture cultureIn, int level) {
         //computeCost();
     }
 
-    public BuildingPlan (int level, int pathLevelIn, BuildingPlan parent) {
+    public BuildingPlan(int level, int pathLevelIn, BuildingPlan parent) {
         length = parent.length;
         width = parent.width;
         height = parent.height;
@@ -94,7 +81,22 @@ public class BuildingPlan {
         //computeCost();
     }
 
-    public BuildingPlan setLengthWidth (int lenIn, int widIn) {
+    private static BlockPos adjustForOrientation(final int x, final int y, final int z, final int xoffset, final int zoffset, final EnumFacing orientation) {
+        BlockPos pos = new BlockPos(x, y, z);
+        if (orientation == EnumFacing.SOUTH) {
+            pos = new BlockPos(x + xoffset, y, z + zoffset);
+        } else if (orientation == EnumFacing.WEST) {
+            pos = new BlockPos(x + zoffset, y, z - xoffset);
+        } else if (orientation == EnumFacing.NORTH) {
+            pos = new BlockPos(x - xoffset, y, z - zoffset);
+        } else if (orientation == EnumFacing.EAST) {
+            pos = new BlockPos(x - zoffset, y, z + xoffset);
+        }
+
+        return pos;
+    }
+
+    public BuildingPlan setLengthWidth(int lenIn, int widIn) {
         this.length = lenIn;
         this.width = widIn;
 
@@ -104,39 +106,39 @@ public class BuildingPlan {
         return this;
     }
 
-    public BuildingPlan setHeightDepth (int hiIn, int depIn) {
+    public BuildingPlan setHeightDepth(int hiIn, int depIn) {
         this.height = hiIn;
         this.depth = depIn;
 
         return this;
     }
 
-    public BuildingPlan setArea (int areaIn) {
+    public BuildingPlan setArea(int areaIn) {
         this.areaToClear = areaIn;
 
         return this;
     }
 
-    public BuildingPlan setDistance (float minIn, float maxIn) {
+    public BuildingPlan setDistance(float minIn, float maxIn) {
         this.minDistance = minIn;
         this.maxDistance = maxIn;
 
         return this;
     }
 
-    public BuildingPlan setSubBuilding (boolean subIn) {
+    public BuildingPlan setSubBuilding(boolean subIn) {
         this.isSubBuilding = subIn;
 
         return this;
     }
 
-    public BuildingPlan setOrientation (EnumFacing orientIn) {
+    public BuildingPlan setOrientation(EnumFacing orientIn) {
         this.buildingOrientation = orientIn;
 
         return this;
     }
 
-    public BuildingPlan setNameAndType (String nameIn, String[] maleIn, String[] femaleIn) {
+    public BuildingPlan setNameAndType(String nameIn, String[] maleIn, String[] femaleIn) {
         this.nativeName = nameIn;
         this.maleVillagerType = maleIn;
         this.femaleVillagerType = femaleIn;
@@ -144,14 +146,14 @@ public class BuildingPlan {
         return this;
     }
 
-    public BuildingPlan setPlan (IBlockState[][][] arrayIn) {
+    public BuildingPlan setPlan(IBlockState[][][] arrayIn) {
         this.buildingArray = arrayIn;
         computeCost();
 
         return this;
     }
 
-    public BuildingLocation findBuildingLocation (VillageGeography geo, MillPathNavigate pathing, BlockPos center, int maxRadius, Random random, EnumFacing orientation) {
+    public BuildingLocation findBuildingLocation(VillageGeography geo, MillPathNavigate pathing, BlockPos center, int maxRadius, Random random, EnumFacing orientation) {
         final int ci = center.getX() - geo.mapStartX;
         final int cj = center.getZ() - geo.mapStartZ;
 
@@ -212,7 +214,7 @@ public class BuildingPlan {
         return null;
     }
 
-    private void addToCost (ItemStack stack, int amount) {
+    private void addToCost(ItemStack stack, int amount) {
         for (int i = 0; i > resCost.size(); i++) {
             if (ItemStack.areItemStacksEqual(stack, resCost.get(i).getStack())) {
                 resCost.get(i).add(amount);
@@ -222,7 +224,7 @@ public class BuildingPlan {
         }
     }
 
-    private void addToCost (String odString, int amount) {
+    private void addToCost(String odString, int amount) {
         for (int i = 0; i > resCost.size(); i++) {
             if (odString.matches(resCost.get(i).getString())) {
                 resCost.get(i).add(amount);
@@ -232,12 +234,12 @@ public class BuildingPlan {
         }
     }
 
-    private boolean freeBuild (IBlockState state) {
+    private boolean freeBuild(IBlockState state) {
         return state.getBlock() == Blocks.dirt || state.getBlock() == Blocks.water || state.getBlock() == Blocks.leaves || state.getBlock() == Blocks.leaves2 || state.getBlock() == Blocks.grass || state.getBlock() == Blocks.tallgrass || state.getBlock() == Blocks.red_flower || state.getBlock() == Blocks.yellow_flower || state.getBlock() == Blocks.double_plant || state.getBlock() == Blocks.deadbush
                 || state.getBlock() == MillBlocks.blockMillPath || state.getBlock() == MillBlocks.blockMillPathSlab || state.equals(MillBlocks.blockDecorativeEarth.getDefaultState().withProperty(VARIANT, EnumType.DIRTWALL));
     }
 
-    private void computeCost () {
+    private void computeCost() {
         resCost = new ArrayList<>();
 
         int plankCost = 0, plankOakCost = 0, plankSpruceCost = 0, plankBirchCost = 0, plankJungleCost = 0, plankAcaciaCost = 0, plankDarkCost = 0, glassPaneCost = 0, byzBricksHalf = 0;
@@ -478,8 +480,10 @@ public class BuildingPlan {
         }
     }
 
-    private LocationReturn testLocation (VillageGeography geography, BlockPos center, int x, int z, EnumFacing facing, MillPathNavigate pathing) {
+    private LocationReturn testLocation(VillageGeography geography, BlockPos center, int x, int z, EnumFacing facing, MillPathNavigate pathing) {
         EnumFacing orientation;
+
+        pathing.setSearchRange(128);
 
         final int relativeX = x + geography.mapStartX - center.getX();
         final int relativeZ = z + geography.mapStartZ - center.getZ();
@@ -566,7 +570,6 @@ public class BuildingPlan {
                     if (nbError > allowedErrors) {
                         final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
 
-                        System.out.println("Cannot build at " + p + " - dangerous");
                         return new LocationReturn(LocationReturn.DANGER, p);
                     } else {
                         nbError++;
@@ -579,26 +582,28 @@ public class BuildingPlan {
                     } else {
                         nbError++;
                     }
+                } else if(geography.water[ci][cj]) {
+                    if(nbError > allowedErrors) {
+                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+
+                        return new LocationReturn(LocationReturn.NOT_REACHABLE, p);
+                    } else {
+                        nbError++;
+                    }
                 }
 
-                if (pathing != null && pathing.tryMoveToXYZ(ci, 64, cj, 0.5D)) {
-                    reachable = false;
-                } else {
-                    reachable = true;
-                }
+                reachable = !pathing.tryMoveToXYZ(ci, geography.world.getHeight(new BlockPos(ci, 10, cj)).getY(), cj, 0.5D);
 
                 altitudeTotal += geography.topGround[ci][cj];
-//					altitudeTotal += geography.constructionHeight[ci][cj];
                 nbPoints++;
             }
         }
 
-        if (pathing != null && !reachable) {
+        if (!reachable) {
             return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
         }
 
         final int altitude = (int) (1 + altitudeTotal * 1.0f / nbPoints);
-
 
         //Adjust for trees + plants
         World world = geography.world;
@@ -617,7 +622,7 @@ public class BuildingPlan {
         return new LocationReturn(l);
     }
 
-    public BuildingBlock[] getBuildingPoints (World worldIn, BuildingLocation location, boolean villageGeneration) {
+    public BuildingBlock[] getBuildingPoints(World worldIn, BuildingLocation location, boolean villageGeneration) {
         final int x = location.position.getX();
         final int y = location.position.getY();
         final int z = location.position.getZ();
@@ -879,22 +884,7 @@ public class BuildingPlan {
         return abblocks;
     }
 
-    private static BlockPos adjustForOrientation (final int x, final int y, final int z, final int xoffset, final int zoffset, final EnumFacing orientation) {
-        BlockPos pos = new BlockPos(x, y, z);
-        if (orientation == EnumFacing.SOUTH) {
-            pos = new BlockPos(x + xoffset, y, z + zoffset);
-        } else if (orientation == EnumFacing.WEST) {
-            pos = new BlockPos(x + zoffset, y, z - xoffset);
-        } else if (orientation == EnumFacing.NORTH) {
-            pos = new BlockPos(x - xoffset, y, z - zoffset);
-        } else if (orientation == EnumFacing.EAST) {
-            pos = new BlockPos(x - zoffset, y, z + xoffset);
-        }
-
-        return pos;
-    }
-
-    private boolean firstPass (IBlockState state) {
+    private boolean firstPass(IBlockState state) {
         //TODO: This cannot ever work on servers - creative tabs don't exist, so I've replaced with if it's a cube
         //TODO: But do fences fall into this category? Probably not. Need an alternative.
         return /*state.getBlock().getCreativeTabToDisplayOn() == CreativeTabs.tabBlock*/ state.getBlock().isNormalCube() || state.getBlock() instanceof BlockDecorativeEarth || state.getBlock() instanceof BlockDecorativeWood ||
@@ -902,7 +892,7 @@ public class BuildingPlan {
                 state.getBlock() == MillBlocks.byzantineTileSlab || state.getBlock() == MillBlocks.byzantineTileSlabDouble;
     }
 
-    private void setReferencePositions (IBlockState state, BlockPos pos, BuildingLocation location) {
+    private void setReferencePositions(IBlockState state, BlockPos pos, BuildingLocation location) {
         Block block = state.getBlock();
 
         if (block instanceof BlockMillChest) {
@@ -944,13 +934,13 @@ public class BuildingPlan {
         int errorCode;
         BlockPos errorPos;
 
-        LocationReturn (final BuildingLocation l) {
+        LocationReturn(final BuildingLocation l) {
             location = l;
             errorCode = 0;
             errorPos = null;
         }
 
-        LocationReturn (final int error, final BlockPos pos) {
+        LocationReturn(final int error, final BlockPos pos) {
             location = null;
             errorCode = error;
             errorPos = pos;
@@ -963,31 +953,31 @@ public class BuildingPlan {
         ItemStack stack;
         String odString;
 
-        ResourceCost (ItemStack stackIn, int amountIn) {
+        ResourceCost(ItemStack stackIn, int amountIn) {
             amount = amountIn;
             stack = stackIn;
             odString = null;
         }
 
-        ResourceCost (String nameIn, int amountIn) {
+        ResourceCost(String nameIn, int amountIn) {
             amount = amountIn;
             stack = null;
             odString = nameIn;
         }
 
-        public ItemStack getStack () {
+        public ItemStack getStack() {
             return stack;
         }
 
-        public String getString () {
+        public String getString() {
             return odString;
         }
 
-        public void add (int amountIn) {
+        public void add(int amountIn) {
             amount += amountIn;
         }
 
-        public int getCost (ItemStack stackIn) {
+        public int getCost(ItemStack stackIn) {
             if (stackIn.getIsItemStackEqual(stack)) {
                 return amount;
             } else {

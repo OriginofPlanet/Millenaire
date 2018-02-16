@@ -1,10 +1,5 @@
 package org.millenaire.items;
 
-import java.util.List;
-
-import org.millenaire.CommonUtilities;
-import org.millenaire.gui.MillAchievement;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,10 +8,14 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.millenaire.CommonUtilities;
+import org.millenaire.gui.MillAchievement;
+
+import java.util.List;
 
 public class ItemMillWallet extends Item {
     @Override
-    public ItemStack onItemRightClick (ItemStack itemStackIn, World worldIn, EntityPlayer playerIn) {
+    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn) {
         if (playerIn.inventory.hasItem(MillItems.denier) || playerIn.inventory.hasItem(MillItems.denierArgent) || playerIn.inventory.hasItem(MillItems.denierOr)) {
             addDenierToWallet(itemStackIn, playerIn);
         } else {
@@ -28,7 +27,7 @@ public class ItemMillWallet extends Item {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation (ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
         if (stack.hasTagCompound()) {
             NBTTagCompound nbt = stack.getTagCompound();
 
@@ -51,7 +50,7 @@ public class ItemMillWallet extends Item {
         }
     }
 
-    private void addDenierToWallet (ItemStack stack, EntityPlayer playerIn) {
+    private void addDenierToWallet(ItemStack stack, EntityPlayer playerIn) {
         if (stack.getItem() == this) {
             CommonUtilities.changeMoney(playerIn);
 
@@ -79,17 +78,15 @@ public class ItemMillWallet extends Item {
             if (!stack.hasTagCompound()) {
                 nbt = new NBTTagCompound();
                 stack.setTagCompound(nbt);
-            } else {
+            } else
                 nbt = stack.getTagCompound();
-            }
 
             denier += nbt.getInteger("Denier");
             argent += nbt.getInteger("DenierArgent");
             or += nbt.getInteger("DenierOr");
 
-            if (or >= 1) {
+            if (or >= 1)
                 playerIn.addStat(MillAchievement.cresus, 1);
-            }
 
             nbt.setInteger("Denier", denier);
             nbt.setInteger("DenierArgent", argent);
@@ -97,7 +94,7 @@ public class ItemMillWallet extends Item {
         }
     }
 
-    private void emptyWallet (ItemStack stack, EntityPlayer playerIn) {
+    private void emptyWallet(ItemStack stack, EntityPlayer playerIn) {
         if (stack.hasTagCompound()) {
             NBTTagCompound nbt = stack.getTagCompound();
 

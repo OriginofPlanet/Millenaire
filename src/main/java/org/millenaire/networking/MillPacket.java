@@ -1,9 +1,5 @@
 package org.millenaire.networking;
 
-import org.millenaire.blocks.BlockVillageStone;
-import org.millenaire.blocks.MillBlocks;
-import org.millenaire.items.MillItems;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -15,36 +11,44 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import org.millenaire.blocks.BlockVillageStone;
+import org.millenaire.blocks.MillBlocks;
+import org.millenaire.items.MillItems;
 
 public class MillPacket implements IMessage {
     private int eventID;
     private boolean messageIsValid;
 
     // for use by the message handler only.
-    public MillPacket () { messageIsValid = false; }
+    public MillPacket() {
+        messageIsValid = false;
+    }
 
-    public MillPacket (int IDin) {
+    public MillPacket(int IDin) {
         eventID = IDin;
         messageIsValid = true;
     }
 
-    public boolean isMessageValid () { return messageIsValid; }
+    public boolean isMessageValid() {
+        return messageIsValid;
+    }
 
-    public int getID () { return eventID; }
+    public int getID() {
+        return eventID;
+    }
 
     @Override
-    public void fromBytes (ByteBuf buf) {
+    public void fromBytes(ByteBuf buf) {
         try {
             eventID = buf.readInt();
         } catch (IndexOutOfBoundsException ioe) {
             System.err.println("Exception while reading MillPacket: " + ioe);
         }
-
         messageIsValid = true;
     }
 
     @Override
-    public void toBytes (ByteBuf buf) {
+    public void toBytes(ByteBuf buf) {
         if (!messageIsValid) {
             return;
         }
@@ -54,19 +58,17 @@ public class MillPacket implements IMessage {
 
     public static class PacketHandlerOnServer implements IMessageHandler<MillPacket, IMessage> {
         @Override
-        public IMessage onMessage (final MillPacket message, MessageContext ctx) {
+        public IMessage onMessage(final MillPacket message, MessageContext ctx) {
             if (ctx.side != Side.SERVER) {
                 System.err.println("MillPacket received on wrong side: " + ctx.side);
                 return null;
             }
-
             if (!message.isMessageValid()) {
                 System.err.println("MillPacket was invalid");
                 return null;
             }
 
             final EntityPlayerMP sendingPlayer = ctx.getServerHandler().playerEntity;
-
             if (sendingPlayer == null) {
                 System.err.println("EntityPlayerMP was null when MillPacket was received");
                 return null;
@@ -78,7 +80,7 @@ public class MillPacket implements IMessage {
             return null;
         }
 
-        private void processMessage (MillPacket message, EntityPlayerMP sendingPlayer) {
+        private void processMessage(MillPacket message, EntityPlayerMP sendingPlayer) {
             if (message.getID() == 2) {
                 ItemStack heldItem = sendingPlayer.getHeldItem();
                 if (heldItem.getItem() != MillItems.wandNegation) {
@@ -94,10 +96,8 @@ public class MillPacket implements IMessage {
                     villStone.negate(world, new BlockPos(posX, posY, posZ), sendingPlayer);
                 }
             }
-
             if (message.getID() == 3) {
                 ItemStack heldItem = sendingPlayer.getHeldItem();
-
                 if (heldItem.getItem() != MillItems.wandNegation) {
                     System.err.println("Player not holding Wand of Negation when attempting to delete Villager");
                 } else {
@@ -111,10 +111,8 @@ public class MillPacket implements IMessage {
                     world.removeEntity(world.getEntityByID(id));
                 }
             }
-
             if (message.getID() == 4) {
                 ItemStack heldItem = sendingPlayer.getHeldItem();
-
                 if (heldItem.getItem() != MillItems.wandSummoning) {
                     System.err.println("Player not holding Wand of Summoning when attempting to create Village");
                 } else {

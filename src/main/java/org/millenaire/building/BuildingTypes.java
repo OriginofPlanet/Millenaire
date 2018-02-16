@@ -1,5 +1,11 @@
 package org.millenaire.building;
 
+import com.google.gson.Gson;
+import net.minecraft.util.ResourceLocation;
+import org.millenaire.MillCulture;
+import org.millenaire.util.ItemRateWrapper;
+import org.millenaire.util.ResourceLocationUtil;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -7,19 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.millenaire.MillCulture;
-import org.millenaire.util.ItemRateWrapper;
-import org.millenaire.util.ResourceLocationUtil;
-
-import com.google.gson.Gson;
-
-import net.minecraft.util.ResourceLocation;
-
 public class BuildingTypes {
 
     private static Map<ResourceLocation, BuildingType> buildingCache = new HashMap<>();
 
-    public static void cacheBuildingTypes (MillCulture culture) {
+    public static void cacheBuildingTypes(MillCulture culture) {
 
         InputStream is = MillCulture.class.getClassLoader().getResourceAsStream("assets/millenaire/cultures/" + culture.cultureName.toLowerCase() + "/buildings/buildings.json");
         String[] buildings = new Gson().fromJson(new InputStreamReader(is), String[].class);
@@ -32,25 +30,32 @@ public class BuildingTypes {
         }
     }
 
-    public static BuildingType getTypeByID (ResourceLocation rl) { return buildingCache.get(rl); }
+    public static BuildingType getTypeByID(ResourceLocation rl) {
+        return buildingCache.get(rl);
+    }
 
-    public static BuildingType getTypeFromProject (BuildingProject proj) {
+    public static BuildingType getTypeFromProject(BuildingProject proj) {
         return buildingCache.get(ResourceLocationUtil.getRL(proj.ID));
     }
 
-    public static Map<ResourceLocation, BuildingType> getCache () { return buildingCache; }
+    public static Map<ResourceLocation, BuildingType> getCache() {
+        return buildingCache;
+    }
 
     public static class BuildingType {
 
-        private String identifier;
-        protected List<ItemRateWrapper> itemrates = new ArrayList<>();
         public boolean isTownHall = false;
+        protected List<ItemRateWrapper> itemrates = new ArrayList<>();
+        private String identifier;
 
-        public BuildingType () {}
+        public BuildingType() {
+        }
 
-        public BuildingType (ResourceLocation cultureandname) { identifier = ResourceLocationUtil.getString(cultureandname); }
+        public BuildingType(ResourceLocation cultureandname) {
+            identifier = ResourceLocationUtil.getString(cultureandname);
+        }
 
-        public BuildingPlan loadBuilding () {
+        public BuildingPlan loadBuilding() {
             ResourceLocation s = ResourceLocationUtil.getRL(identifier);
             try {
                 return PlanIO.loadSchematic(PlanIO.getBuildingTag(s.getResourcePath(), MillCulture.getCulture(s.getResourceDomain()), true), MillCulture.getCulture(s.getResourceDomain()), 1);

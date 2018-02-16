@@ -1,14 +1,13 @@
 package org.millenaire;
 
-import java.util.Random;
-
-import org.millenaire.gui.MillAchievement;
-import org.millenaire.items.MillItems;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import org.millenaire.gui.MillAchievement;
+import org.millenaire.items.MillItems;
+
+import java.util.Random;
 
 public class CommonUtilities {
     public static Random random = new Random();
@@ -18,7 +17,7 @@ public class CommonUtilities {
      *
      * @param playerIn The player to orgainize
      */
-    public static void changeMoney (EntityPlayer playerIn) {
+    public static void changeMoney(EntityPlayer playerIn) {
         ItemStack denier = new ItemStack(MillItems.denier, 0, 0);
         ItemStack argent = new ItemStack(MillItems.denierArgent, 0, 0);
         ItemStack or = new ItemStack(MillItems.denierOr, 0, 0);
@@ -30,12 +29,10 @@ public class CommonUtilities {
                     denier.stackSize = denier.stackSize + stack.stackSize;
                     playerIn.inventory.removeStackFromSlot(i);
                 }
-
                 if (stack.getItem() == MillItems.denierArgent) {
                     argent.stackSize = argent.stackSize + stack.stackSize;
                     playerIn.inventory.removeStackFromSlot(i);
                 }
-
                 if (stack.getItem() == MillItems.denierOr) {
                     or.stackSize = or.stackSize + stack.stackSize;
                     playerIn.inventory.removeStackFromSlot(i);
@@ -47,7 +44,6 @@ public class CommonUtilities {
         denier.stackSize = denier.stackSize % 64;
 
         or.stackSize = or.stackSize + (argent.stackSize / 64);
-
         if (or.stackSize >= 1) {
             playerIn.addStat(MillAchievement.cresus, 1);
         }
@@ -70,24 +66,27 @@ public class CommonUtilities {
      *
      * @return A random non-zero integer
      */
-    public static float getRandomNonzero () { return random.nextFloat() + 0.1f; }
+    public static float getRandomNonzero() {
+        return random.nextFloat() + 0.1f;
+    }
 
     /**
      * gets a random Millager Gender
      *
      * @return
      */
-    public static int randomizeGender () { return random.nextInt(3) - 2; }
+    public static int randomizeGender() {
+        return random.nextInt(3) - 2;
+    }
 
     /**
      * yep
      *
      * @param b       the block to check
      * @param surface if the ground is on the top of the ground (true) or underground (false)
-     *
      * @return
      */
-    public static Block getValidGroundBlock (final Block b, final boolean surface) {
+    public static Block getValidGroundBlock(final Block b, final boolean surface) {
         if (b == Blocks.bedrock || b == Blocks.dirt ||
                 b == Blocks.grass) {
             return Blocks.dirt;

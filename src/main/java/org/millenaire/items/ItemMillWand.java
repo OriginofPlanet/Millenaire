@@ -1,20 +1,5 @@
 package org.millenaire.items;
 
-import java.util.List;
-
-import org.millenaire.CommonUtilities;
-import org.millenaire.Millenaire;
-import org.millenaire.PlayerTracker;
-import org.millenaire.blocks.BlockMillChest;
-import org.millenaire.blocks.BlockMillCrops;
-import org.millenaire.blocks.MillBlocks;
-import org.millenaire.blocks.StoredPosition;
-import org.millenaire.entities.EntityMillVillager;
-import org.millenaire.entities.TileEntityMillChest;
-import org.millenaire.networking.PacketExportBuilding;
-import org.millenaire.networking.PacketImportBuilding;
-import org.millenaire.networking.PacketSayTranslatedMessage;
-
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -30,12 +15,28 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.millenaire.CommonUtilities;
+import org.millenaire.Millenaire;
+import org.millenaire.PlayerTracker;
+import org.millenaire.blocks.BlockMillChest;
+import org.millenaire.blocks.BlockMillCrops;
+import org.millenaire.blocks.MillBlocks;
+import org.millenaire.blocks.StoredPosition;
+import org.millenaire.entities.EntityMillVillager;
+import org.millenaire.entities.TileEntityMillChest;
+import org.millenaire.networking.PacketExportBuilding;
+import org.millenaire.networking.PacketImportBuilding;
+import org.millenaire.networking.PacketSayTranslatedMessage;
+
+import java.util.List;
 
 public class ItemMillWand extends Item {
-    ItemMillWand () { this.setMaxStackSize(1); }
+    ItemMillWand() {
+        this.setMaxStackSize(1);
+    }
 
     @Override
-    public boolean onItemUseFirst (ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onItemUseFirst(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (worldIn.getBlockState(pos).getBlock() == Blocks.standing_sign && worldIn.isRemote && this == MillItems.wandNegation) {
             PacketExportBuilding packet = new PacketExportBuilding(pos);
             Millenaire.simpleNetworkWrapper.sendToServer(packet);
@@ -45,12 +46,11 @@ public class ItemMillWand extends Item {
             Millenaire.simpleNetworkWrapper.sendToServer(packet);
             return true;
         }
-
         return false;
     }
 
     @Override
-    public boolean onItemUse (ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (this == MillItems.wandNegation) {
             if (worldIn.getBlockState(pos).getBlock() == MillBlocks.villageStone) {
                 NBTTagCompound nbt = new NBTTagCompound();
@@ -85,9 +85,12 @@ public class ItemMillWand extends Item {
                     Millenaire.simpleNetworkWrapper.sendTo(new PacketSayTranslatedMessage("message.notimplemented"), (EntityPlayerMP) playerIn);
 //					playerIn.openGui(Millenaire.instance, 4, worldIn, playerIn.getPosition().getX(), playerIn.getPosition().getY(), playerIn.getPosition().getZ());
                 }
+
             }
-//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.emerald_block) {
-//				if (!worldIn.isRemote) {
+//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.emerald_block)
+//			{
+//				if(!worldIn.isRemote)
+//				{	
 //					System.out.println("Emerald Creation");
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100100, MillCulture.normanCulture);
@@ -100,8 +103,11 @@ public class ItemMillWand extends Item {
 //				}
 //				stack.stackSize--;
 //				return true;
-//			} else if (worldIn.getBlockState(pos).getBlock() == Blocks.diamond_block) {
-//				if (!worldIn.isRemote) {
+//			}
+//			else if(worldIn.getBlockState(pos).getBlock() == Blocks.diamond_block)
+//			{
+//				if(!worldIn.isRemote)
+//				{	
 //					System.out.println("Diamond Creation");
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100101, MillCulture.normanCulture);
@@ -149,7 +155,9 @@ public class ItemMillWand extends Item {
                         }
                     }
                 }
-            } else if (worldIn.getBlockState(pos).getBlock() == Blocks.cake) { //Allow you to plant all Crops
+            }
+            //Allow you to plant all Crops
+            else if (worldIn.getBlockState(pos).getBlock() == Blocks.cake) {
                 if (!PlayerTracker.get(playerIn).canPlayerUseCrop(MillItems.grapes)) {
                     PlayerTracker.get(playerIn).setCanUseCrop(MillItems.grapes, true);
                 }
@@ -169,7 +177,9 @@ public class ItemMillWand extends Item {
                 if (worldIn.isRemote) {
                     playerIn.addChatMessage(new ChatComponentText(playerIn.getDisplayNameString() + " can now plant everything"));
                 }
-            } else if (worldIn.getBlockState(pos).getBlock() instanceof BlockMillChest) { //Lock and Unlock Chests
+            }
+            //Lock and Unlock Chests
+            else if (worldIn.getBlockState(pos).getBlock() instanceof BlockMillChest) {
                 boolean isLocked = ((TileEntityMillChest) worldIn.getTileEntity(pos)).setLock();
 
                 if (worldIn.isRemote) {
@@ -185,7 +195,9 @@ public class ItemMillWand extends Item {
                 } else {
                     worldIn.setBlockState(pos, worldIn.getBlockState(pos).cycleProperty(StoredPosition.VARIANT));
                 }
-            } else { //Fixes All Denier in your inventory (if no specific block/entity is clicked)
+            }
+            //Fixes All Denier in your inventory (if no specific block/entity is clicked)
+            else {
                 CommonUtilities.changeMoney(playerIn);
                 if (worldIn.isRemote) {
                     playerIn.addChatMessage(new ChatComponentText("Fixing Denier in " + playerIn.getDisplayNameString() + "'s Inventory"));
@@ -209,7 +221,7 @@ public class ItemMillWand extends Item {
     }
 
     @Override
-    public boolean itemInteractionForEntity (ItemStack stack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity) {
+    public boolean itemInteractionForEntity(ItemStack stack, net.minecraft.entity.player.EntityPlayer player, EntityLivingBase entity) {
         if (stack.getItem() == MillItems.wandNegation && entity instanceof EntityMillVillager) {
             ((EntityMillVillager) entity).isPlayerInteracting = true;
 
@@ -226,7 +238,7 @@ public class ItemMillWand extends Item {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation (ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
         if (stack.getItem() == MillItems.wandCreative) {
             tooltip.add("Creative Mode ONLY");
         }

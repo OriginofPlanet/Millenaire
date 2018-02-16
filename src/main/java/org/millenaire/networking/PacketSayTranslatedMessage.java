@@ -11,12 +11,16 @@ public class PacketSayTranslatedMessage implements IMessage {
 
     String message;
 
-    public PacketSayTranslatedMessage () { }
+    public PacketSayTranslatedMessage() {
 
-    public PacketSayTranslatedMessage (String message) { this.message = message; }
+    }
+
+    public PacketSayTranslatedMessage(String message) {
+        this.message = message;
+    }
 
     @Override
-    public void fromBytes (ByteBuf buf) {
+    public void fromBytes(ByteBuf buf) {
         int length = buf.readInt();
         char[] chars = new char[length];
 
@@ -28,7 +32,7 @@ public class PacketSayTranslatedMessage implements IMessage {
     }
 
     @Override
-    public void toBytes (ByteBuf buf) {
+    public void toBytes(ByteBuf buf) {
         buf.writeInt(message.length());
 
         for (char c : message.toCharArray()) {
@@ -37,13 +41,14 @@ public class PacketSayTranslatedMessage implements IMessage {
     }
 
     public static class Handler implements IMessageHandler<PacketSayTranslatedMessage, IMessage> {
+
         @Override
-        public IMessage onMessage (PacketSayTranslatedMessage message, MessageContext ctx) {
+        public IMessage onMessage(PacketSayTranslatedMessage message, MessageContext ctx) {
             Minecraft.getMinecraft().addScheduledTask(() -> handle(message, ctx));
             return null;
         }
 
-        private void handle (PacketSayTranslatedMessage message, MessageContext ctx) {
+        private void handle(PacketSayTranslatedMessage message, MessageContext ctx) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentTranslation(message.message));
         }
     }

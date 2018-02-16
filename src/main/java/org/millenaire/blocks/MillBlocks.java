@@ -12,6 +12,7 @@ import org.millenaire.entities.TileEntityVillageStone;
 import org.millenaire.items.*;
 
 public class MillBlocks {
+
     public static Block blockDecorativeStone;
     public static Block blockDecorativeWood;
     public static Block blockDecorativeEarth;
@@ -55,7 +56,7 @@ public class MillBlocks {
 
     public static Block storedPosition;
 
-    public static void preinitialize () {
+    public static void preinitialize() {
 
         //Decorative
         blockDecorativeStone = new BlockDecorativeStone().setCreativeTab(Millenaire.tabMillenaire).setUnlocalizedName("blockDecorativeStone");
@@ -154,27 +155,27 @@ public class MillBlocks {
         GameRegistry.registerBlock(storedPosition, "storedPosition");
     }
 
-    public static void recipes () {
+    public static void recipes() {
         GameRegistry.addSmelting(mudBrick, new ItemStack(blockDecorativeStone, 1, 1), 0.3f);
         GameRegistry.addRecipe(new ItemStack(byzantineStoneTile, 6),
-                               "AAA",
-                               "BBB",
-                               'A', new ItemStack(byzantineTile), 'B', new ItemStack(Blocks.stone));
+                "AAA",
+                "BBB",
+                'A', new ItemStack(byzantineTile), 'B', new ItemStack(Blocks.stone));
         GameRegistry.addRecipe(new ItemStack(byzantineTileStairs, 4),
-                               "A  ",
-                               "BA ",
-                               "BBA",
-                               'A', new ItemStack(byzantineTile), 'B', new ItemStack(Blocks.stone));
+                "A  ",
+                "BA ",
+                "BBA",
+                'A', new ItemStack(byzantineTile), 'B', new ItemStack(Blocks.stone));
 
         //Paths
         for (int i = 0; i < BlockMillPath.EnumType.values().length; i++) {
             GameRegistry.addRecipe(new ItemStack(blockMillPathSlab, 6, i),
-                                   "AAA",
-                                   'A', new ItemStack(blockMillPath, 1, i));
+                    "AAA",
+                    'A', new ItemStack(blockMillPath, 1, i));
             GameRegistry.addRecipe(new ItemStack(blockMillPath, 1, i),
-                                   "A",
-                                   "A",
-                                   'A', new ItemStack(blockMillPathSlab, 1, i));
+                    "A",
+                    "A",
+                    'A', new ItemStack(blockMillPathSlab, 1, i));
         }
     }
 

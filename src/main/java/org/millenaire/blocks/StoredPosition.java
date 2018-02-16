@@ -1,7 +1,5 @@
 package org.millenaire.blocks;
 
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -16,37 +14,46 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Random;
+
 public class StoredPosition extends Block {
-    StoredPosition () {
-        super(Material.barrier);
-        this.disableStats();
-        this.translucent = true;
-    }
-
-    @Override
-    public int getRenderType () { return -1; }
-
-    @Override
-    public boolean isOpaqueCube () { return false; }
-
-    @Override
-    public boolean isFullCube () { return false; }
-
-    @SideOnly(Side.CLIENT)
-    public float getAmbientOcclusionLightValue () { return 1.0F; }
-
-    public static final PropertyEnum VARIANT = PropertyEnum.create("variant", EnumType.class);
-    private boolean showParticles = false;
-
+    public static final PropertyEnum<EnumType> VARIANT = PropertyEnum.create("variant", EnumType.class);
     private final int sourceColor = 44820;
     private final int tradeColor = 9983;
     private final int pathColor = 16766976;
     private final int sleepColor = 57538;
     private final int defendColor = 16711680;
     private final int hideColor = 8323127;
+    private boolean showParticles = false;
+
+    StoredPosition() {
+        super(Material.vine); //For passthrough
+        this.disableStats();
+        this.translucent = true;
+    }
+
+    @Override
+    public int getRenderType() {
+        return -1;
+    }
+
+    @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
+
+    @Override
+    public boolean isFullCube() {
+        return false;
+    }
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick (World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public float getAmbientOcclusionLightValue() {
+        return 1.0F;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (showParticles) {
             int color = 16777215;
 
@@ -71,28 +78,34 @@ public class StoredPosition extends Block {
     }
 
     @Override
-    public boolean canCollideCheck (IBlockState state, boolean hitIfLiquid) {
+    public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid) {
         return showParticles;
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBox (World worldIn, BlockPos pos, IBlockState state) {
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
         return null;
     }
 
     @Override
-    public AxisAlignedBB getSelectedBoundingBox (World worldIn, BlockPos pos) {
+    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos) {
         if (showParticles)
             return new AxisAlignedBB((double) pos.getX() + this.minX, (double) pos.getY() + this.minY, (double) pos.getZ() + this.minZ, (double) pos.getX() + this.maxX, (double) pos.getY() + this.maxY, (double) pos.getZ() + this.maxZ);
         else
             return null;
     }
 
-    public void setShowParticles (boolean bool) { showParticles = bool; }
+    public boolean getShowParticles() {
+        return showParticles;
+    }
 
-    public boolean getShowParticles () { return showParticles; }
+    public void setShowParticles(boolean bool) {
+        showParticles = bool;
+    }
 
-    public IProperty getVariantProperty () { return VARIANT; }
+    public IProperty getVariantProperty() {
+        return VARIANT;
+    }
 	
 	/*@Override
 	@SideOnly(Side.CLIENT)
@@ -111,22 +124,24 @@ public class StoredPosition extends Block {
         }
     }*/
 
-    public String getUnlocalizedName (int meta) {
+    public String getUnlocalizedName(int meta) {
         return super.getUnlocalizedName() + "." + EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
     @Override
-    public IBlockState getStateFromMeta (int meta) {
+    public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(VARIANT, EnumType.byMetadata(meta));
     }
 
     @Override
-    public int getMetaFromState (IBlockState state) {
+    public int getMetaFromState(IBlockState state) {
         return ((EnumType) state.getValue(VARIANT)).getMetadata();
     }
 
     @Override
-    protected BlockState createBlockState () { return new BlockState(this, VARIANT); }
+    protected BlockState createBlockState() {
+        return new BlockState(this, VARIANT);
+    }
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -139,29 +154,6 @@ public class StoredPosition extends Block {
         SLEEPPOS(5, "sleepPos");
 
         private static final EnumType[] META_LOOKUP = new EnumType[values().length];
-        private final int meta;
-        private final String name;
-
-        EnumType (int meta, String name) {
-            this.meta = meta;
-            this.name = name;
-        }
-
-        public int getMetadata () { return this.meta; }
-
-        public String toString () { return this.name; }
-
-        public static EnumType byMetadata (int meta) {
-            if (meta < 0 || meta >= META_LOOKUP.length) {
-                meta = 0;
-            }
-
-            return META_LOOKUP[meta];
-        }
-
-        public String getName () { return this.name; }
-
-        public String getUnlocalizedName () { return this.name; }
 
         static {
             EnumType[] var0 = values();
@@ -169,6 +161,38 @@ public class StoredPosition extends Block {
             for (EnumType var3 : var0) {
                 META_LOOKUP[var3.getMetadata()] = var3;
             }
+        }
+
+        private final int meta;
+        private final String name;
+
+        EnumType(int meta, String name) {
+            this.meta = meta;
+            this.name = name;
+        }
+
+        public static EnumType byMetadata(int meta) {
+            if (meta < 0 || meta >= META_LOOKUP.length) {
+                meta = 0;
+            }
+
+            return META_LOOKUP[meta];
+        }
+
+        public int getMetadata() {
+            return this.meta;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getUnlocalizedName() {
+            return this.name;
         }
     }
 }

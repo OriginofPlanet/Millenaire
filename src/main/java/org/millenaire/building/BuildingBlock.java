@@ -1,8 +1,5 @@
 package org.millenaire.building;
 
-import org.millenaire.CommonUtilities;
-import org.millenaire.items.MillItems;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -14,11 +11,9 @@ import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenForest;
-import net.minecraft.world.gen.feature.WorldGenSavannaTree;
-import net.minecraft.world.gen.feature.WorldGenTaiga2;
-import net.minecraft.world.gen.feature.WorldGenTrees;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.*;
+import org.millenaire.CommonUtilities;
+import org.millenaire.items.MillItems;
 
 public class BuildingBlock {
     public static final byte OAKSPAWN = 1;
@@ -48,19 +43,19 @@ public class BuildingBlock {
     public BlockPos position;
     public byte specialBlock;
 
-    BuildingBlock (IBlockState state, BlockPos pos, byte special) {
+    BuildingBlock(IBlockState state, BlockPos pos, byte special) {
         blockState = state;
         position = pos;
         specialBlock = special;
     }
 
-    BuildingBlock (IBlockState state, BlockPos pos) {
+    BuildingBlock(IBlockState state, BlockPos pos) {
         blockState = state;
         position = pos;
         specialBlock = 0;
     }
 
-    public void build (World worldIn, boolean onGeneration) {
+    public void build(World worldIn, boolean onGeneration) {
         if (specialBlock != PRESERVEGROUNDDEPTH && specialBlock != PRESERVEGROUNDSURFACE && specialBlock != CLEARTREE) {
             if (blockState != null) {
                 worldIn.setBlockState(position, blockState);
@@ -218,7 +213,7 @@ public class BuildingBlock {
         }
     }
 
-    public void buildPath () {
+    public void buildPath() {
         //Make code to build paths
     }
 }

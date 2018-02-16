@@ -1,51 +1,52 @@
 package org.millenaire.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 import org.millenaire.CommonUtilities;
-import org.millenaire.MillConfig;
 import org.millenaire.MillCulture;
 import org.millenaire.MillCulture.VillageType;
 import org.millenaire.VillagerType;
 import org.millenaire.blocks.BlockVillageStone;
-import org.millenaire.building.BuildingPlan;
-import org.millenaire.building.BuildingProject;
-import org.millenaire.building.BuildingTypes;
-import org.millenaire.building.BuildingTypes.BuildingType;
 import org.millenaire.village.Village;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.world.World;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class TileEntityVillageStone extends TileEntity {
-    private List<EntityMillVillager> currentVillagers = new ArrayList<>();
-
     //Control Value.  Changed when using wandSummon, if left as 'biome' when onLoad called, culture decided by biome.
     public String culture = "biome";
     public boolean randomVillage = true;
+    public Village village;
     public VillageType villageType;
     public String villageName;
+    public boolean shouldGenVillage = true;
     public boolean willExplode = false;
+    public int testVar = 0;
+    private List<EntityMillVillager> currentVillagers = new ArrayList<>();
     private UUID villageID;
 
-    public int testVar = 0;
-
     @Override
-    public void onLoad () {
+    public void onLoad() {
+        if(worldObj.isRemote) return;
+
+        System.out.println("TEVS created");
+
+        if(!shouldGenVillage) return;
+
         World world = this.getWorld();
         BlockPos pos = this.getPos();
         if (!world.isRemote) { //server only
             if (world.getBlockState(pos).getBlock() instanceof BlockVillageStone) {
 
+                pos = world.getTopSolidOrLiquidBlock(pos); //Get the top block
+
                 if (culture.equalsIgnoreCase("biome")) {
                     if (world.getBiomeGenForCoords(pos) != null) {
                         //Do awesome stuff and set culture.  Below is simply for testing.
-                        System.out.println("Village Culture being set by biome");
+                        //System.out.println("Village Culture being set by biome");
                         culture = "norman";
                     }
                 }
@@ -58,27 +59,10 @@ public class TileEntityVillageStone extends TileEntity {
 
                     villageName = villageType.getVillageName();
 
-                    Village v = Village.createVillage(this.getPos(), world, villageType, MillCulture.getCulture(culture));
-                    boolean success = v.setupVillage();
+                    village = Village.createVillage(this.getPos(), world, villageType, MillCulture.getCulture(culture), villageName);
+                    village.setupVillage();
 
-                    if (!success) {
-                        System.out.println("Village failed to create. Not registering!");
-                        return;
-                    }
-
-                    if (MillConfig.villageAnnouncement) {
-                        if (!world.isRemote) {
-                            for (int i = 0; i < world.playerEntities.size(); i++)
-                                world.playerEntities.get(i).addChatMessage(new ChatComponentText(culture + " village " + villageName + " discovered at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ()));
-                        }
-                    }
-
-                    if (!world.isRemote)
-                        System.out.println(culture + " village " + villageName + " created at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
-                    for (BuildingProject p : MillCulture.getCulture(culture).getVillageType(villageName).startingBuildings) {
-                        BuildingType t = BuildingTypes.getTypeFromProject(p);
-                        BuildingPlan plan = t.loadBuilding();
-                    }
+                    markDirty();
                 } catch (Exception ex) {
                     System.err.println("Something went catastrophically wrong creating this village");
                     ex.printStackTrace();
@@ -91,7 +75,7 @@ public class TileEntityVillageStone extends TileEntity {
     }
 
     //@SideOnly(Side.SERVER)
-    public EntityMillVillager createVillager (World worldIn, MillCulture cultureIn, int villagerID) {
+    public EntityMillVillager createVillager(World worldIn, MillCulture cultureIn, int villagerID) {
         VillagerType currentVillagerType;
         int currentGender;
 
@@ -132,7 +116,7 @@ public class TileEntityVillageStone extends TileEntity {
                 currentVillagerType = cultureIn.getChildType(1);
             }
 
-            EntityMillVillager newVillager = new EntityMillVillager(worldIn, villagerID, cultureIn);
+            EntityMillVillager newVillager = new EntityMillVillager(worldIn, villagerID, cultureIn, null);
             newVillager.setTypeAndGender(currentVillagerType, currentGender);
 
             return newVillager;
@@ -150,12 +134,18 @@ public class TileEntityVillageStone extends TileEntity {
     }
 
     @Override
-    public void readFromNBT (NBTTagCompound compound) {
-
+    public void readFromNBT(NBTTagCompound compound) {
+        System.out.println("TEVS Reading state");
+        String uuidRaw;
+        if((uuidRaw = compound.getString("VillageUUID")) != null) {
+            villageID = UUID.fromString(uuidRaw);
+            shouldGenVillage = false;
+        }
     }
 
     @Override
-    public void writeToNBT (NBTTagCompound compound) {
-
+    public void writeToNBT(NBTTagCompound compound) {
+        if(village != null)
+            compound.setString("VillageUUID", village.getUUID().toString());
     }
 }
