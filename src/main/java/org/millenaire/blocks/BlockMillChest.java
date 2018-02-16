@@ -1,10 +1,5 @@
 package org.millenaire.blocks;
 
-import java.util.Random;
-
-import org.millenaire.Millenaire;
-import org.millenaire.entities.TileEntityMillChest;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockContainer;
@@ -20,26 +15,32 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.World;
+import org.millenaire.Millenaire;
+import org.millenaire.entities.TileEntityMillChest;
+
+import java.util.Random;
 
 public class BlockMillChest extends BlockChest {
-    BlockMillChest () {
+    BlockMillChest() {
         super(2);
 
         this.setBlockUnbreakable();
     }
 
     @Override
-    public int quantityDropped (final Random random) { return 0; }
+    public int quantityDropped(final Random random) {
+        return 0;
+    }
 
     @Override
-    public void breakBlock (World worldIn, BlockPos pos, IBlockState state) {
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         if (hasTileEntity(state) && !(this instanceof BlockContainer)) {
             worldIn.removeTileEntity(pos);
         }
     }
 
     @Override
-    public boolean onBlockActivated (World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
             ILockableContainer ilockablecontainer = this.getLockableContainer(worldIn, pos);
 
@@ -51,10 +52,12 @@ public class BlockMillChest extends BlockChest {
     }
 
     @Override
-    public TileEntity createNewTileEntity (final World world, final int meta) { return new TileEntityMillChest(); }
+    public TileEntity createNewTileEntity(final World world, final int meta) {
+        return new TileEntityMillChest();
+    }
 
     @Override
-    public ILockableContainer getLockableContainer (World worldIn, BlockPos pos) {
+    public ILockableContainer getLockableContainer(World worldIn, BlockPos pos) {
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
         if (!(tileentity instanceof TileEntityMillChest)) {
@@ -93,15 +96,15 @@ public class BlockMillChest extends BlockChest {
         }
     }
 
-    private boolean isBlocked (World worldIn, BlockPos pos) {
+    private boolean isBlocked(World worldIn, BlockPos pos) {
         return this.isBelowSolidBlock(worldIn, pos) || this.isOcelotSittingOnChest(worldIn, pos);
     }
 
-    private boolean isBelowSolidBlock (World worldIn, BlockPos pos) {
+    private boolean isBelowSolidBlock(World worldIn, BlockPos pos) {
         return worldIn.isSideSolid(pos.up(), EnumFacing.DOWN, false);
     }
 
-    private boolean isOcelotSittingOnChest (World worldIn, BlockPos pos) {
+    private boolean isOcelotSittingOnChest(World worldIn, BlockPos pos) {
         for (Entity entity : worldIn.getEntitiesWithinAABB(EntityOcelot.class, new AxisAlignedBB((double) pos.getX(), (double) (pos.getY() + 1), (double) pos.getZ(), (double) (pos.getX() + 1), (double) (pos.getY() + 2), (double) (pos.getZ() + 1)))) {
             EntityOcelot entityocelot = (EntityOcelot) entity;
 

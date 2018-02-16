@@ -4,6 +4,9 @@ Millénaire [![Discord](https://img.shields.io/discord/267477085692362772.svg?la
 
 Millénaire is a Minecraft mod that aims to fill the "emptiness" left by the default Minecraft Villages by adding new NPC villages loosely based on 11th-century cultures. A village is populated by men, women, and children that each lives their own life and have their own story to tell.
 
+## Disclaimer
+This repository is not for Kinniken's port to 1.12.2. Please discuss those errors [on his forums](http://millenaire.org/forum/viewforum.php?f=5&sid=e1b69037ba374473b92fbe9f34114cc1). Any and all issues created for his port will be removed.
+
 ## Downloads
 Millénaire for 1.8.9 and above is currently under development. When a build is ready, it will be put on [CurseForge](https://minecraft.curseforge.com/projects/millenaire).
 

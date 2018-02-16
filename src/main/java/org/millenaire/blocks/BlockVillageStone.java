@@ -1,9 +1,5 @@
 package org.millenaire.blocks;
 
-import java.util.Random;
-
-import org.millenaire.entities.TileEntityVillageStone;
-
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -14,9 +10,13 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import org.millenaire.entities.TileEntityVillageStone;
+
+import java.util.Random;
 
 public class BlockVillageStone extends BlockContainer {
-    BlockVillageStone () {
+
+    BlockVillageStone() {
         super(Material.rock);
 
         this.setBlockUnbreakable();
@@ -24,13 +24,17 @@ public class BlockVillageStone extends BlockContainer {
     }
 
     @Override
-    public int getRenderType () { return 3; }
+    public int getRenderType() {
+        return 3;
+    }
 
     @Override
-    public int quantityDropped (Random random) { return 0; }
+    public int quantityDropped(Random random) {
+        return 0;
+    }
 
     @Override
-    public boolean onBlockActivated (World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (worldIn.isRemote) {
             playerIn.addChatMessage(new ChatComponentText("The Village name almost seems to shimmer in the twilight"));
         }
@@ -45,7 +49,7 @@ public class BlockVillageStone extends BlockContainer {
         return false;
     }
 
-    public void negate (World worldIn, BlockPos pos, EntityPlayer playerIn) {
+    public void negate(World worldIn, BlockPos pos, EntityPlayer playerIn) {
         TileEntityVillageStone te;
 
         if (worldIn.getTileEntity(pos) instanceof TileEntityVillageStone)
@@ -61,7 +65,7 @@ public class BlockVillageStone extends BlockContainer {
     }
 
     @Override
-    public void updateTick (World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         TileEntityVillageStone te;
 
         if (worldIn.getTileEntity(pos) instanceof TileEntityVillageStone) {
@@ -78,5 +82,7 @@ public class BlockVillageStone extends BlockContainer {
     }
 
     @Override
-    public TileEntity createNewTileEntity (World worldIn, int meta) { return new TileEntityVillageStone(); }
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new TileEntityVillageStone();
+    }
 }

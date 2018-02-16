@@ -1,7 +1,5 @@
 package org.millenaire.items;
 
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMob;
@@ -16,18 +14,20 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemMillAmulet extends Item {
-    private int[] colorAlchemist = new int[] { 9868950, 10132109, 10395268, 10658427, 11053168, 11316327, 11579486, 11842645, 12237387, 12500545, 12763705, 13026863, 13421605, 13684764, 13947923, 14211082 };
-    private int[] colorVishnu = new int[] { 236, 983260, 2031820, 3080380, 4063405, 5111965, 6160525, 7209085, 8192110, 9240670, 10289230, 11337790, 12320815, 13369375, 14417935, 15466496 };
-    private int[] colorYggdrasil = new int[] { 396556, 990493, 1453614, 2113086, 2576206, 3104864, 3698799, 4227457, 4755857, 5350050, 5878706, 6407106, 7001299, 7464165, 8058100, 8388606,
-            8781823, 9306111, 9895935, 10420223, 10944511, 11534335, 12058623, 12648447, 13172735, 13762559, 14286847, 14876671, 15400959, 15925247, 16515071, 16777213 };
+import java.util.List;
 
-    ItemMillAmulet () {
+public class ItemMillAmulet extends Item {
+    private int[] colorAlchemist = new int[]{9868950, 10132109, 10395268, 10658427, 11053168, 11316327, 11579486, 11842645, 12237387, 12500545, 12763705, 13026863, 13421605, 13684764, 13947923, 14211082};
+    private int[] colorVishnu = new int[]{236, 983260, 2031820, 3080380, 4063405, 5111965, 6160525, 7209085, 8192110, 9240670, 10289230, 11337790, 12320815, 13369375, 14417935, 15466496};
+    private int[] colorYggdrasil = new int[]{396556, 990493, 1453614, 2113086, 2576206, 3104864, 3698799, 4227457, 4755857, 5350050, 5878706, 6407106, 7001299, 7464165, 8058100, 8388606,
+            8781823, 9306111, 9895935, 10420223, 10944511, 11534335, 12058623, 12648447, 13172735, 13762559, 14286847, 14876671, 15400959, 15925247, 16515071, 16777213};
+
+    ItemMillAmulet() {
 
     }
 
     @Override
-    public ItemStack onItemRightClick (final ItemStack itemstack, final World world, final EntityPlayer entityplayer) {
+    public ItemStack onItemRightClick(final ItemStack itemstack, final World world, final EntityPlayer entityplayer) {
         if (this == MillItems.amuletSkollHati && !world.isRemote) {
             final long time = world.getWorldTime() + 24000L;
 
@@ -44,7 +44,7 @@ public class ItemMillAmulet extends Item {
     }
 
     @Override
-    public void onUpdate (ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
         if (this == MillItems.amuletSkollHati)
             return;
 
@@ -132,7 +132,7 @@ public class ItemMillAmulet extends Item {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public int getColorFromItemStack (ItemStack stack, int renderPass) {
+    public int getColorFromItemStack(ItemStack stack, int renderPass) {
         NBTTagCompound nbt = stack.getTagCompound();
 
         if (renderPass != 0) {
@@ -156,10 +156,12 @@ public class ItemMillAmulet extends Item {
         return 16777215;
     }
 
-    public int getItemStackLimit (ItemStack stack) { return 1; }
+    public int getItemStackLimit(ItemStack stack) {
+        return 1;
+    }
 
     @Override
-    public boolean shouldCauseReequipAnimation (ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
         return !(oldStack.getItem() == this && newStack.getItem() == this);
     }
 }

@@ -1,6 +1,7 @@
 package org.millenaire.building;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -16,6 +17,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fluids.BlockFluidBase;
 import org.millenaire.MillCulture;
 import org.millenaire.Millenaire;
 import org.millenaire.VillageGeography;
@@ -25,10 +27,11 @@ import java.io.*;
 import java.util.*;
 
 public class PlanIO {
+
     private static final String FILE_VERSION = "2";
 
     //IBlockState[y][z][x]
-    public static void exportBuilding (EntityPlayer player, BlockPos startPoint) {
+    public static void exportBuilding(EntityPlayer player, BlockPos startPoint) {
         try {
             TileEntitySign sign = (TileEntitySign) player.getEntityWorld().getTileEntity(startPoint);
 
@@ -162,7 +165,7 @@ public class PlanIO {
     }
 
     //Called only on the logical server
-    public static void importBuilding (EntityPlayer player, BlockPos startPos) {
+    public static void importBuilding(EntityPlayer player, BlockPos startPos) {
         try {
             TileEntitySign te = (TileEntitySign) player.getEntityWorld().getTileEntity(startPos);
             String name = te.signText[0].getUnformattedText();
@@ -201,7 +204,7 @@ public class PlanIO {
         }
     }
 
-    public static void flattenTerrainForBuilding (BuildingPlan plan, BuildingLocation loc, VillageGeography geo) {
+    public static void flattenTerrainForBuilding(BuildingPlan plan, BuildingLocation loc, VillageGeography geo) {
         //System.out.println("Flattening Terrain");
         int ylevel = loc.position.getY();
 
@@ -212,17 +215,26 @@ public class PlanIO {
         BlockPos corner1 = loc.position.subtract(new Vec3i(margin, 0, margin));
         BlockPos corner2 = loc.position.add(plan.width + margin, 0, plan.length + margin);
 
-        for (int xPos = corner1.getX(); xPos <= corner2.getX(); xPos++) {
-            for (int zPos = corner1.getZ(); zPos <= corner2.getZ(); zPos++) {
-                BlockPos highestY = world.getTopSolidOrLiquidBlock(new BlockPos(xPos, ylevel, zPos));
+        //for (int xPos = corner1.getX(); xPos <= corner2.getX(); xPos++) {
+        for (int xPos = loc.minxMargin; xPos <= loc.maxxMargin; xPos++) {
+            //for (int zPos = corner1.getZ(); zPos <= corner2.getZ(); zPos++) {
+            for (int zPos = loc.minzMargin; zPos <= loc.maxzMargin; zPos++) {
+                BlockPos highestY = world.getHeight(new BlockPos(xPos, ylevel, zPos));
+
+                while(world.getBlockState(highestY).getBlock() instanceof BlockFluidBase
+                        || world.getBlockState(highestY).getBlock() instanceof BlockLiquid) {
+                    highestY.down();
+                }
 
                 IBlockState topBlock = world.getBiomeGenForCoords(highestY).topBlock;
                 IBlockState fillerBlock = world.getBiomeGenForCoords(highestY).fillerBlock.getBlock() == Blocks.sand ? Blocks.sandstone.getDefaultState() : world.getBiomeGenForCoords(highestY).fillerBlock;
 
-                if (geo.buildingLoc[xPos - geo.mapStartX][zPos - geo.mapStartZ]) {
+                /*if (geo.buildingLoc[xPos - geo.mapStartX][zPos - geo.mapStartZ]) {
                     //Skip flattening if it would overlap
                     continue;
-                }
+                }*/
+
+                //System.out.println("Flattening at " + xPos + ", " + zPos);
 
                 //Find highest actual surface block, to see if we need to block up.
                 Block b = world.getBlockState(highestY).getBlock();
@@ -232,9 +244,12 @@ public class PlanIO {
                     b = world.getBlockState(highestY).getBlock();
                 }
 
+                //System.out.println("Highest actual y is at " + highestY + ", target y is " + ylevel);
+
                 //Do we need to block up? If so, do so.
                 if (highestY.getY() < ylevel - 1) {
                     for (int yPos = highestY.getY(); yPos <= ylevel - 2; yPos++) {
+                        //System.out.println("Building up at level " + yPos);
                         world.setBlockState(new BlockPos(xPos, yPos, zPos), fillerBlock);
                     }
                 }
@@ -244,13 +259,16 @@ public class PlanIO {
 
                 if (highestY.getY() > ylevel) {
                     for (int yPos = ylevel - 1; yPos <= highestY.getY(); yPos++) {
+                        //System.out.println("Digging down at level " + yPos);
                         world.setBlockState(new BlockPos(xPos, yPos, zPos), Blocks.air.getDefaultState());
                     }
                 }
 
+                //System.out.println("Flattening: Setting top block (" + topBlock.getBlock() + ") at " + (ylevel - 1));
                 //Finish the flattening for the actual level we're targeting
                 world.setBlockState(new BlockPos(xPos, ylevel - 1, zPos), topBlock);
 
+                //System.out.println("Creating foundation below building at level " + (ylevel + plan.depth - 1) + " out of " + fillerBlock.getBlock());
                 //Ensure we have grass under anything we build to prevent gravity-affected blocks from falling.
                 world.setBlockState(new BlockPos(xPos, ylevel + plan.depth - 1, zPos), fillerBlock);
             }
@@ -259,14 +277,14 @@ public class PlanIO {
 
     }
 
-    public static void placeBuilding (BuildingPlan plan, BuildingLocation loc, World world) {
+    public static void placeBuilding(BuildingPlan plan, BuildingLocation loc, World world) {
         IBlockState[][][] blocks = plan.buildingArray;
 
         //The list of blocks that must be placed last.
         //TODO: Any others? Any way to auto-detect?
 
         List<Block> blocksToPlaceLast = Arrays.asList(Blocks.torch, Blocks.redstone_torch, Blocks.vine, Blocks.bed, Blocks.wall_sign, Blocks.standing_sign,
-                                                      Blocks.standing_banner, Blocks.wall_banner);
+                Blocks.standing_banner, Blocks.wall_banner);
 
         //Some blocks must be placed last in order to not drop onto the floor. This stores their locations.
         LinkedHashMap<BlockPos, IBlockState> placeLast = new LinkedHashMap<>();
@@ -290,7 +308,7 @@ public class PlanIO {
         }
     }
 
-    public static BuildingPlan loadSchematic (NBTTagCompound nbt, MillCulture culture, int level) {
+    public static BuildingPlan loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) {
         //Convert Stream to NBTTagCompound
 
         //width = x-axis, height = y-axis, length = z-axis
@@ -379,10 +397,10 @@ public class PlanIO {
 
         return new BuildingPlan(culture, level)
                 .setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.EAST).setPlan(organized).setLengthWidth(length, width)
-                .setNameAndType(name, new String[] { }, new String[] { });
+                .setNameAndType(name, new String[]{}, new String[]{});
     }
 
-    public static NBTTagCompound getBuildingTag (final String name, MillCulture culture, final boolean packaged) {
+    public static NBTTagCompound getBuildingTag(final String name, MillCulture culture, final boolean packaged) {
         if (packaged) {
             InputStream x = MillCulture.class.getClassLoader().getResourceAsStream("assets/millenaire/cultures/" + culture.cultureName.toLowerCase() + "/buildings/" + name + ".mlplan");
             try {
@@ -407,7 +425,7 @@ public class PlanIO {
         }
     }
 
-    public static File getBuildingFile (final String name) {
+    public static File getBuildingFile(final String name) {
         File f = new File(MinecraftServer.getServer().getDataDirectory().getAbsolutePath() + File.separator + "millenaire" + File.separator + "exports" + File.separator);
         if (!f.exists()) {
             f.mkdirs();
@@ -416,7 +434,7 @@ public class PlanIO {
         return new File(f, name + ".mlplan");
     }
 
-    private static boolean valid (short width, short height, short length, short depth, NBTTagCompound tag) {
+    private static boolean valid(short width, short height, short length, short depth, NBTTagCompound tag) {
         boolean valid = true;
         if (tag.getShort("Width") != width && tag.getShort("Width") != 0) {
             System.out.println("Width: Expecting " + tag.getShort("Width") + ". Actual: " + width);
@@ -440,12 +458,10 @@ public class PlanIO {
      * @param length the length (z-axis)
      * @param depth  the depth of the build
      * @param name   the name of the building
-     *
      * @return the file that is outputted to disk
-     *
      * @throws Exception
      */
-    private static File exportToSchem (IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
+    private static File exportToSchem(IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
         File f1 = getBuildingFile(name);
 
         NBTTagCompound tag = getBuildingTag(name, null, false);

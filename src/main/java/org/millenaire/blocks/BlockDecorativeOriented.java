@@ -11,15 +11,17 @@ import net.minecraft.world.World;
 
 public class BlockDecorativeOriented extends BlockDirectional {
 
-    BlockDecorativeOriented (Material materialIn) { super(materialIn); }
+    BlockDecorativeOriented(Material materialIn) {
+        super(materialIn);
+    }
 
     @Override
-    public IBlockState onBlockPlaced (World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }
 
     @Override
-    public IBlockState getStateFromMeta (int meta) {
+    public IBlockState getStateFromMeta(int meta) {
         EnumFacing enumfacing = EnumFacing.getFront(meta);
 
         if (enumfacing.getAxis() == EnumFacing.Axis.Y) {
@@ -30,8 +32,12 @@ public class BlockDecorativeOriented extends BlockDirectional {
     }
 
     @Override
-    public int getMetaFromState (IBlockState state) { return (state.getValue(FACING)).getIndex(); }
+    public int getMetaFromState(IBlockState state) {
+        return (state.getValue(FACING)).getIndex();
+    }
 
     @Override
-    protected BlockState createBlockState () { return new BlockState(this, FACING); }
+    protected BlockState createBlockState() {
+        return new BlockState(this, FACING);
+    }
 }

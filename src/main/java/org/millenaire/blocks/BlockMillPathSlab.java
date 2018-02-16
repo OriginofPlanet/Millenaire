@@ -1,8 +1,5 @@
 package org.millenaire.blocks;
 
-import java.util.List;
-import java.util.Random;
-
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -20,11 +17,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.List;
+import java.util.Random;
+
 public class BlockMillPathSlab extends BlockSlab {
     public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockMillPath.EnumType.class);
     private static final PropertyBool SEAMLESS = PropertyBool.create("seamless");
 
-    BlockMillPathSlab () {
+    BlockMillPathSlab() {
         super(Material.ground);
 
         if (this.isDouble())
@@ -36,24 +36,32 @@ public class BlockMillPathSlab extends BlockSlab {
     }
 
     @Override
-    public boolean isDouble () { return false; }
+    public boolean isDouble() {
+        return false;
+    }
 
     @Override
-    public Item getItemDropped (IBlockState state, Random rand, int fortune) {
+    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(MillBlocks.blockMillPathSlab);
     }
 
     @SideOnly(Side.CLIENT)
-    public Item getItem (World worldIn, BlockPos pos) { return Item.getItemFromBlock(MillBlocks.blockMillPathSlab); }
+    public Item getItem(World worldIn, BlockPos pos) {
+        return Item.getItemFromBlock(MillBlocks.blockMillPathSlab);
+    }
 
     @Override
-    public boolean isFullCube () { return false; }
+    public boolean isFullCube() {
+        return false;
+    }
 
     @Override
-    public boolean isOpaqueCube () { return false; }
+    public boolean isOpaqueCube() {
+        return false;
+    }
 
     @Override
-    public boolean doesSideBlockRendering (IBlockAccess world, BlockPos pos, EnumFacing face) {
+    public boolean doesSideBlockRendering(IBlockAccess world, BlockPos pos, EnumFacing face) {
         if (this.isDouble()) {
             return false;
         }
@@ -64,7 +72,7 @@ public class BlockMillPathSlab extends BlockSlab {
     }
 
     @Override
-    public void setBlockBoundsBasedOnState (IBlockAccess worldIn, BlockPos pos) {
+    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
         if (this.isDouble()) {
             this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.9375F, 1.0F);
         } else {
@@ -80,20 +88,22 @@ public class BlockMillPathSlab extends BlockSlab {
         }
     }
 
-    public String getUnlocalizedName (int meta) {
+    public String getUnlocalizedName(int meta) {
         return super.getUnlocalizedName() + "." + BlockMillPath.EnumType.byMetadata(meta).getUnlocalizedName();
     }
 
     @Override
-    public IProperty getVariantProperty () { return VARIANT; }
+    public IProperty getVariantProperty() {
+        return VARIANT;
+    }
 
     @Override
-    public Object getVariant (ItemStack stack) {
+    public Object getVariant(ItemStack stack) {
         return BlockMillPath.EnumType.byMetadata(stack.getMetadata() & 7);
     }
 
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks (Item itemIn, CreativeTabs tab, List list) {
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
         if (itemIn != Item.getItemFromBlock(MillBlocks.blockMillPathSlabDouble)) {
             BlockMillPath.EnumType[] aenumtype = BlockMillPath.EnumType.values();
 
@@ -104,7 +114,7 @@ public class BlockMillPathSlab extends BlockSlab {
     }
 
     @Override
-    public IBlockState getStateFromMeta (int meta) {
+    public IBlockState getStateFromMeta(int meta) {
         IBlockState iblockstate = this.getDefaultState().withProperty(VARIANT, BlockMillPath.EnumType.byMetadata(meta & 7));
 
         if (this.isDouble()) {
@@ -117,7 +127,7 @@ public class BlockMillPathSlab extends BlockSlab {
     }
 
     @Override
-    public int getMetaFromState (IBlockState state) {
+    public int getMetaFromState(IBlockState state) {
         byte b0 = 0;
         int i = b0 | ((BlockMillPath.EnumType) state.getValue(VARIANT)).getMetadata();
 
@@ -133,12 +143,12 @@ public class BlockMillPathSlab extends BlockSlab {
     }
 
     @Override
-    protected BlockState createBlockState () {
+    protected BlockState createBlockState() {
         return this.isDouble() ? new BlockState(this, SEAMLESS, VARIANT) : new BlockState(this, HALF, VARIANT);
     }
 
     @Override
-    public int damageDropped (IBlockState state) {
+    public int damageDropped(IBlockState state) {
         return ((BlockMillPath.EnumType) state.getValue(VARIANT)).getMetadata();
     }
 }

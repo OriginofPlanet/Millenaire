@@ -1,44 +1,51 @@
 package org.millenaire;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.millenaire.blocks.MillBlocks;
 import org.millenaire.blocks.StoredPosition;
 import org.millenaire.building.BuildingLocation;
 import org.millenaire.building.BuildingPlan;
 import org.millenaire.building.BuildingTypes;
-
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.millenaire.building.PlanIO;
+import org.millenaire.networking.PacketShowBuildPoints;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class MillCommand extends CommandBase {
     @Override
-    public int compareTo (ICommand arg0) { return 0; }
+    public int compareTo(ICommand arg0) {
+        return 0;
+    }
 
     @Override
-    public String getCommandName () { return "mill"; }
+    public String getCommandName() {
+        return "mill";
+    }
 
     @Override
-    public String getCommandUsage (ICommandSender sender) { return "mill <villages, loneBuildings, showBuildPoints>"; }
+    public String getCommandUsage(ICommandSender sender) {
+        return "mill <villages, loneBuildings, showBuildPoints>";
+    }
 
     @Override
-    public List<String> getCommandAliases () {
+    public List<String> getCommandAliases() {
         return new ArrayList<String>() {{
             add("mill");
         }};
     }
 
     @Override
-    public void processCommand (ICommandSender sender, String[] args) {
+    public void processCommand(ICommandSender sender, String[] args) {
         if (args.length < 1) {
             sender.addChatMessage(new ChatComponentText("invalid argument: use villages, loneBuildings, or showBuildPoints"));
             return;
@@ -59,6 +66,8 @@ public class MillCommand extends CommandBase {
             } else {
                 ((StoredPosition) MillBlocks.storedPosition).setShowParticles(true);
             }
+
+            Millenaire.simpleNetworkWrapper.sendTo(new PacketShowBuildPoints(((StoredPosition) MillBlocks.storedPosition).getShowParticles()), (EntityPlayerMP) sender);
         } else if (args[0].equalsIgnoreCase("spawn")) {
             if (args.length < 3) return;
 
@@ -77,7 +86,7 @@ public class MillCommand extends CommandBase {
     }
 
     @Override
-    public boolean canCommandSenderUseCommand (ICommandSender sender) {
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
         if (sender.getCommandSenderEntity() instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) sender.getCommandSenderEntity();
 
@@ -88,10 +97,12 @@ public class MillCommand extends CommandBase {
     }
 
     @Override
-    public List<String> addTabCompletionOptions (ICommandSender sender, String[] args, BlockPos pos) {
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         return getListOfStringsMatchingLastWord(args, "village", "loneBuildings", "showBuildPoints");
     }
 
     @Override
-    public boolean isUsernameIndex (String[] args, int index) { return false; }
+    public boolean isUsernameIndex(String[] args, int index) {
+        return false;
+    }
 }

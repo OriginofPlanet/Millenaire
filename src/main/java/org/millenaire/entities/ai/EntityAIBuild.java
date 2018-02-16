@@ -1,14 +1,13 @@
 package org.millenaire.entities.ai;
 
-import org.millenaire.entities.EntityMillVillager;
-
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
+import org.millenaire.entities.EntityMillVillager;
 
 public class EntityAIBuild extends EntityAIBase {
     private EntityLiving theEntity;
 
-    public EntityAIBuild (EntityLiving entityIn) {
+    public EntityAIBuild(EntityLiving entityIn) {
         this.theEntity = entityIn;
 
         if (!(entityIn instanceof EntityMillVillager)) {
@@ -22,25 +21,29 @@ public class EntityAIBuild extends EntityAIBase {
      * Returns whether the EntityAIBase should begin execution.
      */
     @Override
-    public boolean shouldExecute () { return false; }
+    public boolean shouldExecute() {
+        return false;
+    }
 
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
     @Override
-    public boolean continueExecuting () { return false; }
+    public boolean continueExecuting() {
+        return false;
+    }
 
     /**
      * Execute a one shot task or start executing a continuous task
      */
-    public void startExecuting () {
+    public void startExecuting() {
 
     }
 
     /**
      * Updates the task
      */
-    public void updateTask () {
+    public void updateTask() {
 
     }
 
@@ -48,7 +51,7 @@ public class EntityAIBuild extends EntityAIBase {
      * Resets the task
      */
     @Override
-    public void resetTask () {
+    public void resetTask() {
 
     }
 }

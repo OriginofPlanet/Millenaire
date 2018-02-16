@@ -26,15 +26,17 @@ public class TileEntityMillSign extends TileEntitySign implements ITickable {
     private BlockPos villageStoneLocation;
 
     @Override
-    public boolean executeCommand (final EntityPlayer playerIn) {
+    public boolean executeCommand(final EntityPlayer playerIn) {
         //Display GuiPanel with appropriate info based on SignType
         return false;
     }
 
-    public void setSignType (int typeIn) { thisSignType = typeIn; }
+    public void setSignType(int typeIn) {
+        thisSignType = typeIn;
+    }
 
     @Override
-    public void update () {
+    public void update() {
 
         if (!(villageStoneLocation == null)) {
             signText[0] = new ChatComponentText("The End is Nigh");

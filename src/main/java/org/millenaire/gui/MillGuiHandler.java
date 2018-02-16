@@ -1,18 +1,17 @@
 package org.millenaire.gui;
 
-import org.millenaire.blocks.BlockMillChest;
-import org.millenaire.entities.TileEntityMillChest;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
+import org.millenaire.blocks.BlockMillChest;
+import org.millenaire.entities.TileEntityMillChest;
 
 public class MillGuiHandler implements IGuiHandler {
     @Override
-    public Object getServerGuiElement (int ID, EntityPlayer player, World world, int x, int y, int z) {
+    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (ID == 1) {
             TileEntityMillChest teMillChest = null;
             if (world.getTileEntity(new BlockPos(x, y, z)) instanceof TileEntityMillChest)
@@ -30,7 +29,7 @@ public class MillGuiHandler implements IGuiHandler {
     }
 
     @Override
-    public Object getClientGuiElement (int ID, EntityPlayer player, World world, int x, int y, int z) {
+    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (ID == 0) {
             return new GuiParchment(player.getHeldItem());
         }

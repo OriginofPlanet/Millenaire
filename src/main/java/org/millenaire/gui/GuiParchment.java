@@ -1,13 +1,5 @@
 package org.millenaire.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.millenaire.Millenaire;
-import org.millenaire.Reference;
-import org.millenaire.items.ItemMillParchment;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -15,10 +7,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import org.millenaire.Millenaire;
+import org.millenaire.items.ItemMillParchment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiParchment extends GuiScreen {
-    private final static ResourceLocation PARCHMENTGUI = new ResourceLocation(Reference.MODID + ":textures/gui/ML_parchment.png");
-    private final static ResourceLocation BOOKGUI = new ResourceLocation(Reference.MODID + ":textures/gui/ML_book.png");
+    private final static ResourceLocation PARCHMENTGUI = new ResourceLocation(Millenaire.MODID + ":textures/gui/ML_parchment.png");
+    private final static ResourceLocation BOOKGUI = new ResourceLocation(Millenaire.MODID + ":textures/gui/ML_book.png");
 
     private ItemMillParchment item;
     private List<String> stringPages = new ArrayList<String>();
@@ -27,7 +24,7 @@ public class GuiParchment extends GuiScreen {
     private GuiButton forward;
     private GuiButton backward;
 
-    GuiParchment (ItemStack stack) {
+    GuiParchment(ItemStack stack) {
         if (stack.getItem() instanceof ItemMillParchment)
             item = (ItemMillParchment) stack.getItem();
         else
@@ -63,14 +60,14 @@ public class GuiParchment extends GuiScreen {
     }
 
     @Override
-    public void initGui () {
+    public void initGui() {
         this.buttonList.add(this.backward = new NextPageButton(0, (this.width / 2) - 95, 208, false));
         this.buttonList.add(this.forward = new NextPageButton(1, (this.width / 2) + 77, 208, true));
         updateButtons();
     }
 
     @Override
-    public void drawScreen (int mouseX, int mouseY, float partialTicks) {
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         mc.getTextureManager().bindTexture(PARCHMENTGUI);
         this.drawTexturedModalRect((this.width - 203) / 2, 2, 0, 0, 203, 219);
@@ -85,7 +82,7 @@ public class GuiParchment extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed (GuiButton button) {
+    protected void actionPerformed(GuiButton button) {
         if (button == this.forward) {
             page++;
             updateButtons();
@@ -96,21 +93,21 @@ public class GuiParchment extends GuiScreen {
         }
     }
 
-    private void updateButtons () {
+    private void updateButtons() {
         this.backward.visible = page != 0;
 
         this.forward.visible = page != stringPages.size() - 1;
     }
 
     @Override
-    public boolean doesGuiPauseGame () {
+    public boolean doesGuiPauseGame() {
         return false;
     }
 
     static class NextPageButton extends GuiButton {
         private final boolean nextPage;
 
-        NextPageButton (int id, int xIn, int yIn, boolean nextPageIn) {
+        NextPageButton(int id, int xIn, int yIn, boolean nextPageIn) {
             super(id, xIn, yIn, 18, 10, "");
             this.nextPage = nextPageIn;
         }
@@ -118,7 +115,7 @@ public class GuiParchment extends GuiScreen {
         /**
          * Draws this button to the screen.
          */
-        public void drawButton (Minecraft mc, int mouseX, int mouseY) {
+        public void drawButton(Minecraft mc, int mouseX, int mouseY) {
             if (this.visible) {
                 boolean flag = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

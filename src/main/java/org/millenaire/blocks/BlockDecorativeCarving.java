@@ -1,36 +1,43 @@
 package org.millenaire.blocks;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.millenaire.Millenaire;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.millenaire.Millenaire;
 
 public class BlockDecorativeCarving extends BlockDecorativeOriented {
 
-    BlockDecorativeCarving (Material materialIn) {
+    BlockDecorativeCarving(Material materialIn) {
         super(materialIn);
         this.setCreativeTab(Millenaire.tabMillenaire);
     }
 
     @Override
-    public boolean isOpaqueCube () { return false; }
+    public boolean isOpaqueCube() {
+        return false;
+    }
 
     @Override
-    public boolean isFullBlock () { return false; }
+    public boolean isFullBlock() {
+        return false;
+    }
 
     @Override
-    public boolean isFullCube () { return false; }
+    public boolean isFullCube() {
+        return false;
+    }
 
     @SideOnly(Side.CLIENT)
-    public float getAmbientOcclusionLightValue () { return 0.85F; }
+    public float getAmbientOcclusionLightValue() {
+        return 0.85F;
+    }
 
     @Override
-    public void setBlockBoundsBasedOnState (IBlockAccess worldIn, BlockPos pos) {
+    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
         if (iblockstate.getBlock() == this) {

@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.millenaire.Reference;
+import org.millenaire.Millenaire;
 
 public class ItemMillBow extends ItemBow {
     private float speedFactor = 1;
@@ -19,7 +19,7 @@ public class ItemMillBow extends ItemBow {
 
     private String itemName;
 
-    ItemMillBow (float speedFactor, float damageBonus, String nameIn) {
+    ItemMillBow(float speedFactor, float damageBonus, String nameIn) {
         super();
         this.speedFactor = speedFactor;
         this.damageBonus = damageBonus;
@@ -27,7 +27,7 @@ public class ItemMillBow extends ItemBow {
     }
 
     @Override
-    public void onPlayerStoppedUsing (final ItemStack stack, final World worldIn, final EntityPlayer playerIn, final int timeLeft) {
+    public void onPlayerStoppedUsing(final ItemStack stack, final World worldIn, final EntityPlayer playerIn, final int timeLeft) {
         int i = this.getMaxItemUseDuration(stack) - timeLeft;
         net.minecraftforge.event.entity.player.ArrowLooseEvent event = new net.minecraftforge.event.entity.player.ArrowLooseEvent(playerIn, stack, i);
         if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) return;
@@ -94,23 +94,23 @@ public class ItemMillBow extends ItemBow {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public ModelResourceLocation getModel (ItemStack stack, EntityPlayer player, int ticksRemaining) {
+    public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int ticksRemaining) {
         if (player.isUsingItem()) {
             final int k = stack.getMaxItemUseDuration() - player.getItemInUseCount();
             if (k >= 18) {
                 System.out.println("step 3");
-                return new ModelResourceLocation(Reference.MODID + ":" + itemName + "_pulling_3", "inventory");
+                return new ModelResourceLocation(Millenaire.MODID + ":" + itemName + "_pulling_3", "inventory");
             } else if (k > 13) {
                 System.out.println("step 2");
-                return new ModelResourceLocation(Reference.MODID + ":" + itemName + "_pulling_2", "inventory");
+                return new ModelResourceLocation(Millenaire.MODID + ":" + itemName + "_pulling_2", "inventory");
             } else if (k > 0) {
                 System.out.println("step 1");
-                return new ModelResourceLocation(Reference.MODID + ":" + itemName + "_pulling_1", "inventory");
+                return new ModelResourceLocation(Millenaire.MODID + ":" + itemName + "_pulling_1", "inventory");
             } else {
-                return new ModelResourceLocation(Reference.MODID + ":" + itemName, "inventory");
+                return new ModelResourceLocation(Millenaire.MODID + ":" + itemName, "inventory");
             }
         } else {
-            return new ModelResourceLocation(Reference.MODID + ":" + itemName, "inventory");
+            return new ModelResourceLocation(Millenaire.MODID + ":" + itemName, "inventory");
         }
     }
 }

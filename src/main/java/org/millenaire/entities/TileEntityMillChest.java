@@ -10,10 +10,13 @@ import net.minecraft.tileentity.TileEntityChest;
 public class TileEntityMillChest extends TileEntityChest {
     private boolean isLocked = true;
 
-    public TileEntityMillChest () { super(); }
+    public TileEntityMillChest() {
+        super();
+    }
 
-    public boolean setLock () {
+    public boolean setLock() {
         isLocked = !isLocked;
+
 
         checkForAdjacentChests();
         if (adjacentChestZNeg != null || adjacentChestZPos != null ||
@@ -25,7 +28,7 @@ public class TileEntityMillChest extends TileEntityChest {
         return isLocked;
     }
 
-    public boolean isLockedFor (EntityPlayer playerIn) {
+    public boolean isLockedFor(EntityPlayer playerIn) {
         if (playerIn == null) {
             return false;
         }
@@ -42,7 +45,7 @@ public class TileEntityMillChest extends TileEntityChest {
     }
 
     @Override
-    public void readFromNBT (NBTTagCompound compound) {
+    public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
 
         if (compound.hasKey("millChestLocked")) {
@@ -51,17 +54,19 @@ public class TileEntityMillChest extends TileEntityChest {
     }
 
     @Override
-    public void writeToNBT (NBTTagCompound compound) {
+    public void writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
 
         compound.setBoolean("millChestLocked", isLocked);
     }
 
     @Override
-    public String getGuiID () { return "millenaire:chest"; }
+    public String getGuiID() {
+        return "millenaire:chest";
+    }
 
     @Override
-    public Container createContainer (InventoryPlayer playerInventory, EntityPlayer playerIn) {
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
         return new ContainerChest(playerInventory, this, playerIn);
     }
 }

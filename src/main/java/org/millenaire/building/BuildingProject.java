@@ -13,14 +13,14 @@ public class BuildingProject {
     /**
      * This is just here to make the JSON parser work correctly. USE OTHER CONSTRUCTOR!
      */
-    public BuildingProject () {
+    public BuildingProject() {
 
     }
 
     /**
      * The best constructor
      */
-    public BuildingProject (String buildingID, int level) {
+    public BuildingProject(String buildingID, int level) {
         this.ID = buildingID;
         this.lvl = level;
     }

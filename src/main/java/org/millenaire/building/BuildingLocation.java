@@ -1,14 +1,13 @@
 package org.millenaire.building;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.millenaire.MillConfig;
-import org.millenaire.entities.EntityMillVillager;
-
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import org.millenaire.MillConfig;
+import org.millenaire.entities.EntityMillVillager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BuildingLocation {
     public int minx, maxx, minz, maxz, miny, maxy;
@@ -25,11 +24,10 @@ public class BuildingLocation {
     public List<BlockPos> sleepPos = new ArrayList<>();
     public List<BlockPos> hidePos = new ArrayList<>();
     public List<BlockPos> defendPos = new ArrayList<>();
-
-    List<EntityMillVillager> residents = new ArrayList<>();
     public List<String> subBuildings = new ArrayList<>();
+    List<EntityMillVillager> residents = new ArrayList<>();
 
-    public BuildingLocation (BuildingPlan plan, BlockPos pos, EnumFacing orientIn) {
+    public BuildingLocation(BuildingPlan plan, BlockPos pos, EnumFacing orientIn) {
         orientation = orientIn;
         position = pos;
         length = plan.length;
@@ -38,7 +36,7 @@ public class BuildingLocation {
         this.computeMargins();
     }
 
-    public BuildingLocation (int l, int h, int w, BlockPos pos, EnumFacing orientIn) {
+    public BuildingLocation(int l, int h, int w, BlockPos pos, EnumFacing orientIn) {
         orientation = orientIn;
         position = pos;
         length = l;
@@ -47,11 +45,11 @@ public class BuildingLocation {
         this.computeMargins();
     }
 
-    BuildingLocation (ResourceLocation rl, BlockPos pos, EnumFacing orientIn) {
+    BuildingLocation(ResourceLocation rl, BlockPos pos, EnumFacing orientIn) {
         this(BuildingTypes.getTypeByID(rl).loadBuilding(), pos, orientIn);
     }
 
-    public void computeMargins () {
+    public void computeMargins() {
         minx = position.getX();
         miny = position.getY();
         minz = position.getZ();
@@ -60,12 +58,12 @@ public class BuildingLocation {
         maxy = position.getY() + height;
         maxz = position.getZ() + length;
 
-        minxMargin = minx - MillConfig.minBuildingDistance + 1;
-        minzMargin = minz - MillConfig.minBuildingDistance + 1;
+        minxMargin = minx - MillConfig.minBuildingDistance;
+        minzMargin = minz - MillConfig.minBuildingDistance;
         minyMargin = miny - 3;
         maxyMargin = maxy + 1;
-        maxxMargin = maxx + MillConfig.minBuildingDistance + 1;
-        maxzMargin = maxz + MillConfig.minBuildingDistance + 1;
+        maxxMargin = maxx + MillConfig.minBuildingDistance;
+        maxzMargin = maxz + MillConfig.minBuildingDistance;
     }
 	/*
 	public static BuildingLocation fromNBT(NBTTagCompound nbt) {

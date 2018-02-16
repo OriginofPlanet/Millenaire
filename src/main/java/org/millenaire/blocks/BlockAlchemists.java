@@ -11,13 +11,13 @@ import net.minecraft.world.World;
 public class BlockAlchemists extends Block {
     private static final int EXPLOSIONRADIUS = 32;
 
-    BlockAlchemists () {
+    BlockAlchemists() {
         super(Material.rock);
 
         //this.setResistance(6000000.0F);
     }
 
-    private void alchemistExplosion (final World world, final int i, final int j, final int k) {
+    private void alchemistExplosion(final World world, final int i, final int j, final int k) {
         world.setBlockToAir(new BlockPos(i, j, k));
         world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, i + 0.5D, j + 0.5D, k + 0.5D, 0.0D, 0.0D, 0.0D);
         world.playSoundEffect(i, j, k, "random.explode", 8.0F, (1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.9F);
@@ -40,7 +40,7 @@ public class BlockAlchemists extends Block {
     }
 
     @Override
-    public void onBlockDestroyedByExplosion (World worldIn, BlockPos pos, Explosion explosionIn) {
+    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn) {
         alchemistExplosion(worldIn, pos.getX(), pos.getY(), pos.getZ());
     }
 }

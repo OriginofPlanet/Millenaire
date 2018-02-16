@@ -1,12 +1,5 @@
 package org.millenaire.generation;
 
-import java.util.HashSet;
-import java.util.Random;
-
-import org.millenaire.MillConfig;
-import org.millenaire.VillageTracker;
-import org.millenaire.blocks.MillBlocks;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3i;
@@ -14,6 +7,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import org.millenaire.MillConfig;
+import org.millenaire.VillageTracker;
+import org.millenaire.blocks.MillBlocks;
+
+import java.util.HashSet;
+import java.util.Random;
 
 
 public class VillageGenerator implements IWorldGenerator {
@@ -27,7 +26,7 @@ public class VillageGenerator implements IWorldGenerator {
 
 
     @Override
-    public void generate (Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
+    public void generate(Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
         if (world.provider.getDimensionId() == 0) {
             BlockPos pos1 = new BlockPos(chunkX * 16, 0, chunkZ * 16);
             //System.out.println("testing1");
@@ -42,7 +41,7 @@ public class VillageGenerator implements IWorldGenerator {
     /**
      * Attempt to generate the village
      */
-    private boolean generateVillageAt (Random rand, BlockPos pos, World world) {
+    private boolean generateVillageAt(Random rand, BlockPos pos, World world) {
 
         BlockPos villageCenter = null;
 
@@ -89,7 +88,11 @@ public class VillageGenerator implements IWorldGenerator {
                 || world.getBiomeGenForCoords(corner3).biomeID == BiomeGenBase.ocean.biomeID
                 || world.getBiomeGenForCoords(corner4).biomeID == BiomeGenBase.ocean.biomeID
                 || world.getBiomeGenForCoords(villageCenter).biomeID == BiomeGenBase.ocean.biomeID
-                || world.getBiomeGenForCoords(villageCenter).biomeID == BiomeGenBase.river.biomeID) {
+                || world.getBiomeGenForCoords(corner1).biomeID == BiomeGenBase.deepOcean.biomeID
+                || world.getBiomeGenForCoords(corner2).biomeID == BiomeGenBase.deepOcean.biomeID
+                || world.getBiomeGenForCoords(corner3).biomeID == BiomeGenBase.deepOcean.biomeID
+                || world.getBiomeGenForCoords(corner4).biomeID == BiomeGenBase.deepOcean.biomeID
+                || world.getBiomeGenForCoords(villageCenter).biomeID == BiomeGenBase.deepOcean.biomeID) {
             return false; //Water is a big no-no
         }
         int biomeMismatches = 0;
@@ -106,6 +109,7 @@ public class VillageGenerator implements IWorldGenerator {
         if (world.getBiomeGenForCoords(villageCenter).biomeID != world.getBiomeGenForCoords(corner4).biomeID) {
             biomeMismatches++;
         }
+
         if (biomeMismatches > 2) {
             return false; //Biome mismatch
         }
@@ -117,13 +121,15 @@ public class VillageGenerator implements IWorldGenerator {
         coordsTried.add(villageCenter.getX() + (villageCenter.getZ() << 16));
 
         // check if other villages are too close
-        // TODO - debug and use this instead of my own
-        //if(!VillageTracker.get(world).getNearVillages(villageCenter, MillConfig.minVillageDistance).isEmpty()) {
 
         if (VillageTracker.get(world).isCloseToOtherVillage(villageCenter, MillConfig.minVillageDistance)) {
             return false;
         } else {
-            BlockPos nPos = world.getHeight(villageCenter);
+            BlockPos nPos = world.getTopSolidOrLiquidBlock(villageCenter);
+
+            nPos.subtract(new Vec3i(0, 20, 0)); //Take away 20 blocks so it doesn't interfere with pathfinding or such
+
+            System.out.println("Attempting to generate a village at or near " + nPos.getX() + ", " + nPos.getZ());
             VillageTracker.get(world).registerVillagePos(nPos);
             world.setBlockState(nPos, MillBlocks.villageStone.getDefaultState());
             return false;
@@ -132,7 +138,7 @@ public class VillageGenerator implements IWorldGenerator {
 
     // Check that all chunks around the tested chunk are loaded
     // used both for the generated chunk and when checking close by
-    private boolean areChunksLoaded (World world, BlockPos pos) {
+    private boolean areChunksLoaded(World world, BlockPos pos) {
         BlockPos bPos1 = new BlockPos(pos.getX() - 5 * 16, pos.getY(), pos.getZ() - 5 * 16);
         BlockPos bPos2 = new BlockPos(pos.getX() + 5 * 16, pos.getY(), pos.getZ() + 5 * 16);
 
@@ -142,7 +148,7 @@ public class VillageGenerator implements IWorldGenerator {
     // check other areas close by the generated chunk
     // should get a hit closer to the player.
     // TODO check if this can be optimized by only checking some of the chunks.
-    private BlockPos anyAreaCloseByLoaded (World world, BlockPos pos) {
+    private BlockPos anyAreaCloseByLoaded(World world, BlockPos pos) {
         int ix = 0;
         for (int i = -6; i < 7; i++) {
             for (int j = -6; j < 7; j++) {

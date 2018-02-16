@@ -1,8 +1,5 @@
 package org.millenaire.rendering;
 
-import org.lwjgl.opengl.GL11;
-import org.millenaire.entities.EntityMillVillager;
-
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.GlStateManager;
@@ -16,24 +13,27 @@ import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
+import org.lwjgl.opengl.GL11;
+import org.millenaire.entities.EntityMillVillager;
 
 public class RenderMillVillager extends RenderBiped<EntityMillVillager> {
-    private ResourceLocation villagerTexture;
-
     protected String name = "Suzy Carmichael";
+    private ResourceLocation villagerTexture;
     private String quest = null;
 
-    public RenderMillVillager (RenderManager rendermanagerIn, ModelBiped modelbaseIn, float shadowsizeIn) {
+    public RenderMillVillager(RenderManager rendermanagerIn, ModelBiped modelbaseIn, float shadowsizeIn) {
         super(rendermanagerIn, modelbaseIn, shadowsizeIn);
         this.addLayer(new LayerBipedArmor(this));
         this.addLayer(new LayerHeldItem(this));
     }
 
     @Override
-    protected boolean canRenderName (EntityMillVillager entity) { return true; }
+    protected boolean canRenderName(EntityMillVillager entity) {
+        return true;
+    }
 
     @Override
-    protected void preRenderCallback (EntityMillVillager entity, float f) {
+    protected void preRenderCallback(EntityMillVillager entity, float f) {
         villagerTexture = new ResourceLocation(entity.getTexture());
         name = entity.getName();
         //if(entity.isChild())
@@ -52,10 +52,12 @@ public class RenderMillVillager extends RenderBiped<EntityMillVillager> {
     }
 
     @Override
-    protected ResourceLocation getEntityTexture (EntityMillVillager entity) { return villagerTexture; }
+    protected ResourceLocation getEntityTexture(EntityMillVillager entity) {
+        return villagerTexture;
+    }
 
     @Override
-    protected void rotateCorpse (EntityMillVillager entityIn, float par2, float par3, float partialTicks) {
+    protected void rotateCorpse(EntityMillVillager entityIn, float par2, float par3, float partialTicks) {
 		/*if (entityIn.isEntityAlive() && entityIn.isVillagerSleeping()) 
 		{
 			final float orientation = -entityIn.getBedOrientationInDegrees();
@@ -70,7 +72,7 @@ public class RenderMillVillager extends RenderBiped<EntityMillVillager> {
     }
 
     @Override
-    protected void renderOffsetLivingLabel (EntityMillVillager entityIn, double x, double y, double z, String str, float p_177069_9_, double p_177069_10_) {
+    protected void renderOffsetLivingLabel(EntityMillVillager entityIn, double x, double y, double z, String str, float p_177069_9_, double p_177069_10_) {
         float scale = 0.01666667F;
         float lineHeight = 0.2f;
 
@@ -81,7 +83,7 @@ public class RenderMillVillager extends RenderBiped<EntityMillVillager> {
         displayText(name, scale, 16777215, x, y + entityIn.height + 0.5F, z);
     }
 
-    private void displayText (String text, float scale, int color, double x, double y, double z) {
+    private void displayText(String text, float scale, int color, double x, double y, double z) {
         final FontRenderer fontrenderer = getFontRendererFromRenderManager();
         GL11.glPushMatrix();
         GL11.glTranslated(x, y, z);
@@ -119,7 +121,7 @@ public class RenderMillVillager extends RenderBiped<EntityMillVillager> {
 
     public static class millVillagerRenderFactory implements IRenderFactory {
         @Override
-        public Render createRenderFor (RenderManager manager) {
+        public Render createRenderFor(RenderManager manager) {
             return new RenderMillVillager(manager, new ModelBiped(), 0.5F);
         }
     }

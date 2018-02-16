@@ -19,48 +19,81 @@ public class VillageGeography {
 
     public int length = 0;
     public int width = 0;
-    private int chunkStartX = 0, chunkStartZ = 0;
     public int mapStartX = 0, mapStartZ = 0;
-    private int yBaseline = 0;
-
+    /**
+     * The position of the top block at the given RELATIVE x and z coords
+     */
     public short[][] topGround;
-    public short[][] constructionHeight;
-    private short[][] spaceAbove;
-
+    /**
+     * Any coordinates where there is lava
+     */
     public boolean[][] danger;
+    /**
+     * Anywhere that contains forbidden blocks is set to true
+     */
     public boolean[][] buildingForbidden;
+    /**
+     * Anywhere we can build is set to true
+     */
     public boolean[][] canBuild;
-
+    /**
+     * Anywhere where an existing building is placed is set to true
+     */
     public boolean[][] buildingLoc;
-
-    private boolean[][] water;
-    private boolean[][] tree;
-
+    /**
+     * Anywhere a building has tried to be placed is set to true.
+     */
     public boolean[][] buildTested = null;
-
-    private boolean[][] topAdjusted;
-
+    /**
+     * Anywhere a path is placed is set to true
+     */
     public boolean[][] path;
-
-    private int frequency = 10;
     public LinkedHashMap<BuildingLocation, BuildingPlan> buildingLocations = new LinkedHashMap<>();
-    private BuildingLocation locationIP;
-
-    public int nbLoc = 0;
-
     public World world;
-
+    private int yBaseline = 0;
+    /**
+     * The amount of space in a given spot
+     */
+    public short[][] spaceAbove;
+    /**
+     * Whether there is water in the given spot
+     */
+    public boolean[][] water;
+    /**
+     * Whether there is a tree in the given spot
+     */
+    private boolean[][] tree;
+    /**
+     * Anywhere we have attempted to bridge a gap is set to true
+     */
+    private boolean[][] topAdjusted;
+    private int frequency = 10;
     private int lastUpdatedX, lastUpdatedZ;
 
     private int updateCounter;
 
-    public VillageGeography () {
+    public VillageGeography() {
 
     }
 
-    private void createWorldInfo (final int pstartX, final int pstartZ, final int endX, final int endZ) {
-        chunkStartX = pstartX >> 4;
-        chunkStartZ = pstartZ >> 4;
+    private static boolean isForbiddenBlockForConstruction(final Block block) {
+        return block == Blocks.water || block == Blocks.flowing_water || block == Blocks.ice || block == Blocks.flowing_lava || block == Blocks.lava || block == Blocks.planks || block == Blocks.cobblestone || block == Blocks.brick_block || block == Blocks.chest || block == Blocks.glass || block == Blocks.stonebrick || block == Blocks.prismarine
+                || block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
+    }
+
+    private static boolean isBlockIdGround(final Block b) {
+        return b == Blocks.bedrock || b == Blocks.clay || b == Blocks.dirt || b == Blocks.stone || b == Blocks.snow ||
+                b == Blocks.packed_ice || b == Blocks.grass || b == Blocks.gravel || b == Blocks.obsidian ||
+                b == Blocks.sand || b == Blocks.farmland || b == Blocks.mycelium;
+    }
+
+    private static boolean isBlockSolid(Block block) {
+        return block.getMaterial().blocksMovement() || block == Blocks.glass || block == Blocks.glass_pane || block instanceof BlockSlab || block instanceof BlockStairs || block instanceof BlockFence || block instanceof BlockWall || block == MillBlocks.paperWall;
+    }
+
+    private void createWorldInfo(final int pstartX, final int pstartZ, final int endX, final int endZ) {
+        int chunkStartX = pstartX >> 4;
+        int chunkStartZ = pstartZ >> 4;
         mapStartX = chunkStartX << 4;
         mapStartZ = chunkStartZ << 4;
 
@@ -74,7 +107,6 @@ public class VillageGeography {
         }
 
         topGround = new short[length][width];
-        constructionHeight = new short[length][width];
         spaceAbove = new short[length][width];
         danger = new boolean[length][width];
         buildingLoc = new boolean[length][width];
@@ -98,42 +130,28 @@ public class VillageGeography {
                 updateChunk(i, j);
             }
         }
-
         lastUpdatedX = 0;
         lastUpdatedZ = 0;
     }
 
-    private static boolean isForbiddenBlockForConstruction (final Block block) {
-        return block == Blocks.water || block == Blocks.flowing_water || block == Blocks.ice ||
-                block == Blocks.flowing_lava || block == Blocks.lava || block == Blocks.planks ||
-                block == Blocks.cobblestone || block == Blocks.brick_block || block == Blocks.chest ||
-                block == Blocks.glass || block == Blocks.stonebrick || block == Blocks.prismarine ||
-                block instanceof BlockWall || block instanceof BlockFence ||
-                block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone ||
-                block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile ||
-                block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile ||
-                block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
-    }
-
-    public void registerBuilding (BuildingPlan p, final BuildingLocation bl) {
+    public void registerBuilding(BuildingPlan p, final BuildingLocation bl) {
         buildingLocations.put(bl, p);
 
-        final int sx = Math.max(bl.minxMargin - mapStartX, 0);
-        final int sz = Math.max(bl.minzMargin - mapStartZ, 0);
-        final int ex = Math.min(bl.maxxMargin - mapStartX, length + 1);
-        final int ez = Math.min(bl.maxzMargin - mapStartZ, width + 1);
+        final int lowerX = Math.max(bl.minxMargin - mapStartX, 0);
+        final int lowerZ = Math.max(bl.minzMargin - mapStartZ, 0);
+        final int upperX = Math.min(bl.maxxMargin - mapStartX, length + 1);
+        final int upperZ = Math.min(bl.maxzMargin - mapStartZ, width + 1);
 
-        for (int i = sx; i < ex; i++) {
-            for (int j = sz; j < ez; j++) {
-                buildingLoc[i][j] = true;
+        for (int x = lowerX; x < upperX; x++) {
+            for (int z = lowerZ; z < upperZ; z++) {
+                buildingLoc[x][z] = true;
             }
         }
     }
 
-    public boolean update (final World world, final List<BuildingLocation> locations, final BuildingLocation blIP, final BlockPos center, final int radius) {
+    public boolean update(final World world, final List<BuildingLocation> locations, final BuildingLocation blIP, final BlockPos center, final int radius) {
         this.world = world;
         this.yBaseline = center.getY();
-        locationIP = blIP;
 
         int startX = center.getX(), startZ = center.getZ(), endX = center.getX(), endZ = center.getZ();
 
@@ -142,15 +160,12 @@ public class VillageGeography {
                 if (location.position.getX() - location.length / 2 < startX) {
                     startX = location.position.getX() - location.length / 2;
                 }
-
                 if (location.position.getX() + location.length / 2 > endX) {
                     endX = location.position.getX() + location.length / 2;
                 }
-
                 if (location.position.getZ() - location.width / 2 < startZ) {
                     startZ = location.position.getZ() - location.width / 2;
                 }
-
                 if (location.position.getZ() + location.width / 2 > endZ) {
                     endZ = location.position.getZ() + location.width / 2;
                 }
@@ -161,15 +176,12 @@ public class VillageGeography {
             if (blIP.position.getX() - blIP.length / 2 < startX) {
                 startX = blIP.position.getX() - blIP.length / 2;
             }
-
             if (blIP.position.getX() + blIP.length / 2 > endX) {
                 endX = blIP.position.getX() + blIP.length / 2;
             }
-
             if (blIP.position.getZ() - blIP.width / 2 < startZ) {
                 startZ = blIP.position.getZ() - blIP.width / 2;
             }
-
             if (blIP.position.getZ() + blIP.width / 2 > endZ) {
                 endZ = blIP.position.getZ() + blIP.width / 2;
             }
@@ -196,181 +208,158 @@ public class VillageGeography {
         }
     }
 
-    private void updateChunk (final int startX, final int startZ) {
+    private void updateChunk(final int startX, final int startZ) {
         // We have to test not just for this chunk but the surrounding ones also
         // as we need to do some operations that involve
         // neighbouring blocks
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
-                if (!world.getChunkProvider().chunkExists((startX + mapStartX >> 4) + i, (startZ + mapStartZ >> 4) + j)) {
-                    world.getChunkProvider().provideChunk((startX + mapStartX >> 4) + i, (startZ + mapStartZ >> 4) + j);
+        for (int chunkX = -1; chunkX < 2; chunkX++) {
+            for (int chunkZ = -1; chunkZ < 2; chunkZ++) {
+                if (!world.getChunkProvider().chunkExists((startX + mapStartX >> 4) + chunkX, (startZ + mapStartZ >> 4) + chunkZ)) {
+                    world.getChunkProvider().provideChunk((startX + mapStartX >> 4) + chunkX, (startZ + mapStartZ >> 4) + chunkZ);
                 }
             }
         }
 
         final Chunk chunk = world.getChunkFromBlockCoords(new BlockPos(startX + mapStartX, yBaseline, startZ + mapStartZ));
 
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                final short miny = (short) Math.max(yBaseline - 25, 1);
-                final short maxy = (short) Math.min(yBaseline + 25, 255);
+        for (int xInChunk = 0; xInChunk < 16; xInChunk++) {
+            for (int zInChunk = 0; zInChunk < 16; zInChunk++) {
+                final short minPermittedYCoord = (short) Math.max(yBaseline - 25, 1);
+                final short maxPermittedYCoord = (short) Math.min(yBaseline + 25, 255);
 
-                final int mx = i + startX;
-                final int mz = j + startZ;
+                final int currentRelativeX = xInChunk + startX;
+                final int currentRelativeZ = zInChunk + startZ;
 
-                canBuild[mx][mz] = false;
-                buildingForbidden[mx][mz] = false;
-                water[mx][mz] = false;
-                topAdjusted[mx][mz] = false;
-
-                short y = maxy;
+                canBuild[currentRelativeX][currentRelativeZ] = false;
+                buildingForbidden[currentRelativeX][currentRelativeZ] = false;
+                water[currentRelativeX][currentRelativeZ] = false;
+                topAdjusted[currentRelativeX][currentRelativeZ] = false;
 
                 Block block;
 
-                short ceilingSize = 0;
-                Block tblock = chunk.getBlock(i, y, j);
+                short currentY = (short) (chunk.getHeight(new BlockPos(xInChunk, yBaseline, zInChunk)));
 
-/* MoonCutter replaced this with chunk.GetHeight...
-				while (y >= miny && !isBlockIdGround(tblock)) {
-					if (isBlockIdGroundOrCeiling(tblock)) {
-						ceilingSize++;
-					} else {
-						ceilingSize = 0;
-					}
+                short topBlockYPos = currentY;
 
-					y--;
-
-					if (ceilingSize > 3) {
-						break;
-					}
-
-					tblock = chunk.getBlock(i, y, j);
-				}*/
-
-                y = (short) (chunk.getHeight(new BlockPos(i, yBaseline, j)));
-                Block blockY = chunk.getBlock(i, y, j);
-                Block blockYMinus1 = chunk.getBlock(i, y - 1, j);
-
-                constructionHeight[mx][mz] = (short) (y - 1);
-
-                short my = (short) (y - 1);
-
-                if (!chunk.canSeeSky(new BlockPos(i, y, j))) {
+                if (!chunk.canSeeSky(new BlockPos(xInChunk, currentY, zInChunk))) {
                     System.out.println("Block is Blocked");
                 }
 
-                boolean heightDone = false;
+                while(!isBlockIdGround(world.getBlockState(new BlockPos(xInChunk, topBlockYPos, zInChunk)).getBlock())) {
+                    topBlockYPos--;
+                }
 
-                if (y <= maxy && y > 1) {
-                    block = chunk.getBlock(i, my, j);
+                if (currentY <= maxPermittedYCoord && currentY > 1) {
+                    block = chunk.getBlock(xInChunk, topBlockYPos, zInChunk);
                 } else {
                     block = null;
                 }
 
-                //System.out.println("y is " + constructionHeight[mx][mz]);
+                boolean onGround = true;
 
-                boolean onground = true;// used to continue looking for surface
-                // if starting in water
                 short lastLiquid = -1;
 
-                while (block != null && (isBlockSolid(block) || block instanceof BlockLiquid || !onground)) {
-                    if (block == Blocks.log) {
-                        heightDone = true;
-                    } else if (!heightDone) { // everything solid but wood counts
-                        constructionHeight[mx][mz]++;
-                    } else {
-                        heightDone = true;
-                    }
-
+                //Keep going up from our highest block until it's not solid
+                while (block != null && (isBlockSolid(block) || block instanceof BlockLiquid || !onGround)) {
                     if (isForbiddenBlockForConstruction(block)) {
-                        buildingForbidden[mx][mz] = true;
+                        buildingForbidden[currentRelativeX][currentRelativeZ] = true;
                     }
 
                     if (block instanceof BlockLiquid) {
-                        onground = false;
-                        lastLiquid = y;
+                        onGround = false;
+                        lastLiquid = currentY;
                     } else if (isBlockSolid(block)) {
-                        onground = true;
+                        onGround = true;
                     }
 
-                    y++;
+                    currentY++;
 
-                    if (y <= maxy && y > 1) {
-                        block = chunk.getBlock(i, y, j);
+                    if (currentY <= maxPermittedYCoord && currentY > 1) {
+                        block = chunk.getBlock(xInChunk, currentY, zInChunk);
                     } else {
                         block = null;
                     }
                 }
 
-                //System.out.println("constHeight is now at " + constructionHeight[mx][mz]);
-
-                if (!onground) {
-                    y = lastLiquid;
+                if (!onGround) {
+                    currentY = lastLiquid;
                 }
 
-                while (y <= maxy && y > 1 && !(!isBlockSolid(chunk.getBlock(i, y, j)) && !isBlockSolid(chunk.getBlock(i, y + 1, j)))) {
-                    y++;
+                while (currentY <= maxPermittedYCoord && currentY > 1 && !(!isBlockSolid(chunk.getBlock(xInChunk, currentY, zInChunk)) && !isBlockSolid(chunk.getBlock(xInChunk, currentY + 1, zInChunk)))) {
+                    currentY++;
                 }
 
-                y = (byte) Math.max(1, y);
+                currentY = (byte) Math.max(1, currentY);
 
-//				topGround[mx][mz] = y;
-                topGround[mx][mz] = my;
-                spaceAbove[mx][mz] = 0;
+                topGround[currentRelativeX][currentRelativeZ] = topBlockYPos;
+                spaceAbove[currentRelativeX][currentRelativeZ] = 0;
 
-                final Block soilBlock = chunk.getBlock(i, my - 1, j);
-                block = chunk.getBlock(i, my, j);
+                final Block blockBelowTop = chunk.getBlock(xInChunk, topBlockYPos - 1, zInChunk);
+                block = chunk.getBlock(xInChunk, topBlockYPos, zInChunk);
 
-                water[mx][mz] = (block == Blocks.flowing_water || block == Blocks.water);
+                water[currentRelativeX][currentRelativeZ] = (block == Blocks.flowing_water || block == Blocks.water);
 
-                tree[mx][mz] = (soilBlock == Blocks.log);
+                tree[currentRelativeX][currentRelativeZ] = (blockBelowTop == Blocks.log);
 
-                path[mx][mz] = (soilBlock == MillBlocks.blockMillPath || soilBlock == MillBlocks.blockMillPathSlab || soilBlock == MillBlocks.blockMillPathSlabDouble);
+                path[currentRelativeX][currentRelativeZ] = (blockBelowTop == MillBlocks.blockMillPath || blockBelowTop == MillBlocks.blockMillPathSlab || blockBelowTop == MillBlocks.blockMillPathSlabDouble);
 
                 boolean blocked = false;
 
-                if (!(soilBlock instanceof BlockFence) && !(soilBlock instanceof BlockWall) && !isBlockSolid(block) && block != Blocks.flowing_water && soilBlock != Blocks.water) {
-                    spaceAbove[mx][mz] = 1;
+                //If we're not on top of a fence or wall (which are just over a block tall)
+                //And we're not a full cube, glass, iron bars or similar, and not a liquid, then we're empty space
+                if (!(blockBelowTop instanceof BlockFence) && !(blockBelowTop instanceof BlockWall) && !isBlockSolid(block) && block != Blocks.flowing_water && blockBelowTop != Blocks.water) {
+                    spaceAbove[currentRelativeX][currentRelativeZ] = 1;
                 } else {
+                    //Otherwise we're blocked - i.e. not walkable
                     blocked = true;
                 }
 
+                //If this is lava it's dangerous. Simple enough
                 if (block == Blocks.flowing_lava || block == Blocks.lava) {
-                    danger[mx][mz] = true;
+                    danger[currentRelativeX][currentRelativeZ] = true;
                 } else {
-                    danger[mx][mz] = false;
-
+                    danger[currentRelativeX][currentRelativeZ] = false;
+                    //If this is a forbidden block, AND the one below it is the SAME forbidden block, this is dangerous
                     for (final Block forbiddenBlock : Millenaire.instance.forbiddenBlocks) {
-                        danger[mx][mz] = (forbiddenBlock == block);
-                        danger[mx][mz] = (soilBlock == block);
+                        danger[currentRelativeX][currentRelativeZ] = (forbiddenBlock == block);
+                        danger[currentRelativeX][currentRelativeZ] = (blockBelowTop == block);
                     }
                 }
 
-                if (!danger[mx][mz] && !buildingLoc[mx][mz]) {
-                    if (constructionHeight[mx][mz] > yBaseline - VALIDHEIGHTDIFF && constructionHeight[mx][mz] < yBaseline + VALIDHEIGHTDIFF) {
-                        canBuild[mx][mz] = true;
+                //If we're not dangerous
+                if (!danger[currentRelativeX][currentRelativeZ] && !buildingLoc[currentRelativeX][currentRelativeZ]) {
+                    if (topBlockYPos - 1 > yBaseline - VALIDHEIGHTDIFF && topBlockYPos - 1 < yBaseline + VALIDHEIGHTDIFF) {
+                        //If the block below the top block is in the height range, we can build here
+                        canBuild[currentRelativeX][currentRelativeZ] = true;
                     }
                 }
 
-                buildingForbidden[mx][mz] = isForbiddenBlockForConstruction(block);
+                buildingForbidden[currentRelativeX][currentRelativeZ] = isForbiddenBlockForConstruction(block);
 
-                y++;
+                //Get the block above the top block, which should in theory be air, no?
+                currentY++;
 
-                while (y < maxy && y > 0) {
-                    block = chunk.getBlock(i, y, j);
+                //Keep going up until we're at the max Y
+                while (currentY < maxPermittedYCoord && currentY > 0) {
+                    block = chunk.getBlock(xInChunk, currentY, zInChunk);
 
-                    if (!blocked && spaceAbove[mx][mz] < 3 && !isBlockSolid(block)) {
-                        spaceAbove[mx][mz]++;
+                    //If we're not blocked, and the current block isn't solid (i.e. it's walkable) then there's another
+                    //block's worth of space here.
+                    if (!blocked && spaceAbove[currentRelativeX][currentRelativeZ] < 3 && !isBlockSolid(block)) {
+                        //System.out.println("Not solid - we have space");
+                        spaceAbove[currentRelativeX][currentRelativeZ]++;
                     } else {
                         blocked = true;
                     }
 
-                    buildingForbidden[mx][mz] = (isForbiddenBlockForConstruction(block));
+                    //If any blocks ABOVE the top one are forbidden then this area is forbidden.
+                    buildingForbidden[currentRelativeX][currentRelativeZ] = (isForbiddenBlockForConstruction(block));
 
-                    y++;
+                    currentY++;
                 }
 
-                canBuild[mx][mz] = !(buildingForbidden[mx][mz]);
+                //If building isn't forbidden, we can build. Duh.
+                canBuild[currentRelativeX][currentRelativeZ] = !(buildingForbidden[currentRelativeX][currentRelativeZ]);
             }
         }
 
@@ -386,7 +375,6 @@ public class VillageGeography {
 
         while (gapFilled) {
             gapFilled = false;
-
             for (int i = -5; i < 21; i++) {
                 for (int j = -5; j < 21; j++) {
                     final int mx = i + startX;
@@ -406,42 +394,35 @@ public class VillageGeography {
                                 // check if same level works
                                 if (Math.abs(topGround[mx - 1][mz] - topGround[mx + 1][mz]) < 2 && belowsolid && !samesolid && !abovesolid) {
                                     topGround[mx][mz] = ntg;
-
                                     if (!above2solid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 } else if (topGround[mx + 1][mz] <= topGround[mx - 1][mz] && below2solid && !belowsolid && !samesolid && !abovesolid) {
                                     topGround[mx][mz] = (short) (ntg - 1);
-
                                     if (!abovesolid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 } else if (topGround[mx + 1][mz] >= topGround[mx - 1][mz] && samesolid && !abovesolid && !above2solid) {
                                     topGround[mx][mz] = (short) (ntg + 1);
-
                                     if (!above3solid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 }
                             }
                         }
                     }
-
                     if (mx >= 0 && mx < length) {
                         if (mz > 1 && mz < width - 1) {
                             if (Math.abs(topGround[mx][mz - 1] - topGround[mx][mz + 1]) < 3 && (topGround[mx][mz - 1] + 2 < topGround[mx][mz] || topGround[mx][mz + 1] + 2 < topGround[mx][mz])) {
@@ -456,35 +437,29 @@ public class VillageGeography {
                                 // check if same level works
                                 if (Math.abs(topGround[mx][mz - 1] - topGround[mx][mz + 1]) < 2 && belowsolid && !samesolid && !abovesolid) {
                                     topGround[mx][mz] = ntg;
-
                                     if (!above2solid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 } else if (topGround[mx][mz + 1] <= topGround[mx][mz - 1] && below2solid && !belowsolid && !samesolid && !abovesolid) {
                                     topGround[mx][mz] = (short) (ntg - 1);
-
                                     if (!abovesolid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 } else if (topGround[mx][mz + 1] >= topGround[mx][mz - 1] && samesolid && !abovesolid && !above2solid) {
                                     topGround[mx][mz] = (short) (ntg + 1);
-
                                     if (!above3solid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
                                         spaceAbove[mx][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 }
@@ -523,7 +498,6 @@ public class VillageGeography {
                                 if (belowsolid && nextbelowsolid && !samesolid && !nextsamesolid && !abovesolid && !nextabovesolid) {
                                     topGround[mx][mz] = ntg;
                                     topGround[mx + 1][mz] = ntg;
-
                                     if (!above2solid) {
                                         spaceAbove[mx][mz] = 3;
                                     } else {
@@ -535,14 +509,12 @@ public class VillageGeography {
                                     } else {
                                         spaceAbove[mx + 1][mz] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 }
                             }
                         }
                     }
-
                     if (mx >= 0 && mx < length) {
                         if (mz > 1 && mz < width - 2) {
                             if (topGround[mx][mz - 1] == topGround[mx][mz + 2] && topGround[mx][mz - 1] < topGround[mx][mz] && topGround[mx][mz - 1] < topGround[mx][mz + 1]) {
@@ -576,7 +548,6 @@ public class VillageGeography {
                                     } else {
                                         spaceAbove[mx][mz + 1] = 2;
                                     }
-
                                     gapFilled = true;
                                     topAdjusted[mx][mz] = true;
                                 }
@@ -589,6 +560,7 @@ public class VillageGeography {
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
+
                 final int mx = i + startX;
                 final int mz = j + startZ;
 
@@ -605,7 +577,7 @@ public class VillageGeography {
         }
     }
 
-    private void updateNextChunk () {
+    private void updateNextChunk() {
         updateCounter = (updateCounter + 1) % frequency;
 
         if (updateCounter != 0) {
@@ -613,7 +585,6 @@ public class VillageGeography {
         }
 
         lastUpdatedX++;
-
         if (lastUpdatedX * 16 >= length) {
             lastUpdatedX = 0;
             lastUpdatedZ++;
@@ -623,26 +594,28 @@ public class VillageGeography {
             lastUpdatedZ = 0;
         }
 
-        final UpdateThread thread = new UpdateThread();
+        final UpdateThread thread = new UpdateThread(Thread.currentThread());
         thread.setPriority(Thread.MIN_PRIORITY);
         thread.x = lastUpdatedX << 4;
         thread.z = lastUpdatedZ << 4;
 
         thread.start();
+        try {
+            thread.wait(); //Wait for our chunk updater to finish.
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    private static boolean isBlockIdGround (final Block b) {
-        return (b == Blocks.bedrock || b == Blocks.clay || b == Blocks.dirt ||
-                b == Blocks.grass || b == Blocks.gravel || b == Blocks.obsidian ||
-                b == Blocks.sand || b == Blocks.farmland);
-    }
+    public static short[][] shortArrayDeepClone(final short[][] source) {
 
-    private static boolean isBlockIdGroundOrCeiling (final Block b) { return (b == Blocks.stone || b == Blocks.sandstone); }
+        final short[][] target = new short[source.length][];
 
-    private static boolean isBlockSolid (Block block) {
-        return block.isFullCube() || block == Blocks.glass || block == Blocks.glass_pane ||
-                block instanceof BlockSlab || block instanceof BlockStairs || block instanceof BlockFence ||
-                block instanceof BlockWall || block == MillBlocks.paperWall;
+        for (int i = 0; i < source.length; i++) {
+            target[i] = source[i].clone();
+        }
+
+        return target;
     }
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -650,8 +623,16 @@ public class VillageGeography {
     public class UpdateThread extends Thread {
         int x;
         int z;
+        Thread t;
+
+        public UpdateThread(Thread thread) {
+            t = thread;
+        }
 
         @Override
-        public void run () { updateChunk(x, z); }
+        public void run() {
+            updateChunk(x, z);
+            t.notify();
+        }
     }
 }

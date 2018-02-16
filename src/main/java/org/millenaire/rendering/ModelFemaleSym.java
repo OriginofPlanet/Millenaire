@@ -11,11 +11,15 @@ public class ModelFemaleSym extends ModelBiped {
     public boolean heldItemLeft;
     public boolean heldItemRight;
 
-    public ModelFemaleSym () { this(0.0F); }
+    public ModelFemaleSym() {
+        this(0.0F);
+    }
 
-    public ModelFemaleSym (final float f) { this(f, 0.0F); }
+    public ModelFemaleSym(final float f) {
+        this(f, 0.0F);
+    }
 
-    public ModelFemaleSym (final float f, final float f1) {
+    public ModelFemaleSym(final float f, final float f1) {
         heldItemLeft = false;
         heldItemRight = false;
         bipedHead = new ModelRenderer(this, 0, 0);
@@ -47,7 +51,7 @@ public class ModelFemaleSym extends ModelBiped {
     }
 
     @Override
-    public void render (final Entity par1Entity, final float f, final float f1, final float f2, final float f3, final float f4, final float f5) {
+    public void render(final Entity par1Entity, final float f, final float f1, final float f2, final float f3, final float f4, final float f5) {
         setRotationAngles(f, f1, f2, f3, f4, f5, par1Entity);
         bipedHead.render(f5);
         bipedUpperBody.render(f5);
