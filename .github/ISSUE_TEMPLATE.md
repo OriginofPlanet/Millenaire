@@ -1,6 +1,7 @@
 <!-- 
+  THIS ISSUE TRACKER IS NOT FOR VERSION 1.12.2 OF THE MOD. PLEASE GO TO [THE FORUMS](http://millenaire.org/forum/) SUBMIT ANY ISSUES FOR 1.12.2.
   Please ensure that when submitting a bug report that you are using a version above 1.8.9. 
-    1.7.10 is no longer supported. 
+    1.7.10 is no longer supported.
   If you need help with installation or usage, please contact us on our Discord instead.
   Only submit issues if they are an issue with the mod itself. If it's a technic launcher issue, 
     please use the Technic discord and the likewise for other platforms.
@@ -31,3 +32,4 @@
 -->
 - [ ] This issue is High Priority (Crashes the modpack, makes the mod unuseable)
 - [ ] I've tested this issue on the latest version of the mod for the latest version of Minecraft.
+- [ ] I understand that this issue tracker is NOT for the 1.12.2 version of the mod.
