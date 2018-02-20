@@ -27,6 +27,11 @@ public class VillageTracker extends WorldSavedData {
         super(id);
     }
 
+    /**
+     * Creates or gets the village tracker for a world.
+     * @param world The world to get the tracker for
+     * @return An instance of the VillageTracker class.
+     */
     public static VillageTracker get(World world) {
         MapStorage storage = world.getPerWorldStorage();
         VillageTracker data = (VillageTracker) storage.loadData(VillageTracker.class, IDENTITY);
@@ -38,6 +43,10 @@ public class VillageTracker extends WorldSavedData {
         return data;
     }
 
+    /**
+     * Called by MC on world load - reads in the saved village data.
+     * @param nbt The data saved in the world
+     */
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
         System.out.println("Village Tracker reading from NBT");
@@ -50,13 +59,22 @@ public class VillageTracker extends WorldSavedData {
         }
     }
 
+    /**
+     * Convenience method that reads a village from NBT and instantiates it.
+     * @param nbt The NBT to read the village from.
+     * @return The instantiated village object.
+     */
     private Village readVillageFromCompound(NBTTagCompound nbt) {
         Village vil = new Village();
         vil.setPos(BlockPos.fromLong(nbt.getLong("pos")));
-        vil.setType(MillCulture.getTypeFromName(nbt.getString("Type")));
+        vil.setType(MillCulture.findVillageTypeByID(nbt.getString("Type")));
         return vil;
     }
 
+    /**
+     * Called by MC to get us to save the village data
+     * @param nbt The NBT we must write to.
+     */
     @Override
     public void writeToNBT(NBTTagCompound nbt) {
         System.out.println("Village Tracker Writing to NBT");
@@ -78,7 +96,7 @@ public class VillageTracker extends WorldSavedData {
      * @param minDist maximum distance to check
      * @return
      */
-    public boolean isCloseToOtherVillage(BlockPos pos, int minDist) {
+    public boolean isTooCloseToOtherVillage(BlockPos pos, int minDist) {
         boolean tooClose = false;
 
         for (BlockPos bp : VPs) {
@@ -91,20 +109,37 @@ public class VillageTracker extends WorldSavedData {
         return tooClose;
     }
 
+    /**
+     * Registers a village so that it will be saved with the world.
+     * @param id The {@link UUID Universally Unique Identifier (UUID)} associated with this village.
+     * @param vil The {@link Village} itself.
+     */
     public void registerVillage(UUID id, Village vil) {
-        markDirty();
         villages.put(id, vil);
+        markDirty();
     }
 
+    /**
+     * Registers a village position so that no other villages will be generated too close.
+     * @param pos The {@link BlockPos} of the village
+     */
     public void registerVillagePos(BlockPos pos) {
         VPs.add(pos);
     }
 
+    /**
+     * Removes a village from the village list so that it is no longer saved.
+     * @param id The {@link UUID Universally Unique Identifier (UUID)} of the village to remove
+     */
     public void unregisterVillage(UUID id) {
-        markDirty();
         villages.remove(id);
+        markDirty();
     }
 
+    /**
+     * Removes a {@link VillageTracker#registerVillagePos(BlockPos) village position} from the list so that other villages may once again generate near it
+     * @param pos The position to remove
+     */
     public void unregisterVillagePos(BlockPos pos) {
         VPs.remove(pos);
     }

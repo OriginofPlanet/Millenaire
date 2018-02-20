@@ -595,7 +595,7 @@ public class EntityMillVillager extends EntityCreature implements IAStarPathedEn
             culture.getChildType(GENDER);
         }
         this.dataWatcher.updateObject(GENDER, nbt.getInteger("gender"));
-        type = culture.getVillagerType(nbt.getString("villagerType"));
+        type = culture.getVillagerTypeByID(nbt.getString("villagerType"));
         isVillagerSleeping = nbt.getBoolean("sleeping");
 
         this.dataWatcher.updateObject(TEXTURE, nbt.getString("texture"));

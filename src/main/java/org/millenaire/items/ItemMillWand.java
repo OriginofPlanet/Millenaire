@@ -95,8 +95,8 @@ public class ItemMillWand extends Item {
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100100, MillCulture.normanCulture);
 //					System.out.println("cultured: " + entity.culture.cultureName);
-//					entity = entity.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanGirl"), 1);
-//					System.out.println(entity.getVillagerType());
+//					entity = entity.setTypeAndGender(MillCulture.normanCulture.getVillagerTypeByID("normanGirl"), 1);
+//					System.out.println(entity.getVillagerTypeByID());
 //					entity.setChild();
 //					entity.setPosition(pos.getX(), pos.getY(), pos.getZ());
 //					worldIn.spawnEntityInWorld(entity);
@@ -112,8 +112,8 @@ public class ItemMillWand extends Item {
 //					worldIn.setBlockToAir(pos);
 //					EntityMillVillager entity = new EntityMillVillager(worldIn, 100101, MillCulture.normanCulture);
 //					System.out.println("cultured: ");
-//					entity = entity.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanLady"), 1);
-//					System.out.println(entity.getVillagerType());
+//					entity = entity.setTypeAndGender(MillCulture.normanCulture.getVillagerTypeByID("normanLady"), 1);
+//					System.out.println(entity.getVillagerTypeByID());
 //					entity.setPosition(pos.getX(), pos.getY(), pos.getZ());
 //					worldIn.spawnEntityInWorld(entity);
 //				}

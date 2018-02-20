@@ -43,7 +43,7 @@ public class MillPathNavigate extends PathNavigateGround {
 
             synchronized (lock) {
                 if (lastPos.getX() != newPos.getX() || lastPos.getZ() != newPos.getZ() || lastPos.getY() != newPos.getY())
-                    villager.pathing.createConnectionsTable(villager.village.geography, villager.getPosition());
+                    villager.pathing.createConnectionsTable(villager.village.geography);
 
                 lastPos = newPos;
 

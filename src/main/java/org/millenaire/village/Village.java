@@ -30,6 +30,14 @@ public class Village {
     private BuildingLocation[] buildings;
     private String villageName;
 
+    /**
+     * Constructor used by {@link Village#createVillage(BlockPos, World, VillageType, MillCulture, String)}
+     * @param b The position of the village stone
+     * @param worldIn The world the village is in
+     * @param typeIn The {@link VillageType type} of village this is.
+     * @param cultureIn The {@link MillCulture culture of the village}
+     * @param villageName The name of the village, as displayed to the user.
+     */
     private Village(BlockPos b, World worldIn, VillageType typeIn, MillCulture cultureIn, String villageName) {
         this.setPos(b);
         this.uuid = UUID.randomUUID();
@@ -41,7 +49,7 @@ public class Village {
         BuildingLocation loc = new BuildingLocation(1, 1, 1, mainBlock, EnumFacing.NORTH);
 
         ArrayList<BuildingLocation> bl = new ArrayList<>();
-        bl.add(loc); //TODO: It doesn't matter if the village stone is overwritten, right?
+        bl.add(loc);
 
         System.out.println("Constructing map of area...");
         this.geography.update(world, bl, null, mainBlock, world.getHeight(b).getY());
@@ -55,14 +63,32 @@ public class Village {
 
     }
 
+    /**
+     * Creates a village. Note that it will not be spawned until {@link Village#setupVillage()} is called.
+     * @param VSPos The position of the {@link org.millenaire.entities.TileEntityVillageStone Village Stone}
+     * @param world The world this village is in.
+     * @param typeIn The {@link VillageType type} of village this is (or will be)
+     * @param cultureIn The {@link MillCulture culture} of the village.
+     * @param villageName The name of the village, as shown to the player.
+     * @return The instantiated Village object.
+     */
     public static Village createVillage(BlockPos VSPos, World world, VillageType typeIn, MillCulture cultureIn, String villageName) {
         return new Village(VSPos, world, typeIn, cultureIn, villageName);
     }
 
+    /**
+     * Get the {@link VillageType} of this village.
+     * @return The type
+     */
     public VillageType getType() {
         return type;
     }
 
+    /**
+     * Sets the {@link VillageType} of this village. Should in theory only be used when loading a village from a save.
+     * Will log if the type is overwritten.
+     * @param t The type to set.
+     */
     public void setType(VillageType t) {
         if (type != null) {
             System.out.println("Warning: Type being overwritten for village at " + getPos());
@@ -70,10 +96,18 @@ public class Village {
         this.type = t;
     }
 
+    /**
+     * Get the unique identifier of this village.
+     * @return The {@link UUID} of this vilage.
+     */
     public UUID getUUID() {
         return uuid;
     }
 
+    /**
+     * Sets the unique identifier of this village. Should in theory only be used when loading a village from a save.
+     * @param u The UUID to set.
+     */
     public void setUUID(UUID u) {
         if (uuid != null) {
             System.out.println("Warning: UUID Being overwritten for village at " + getPos());
@@ -81,6 +115,10 @@ public class Village {
         uuid = u;
     }
 
+    /**
+     * Gets the position of the {@link org.millenaire.entities.TileEntityVillageStone village stone} for this village.
+     * @return The {@link BlockPos position} of the stone.
+     */
     public BlockPos getPos() {
         return mainBlock;
     }
@@ -93,18 +131,21 @@ public class Village {
         mainBlock = pos;
     }
 
+    /**
+     * Generates starting buildings and paths. Runs on a separate thread to the server thread.
+     */
     public void setupVillage() {
         new Thread(() -> {
             try {
                 EntityMillVillager v = new EntityMillVillager(world, 100100, culture, this);
                 v.setPosition(mainBlock.getX(), mainBlock.getY(), mainBlock.getZ());
-                v.setTypeAndGender(MillCulture.normanCulture.getVillagerType("normanKnight"), 1);
+                v.setTypeAndGender(MillCulture.normanCulture.getVillagerTypeByID("normanKnight"), 1);
                 MillPathNavigate mpn = new MillPathNavigate(v, world);
 
                 world.spawnEntityInWorld(v);
 
-                for (BuildingProject proj : type.startingBuildings) {
-                    BuildingPlan p = PlanIO.loadSchematic(PlanIO.getBuildingTag(ResourceLocationUtil.getRL(proj.ID).getResourcePath(), culture, true), culture, proj.lvl);
+                for (BuildingRecord proj : type.startingBuildings) {
+                    Building p = PlanIO.loadSchematic(PlanIO.getBuildingTag(ResourceLocationUtil.getRL(proj.ID).getResourcePath(), culture, true), culture, proj.lvl);
 
                     System.out.println("Finding a place to put a " + proj.ID);
 
@@ -173,48 +214,19 @@ public class Village {
         }).start();
     }
 
+    /**
+     * Builds all the paths in the village at generation time.
+     * @param pathing The {@link MillPathNavigate} to use to generate paths.
+     */
     private void genPaths(MillPathNavigate pathing) {
         pathing.villager.useNewPathingAtThisPoint = true;
-
-        /*System.out.println("Creating pathfinding-safe environment");
-        //TODO: Can this be more efficient?
-        //Set barriers around the outside to prevent pathfinding through structures
-        for (BuildingLocation loc : geography.buildingLocations.keySet()) {
-            BuildingPlan plan = geography.buildingLocations.get(loc);
-            if (plan.isCenter) continue;
-
-            for (int x = 0; x < plan.width; x++) {
-                ZLoop:
-                for (int z = 0; z < plan.length; z++) {
-                    //If we're not on the top or bottom row
-                    if (!(x == 0 || x == plan.width - 1)) {
-                        //And we're not on the left or right side
-                        if (!(z == 0 || z == plan.length - 1)) {
-                            //Don't do anything
-                            continue;
-                        }
-                    }
-
-                    //2 below the base, up to 3 above the top, just to be safe. Possibly overkill.
-                    for (int y = loc.position.getY() - 2; y < loc.position.getY() + plan.height + 3; y++) {
-                        BlockPos pos = new BlockPos(x + loc.position.getX(), y, z + loc.position.getZ());
-
-                        if (world.getBlockState(pos).getBlock() == MillBlocks.storedPosition) continue ZLoop;
-
-                        if (world.getBlockState(pos).getBlock() == Blocks.air) {
-                            world.setBlockState(pos, Blocks.barrier.getDefaultState());
-                        }
-                    }
-                }
-            }
-        }*/
 
         pathing.setSearchRange(400);
 
         BuildingLoop:
         for (BuildingLocation loc : geography.buildingLocations.keySet()) {
             try {
-                BuildingPlan plan = geography.buildingLocations.get(loc);
+                Building plan = geography.buildingLocations.get(loc);
 
                 if (!plan.rebuildPath) continue;
 
@@ -256,36 +268,5 @@ public class Village {
                 e.printStackTrace();
             }
         }
-
-        /*System.out.println("Reverting pathfinding-safe environment");
-        //Remove barriers from the outside
-        for (BuildingLocation loc : geography.buildingLocations.keySet()) {
-            BuildingPlan plan = geography.buildingLocations.get(loc);
-
-            for (int x = 0; x < plan.width; x++) {
-                ZLoop:
-                for (int z = 0; z < plan.length; z++) {
-                    //If we're not on the top or bottom row
-                    if (!(x == 0 || x == plan.width - 1)) {
-                        //And we're not on the left or right side
-                        if (!(z == 0 || z == plan.length - 1)) {
-                            //Don't do anything
-                            continue;
-                        }
-                    }
-
-                    //2 below the base, up to 3 above the top, just to be safe. Possibly overkill.
-                    for (int y = loc.position.getY() - 2; y < loc.position.getY() + plan.height + 3; y++) {
-                        BlockPos pos = new BlockPos(x + loc.position.getX(), y, z + loc.position.getZ());
-
-                        if (world.getBlockState(pos).getBlock() == MillBlocks.storedPosition) continue ZLoop;
-
-                        if (world.getBlockState(pos).getBlock() == Blocks.barrier) {
-                            world.setBlockToAir(pos);
-                        }
-                    }
-                }
-            }
-        }*/
     }
 }

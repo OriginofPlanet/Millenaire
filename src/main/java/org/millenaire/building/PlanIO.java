@@ -30,10 +30,16 @@ public class PlanIO {
 
     private static final String FILE_VERSION = "2";
 
-    //IBlockState[y][z][x]
-    public static void exportBuilding(EntityPlayer player, BlockPos startPoint) {
+    /**
+     * Called by the {@link org.millenaire.networking.PacketExportBuilding} on the server-side.
+     * Reads a sign specified by the given BlockPos, and exports to a file based on those params.
+     *
+     * @param player The player exporting the building.
+     * @param signPos The position of the sign containing the export parameters.
+     */
+    public static void exportBuilding(EntityPlayer player, BlockPos signPos) {
         try {
-            TileEntitySign sign = (TileEntitySign) player.getEntityWorld().getTileEntity(startPoint);
+            TileEntitySign sign = (TileEntitySign) player.getEntityWorld().getTileEntity(signPos);
 
             String buildingName = sign.signText[0].getUnformattedText();
             boolean saveSnow = (sign.signText[3].getUnformattedText().toLowerCase().equals("snow"));
@@ -65,9 +71,9 @@ public class PlanIO {
             Millenaire.simpleNetworkWrapper.sendTo(packet, (EntityPlayerMP) player);
 
             boolean foundEnd = false;
-            int xEnd = startPoint.getX() + 1;
-            while (xEnd < startPoint.getX() + 257) {
-                final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(xEnd, startPoint.getY(), startPoint.getZ()));
+            int xEnd = signPos.getX() + 1;
+            while (xEnd < signPos.getX() + 257) {
+                final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(xEnd, signPos.getY(), signPos.getZ()));
 
                 if (block.getBlock() == Blocks.standing_sign) {
                     foundEnd = true;
@@ -81,9 +87,9 @@ public class PlanIO {
                 throw new Exception("exporting.xaxis");
             }
             foundEnd = false;
-            int zEnd = startPoint.getZ() + 1;
-            while (zEnd < startPoint.getZ() + 257) {
-                final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(startPoint.getX(), startPoint.getY(), zEnd));
+            int zEnd = signPos.getZ() + 1;
+            while (zEnd < signPos.getZ() + 257) {
+                final IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(signPos.getX(), signPos.getY(), zEnd));
 
                 if (block.getBlock() == Blocks.standing_sign) {
                     foundEnd = true;
@@ -97,8 +103,8 @@ public class PlanIO {
                 throw new Exception("Ahhh!");
             }
 
-            final int width = xEnd - startPoint.getX() - 1;
-            final int length = zEnd - startPoint.getZ() - 1;
+            final int width = xEnd - signPos.getX() - 1;
+            final int length = zEnd - signPos.getZ() - 1;
 
             boolean stop = false;
             int y = 0;
@@ -113,7 +119,7 @@ public class PlanIO {
 
                 for (int x = 0; x < width; x++) {
                     for (int z = 0; z < length; z++) {
-                        IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(x + startPoint.getX() + 1, y + startPoint.getY() + startLevel, z + startPoint.getZ() + 1));
+                        IBlockState block = player.getEntityWorld().getBlockState(new BlockPos(x + signPos.getX() + 1, y + signPos.getY() + startLevel, z + signPos.getZ() + 1));
 
                         if (block.getBlock() != Blocks.air) {
                             blockFound = true;
@@ -134,7 +140,7 @@ public class PlanIO {
 
                 y++;
 
-                if (y + startPoint.getY() + startLevel >= 256) {
+                if (y + signPos.getY() + startLevel >= 256) {
                     stop = true;
                 }
             }
@@ -153,7 +159,7 @@ public class PlanIO {
             packet = new PacketSayTranslatedMessage("message.export.start.save");
             Millenaire.simpleNetworkWrapper.sendTo(packet, (EntityPlayerMP) player);
 
-            exportToSchem(ex2, (short) width, (short) ex.size(), (short) length, (short) startLevel, buildingName, buildingLevel, player);
+            exportToSchematic(ex2, (short) width, (short) ex.size(), (short) length, (short) startLevel, buildingName, buildingLevel, player);
 
             packet = new PacketSayTranslatedMessage("message.export.finish");
             Millenaire.simpleNetworkWrapper.sendTo(packet, (EntityPlayerMP) player);
@@ -164,10 +170,15 @@ public class PlanIO {
         }
     }
 
-    //Called only on the logical server
-    public static void importBuilding(EntityPlayer player, BlockPos startPos) {
+    /**
+     * Imports a building from the exports folder based on the parameters on the sign at the given BlockPos.
+     *
+     * @param player The player importing the building.
+     * @param signPos The sign containing import parameters.
+     */
+    public static void importBuilding(EntityPlayer player, BlockPos signPos) {
         try {
-            TileEntitySign te = (TileEntitySign) player.getEntityWorld().getTileEntity(startPos);
+            TileEntitySign te = (TileEntitySign) player.getEntityWorld().getTileEntity(signPos);
             String name = te.signText[0].getUnformattedText();
             int level = 1;
             if (te.signText[1] != null && te.signText[1].getUnformattedText().length() > 0) {
@@ -194,9 +205,9 @@ public class PlanIO {
             }
             FileInputStream fis = new FileInputStream(schem);
 
-            BuildingPlan plan = loadSchematic(CompressedStreamTools.readCompressed(fis), MillCulture.normanCulture, level);
+            Building plan = loadSchematic(CompressedStreamTools.readCompressed(fis), MillCulture.normanCulture, level);
 
-            placeBuilding(plan, new BuildingLocation(plan, startPos, EnumFacing.EAST), world);
+            placeBuilding(plan, new BuildingLocation(plan, signPos, EnumFacing.EAST), world);
         } catch (IOException e) {
             e.printStackTrace();
             PacketSayTranslatedMessage message = new PacketSayTranslatedMessage("message.error.unknown");
@@ -204,7 +215,14 @@ public class PlanIO {
         }
     }
 
-    public static void flattenTerrainForBuilding(BuildingPlan plan, BuildingLocation loc, VillageGeography geo) {
+    /**
+     * Flattens terrain for a building.
+     *
+     * @param building The building to flatten for.
+     * @param loc The location we are flattening.
+     * @param geo The geography of the village
+     */
+    public static void flattenTerrainForBuilding(Building building, BuildingLocation loc, VillageGeography geo) {
         //System.out.println("Flattening Terrain");
         int ylevel = loc.position.getY();
 
@@ -213,7 +231,7 @@ public class PlanIO {
         int margin = 3; //TODO: Tweak?
 
         BlockPos corner1 = loc.position.subtract(new Vec3i(margin, 0, margin));
-        BlockPos corner2 = loc.position.add(plan.width + margin, 0, plan.length + margin);
+        BlockPos corner2 = loc.position.add(building.width + margin, 0, building.length + margin);
 
         //for (int xPos = corner1.getX(); xPos <= corner2.getX(); xPos++) {
         for (int xPos = loc.minxMargin; xPos <= loc.maxxMargin; xPos++) {
@@ -268,20 +286,27 @@ public class PlanIO {
                 //Finish the flattening for the actual level we're targeting
                 world.setBlockState(new BlockPos(xPos, ylevel - 1, zPos), topBlock);
 
-                //System.out.println("Creating foundation below building at level " + (ylevel + plan.depth - 1) + " out of " + fillerBlock.getBlock());
+                //System.out.println("Creating foundation below building at level " + (ylevel + building.depth - 1) + " out of " + fillerBlock.getBlock());
                 //Ensure we have grass under anything we build to prevent gravity-affected blocks from falling.
-                world.setBlockState(new BlockPos(xPos, ylevel + plan.depth - 1, zPos), fillerBlock);
+                world.setBlockState(new BlockPos(xPos, ylevel + building.depth - 1, zPos), fillerBlock);
             }
 
         }
 
     }
 
-    public static void placeBuilding(BuildingPlan plan, BuildingLocation loc, World world) {
-        IBlockState[][][] blocks = plan.buildingArray;
+    /**
+     * Places a building from the schematic file.
+     *
+     * @param plan The building to place
+     * @param loc Where to place it
+     * @param world The world to place it in.
+     */
+    public static void placeBuilding(Building plan, BuildingLocation loc, World world) {
+        IBlockState[][][] blocks = plan.blocksInBuilding;
 
         //The list of blocks that must be placed last.
-        //TODO: Any others? Any way to auto-detect?
+        //TODO: Any others? Any way to auto-detect? Config Value?
 
         List<Block> blocksToPlaceLast = Arrays.asList(Blocks.torch, Blocks.redstone_torch, Blocks.vine, Blocks.bed, Blocks.wall_sign, Blocks.standing_sign,
                 Blocks.standing_banner, Blocks.wall_banner);
@@ -289,14 +314,14 @@ public class PlanIO {
         //Some blocks must be placed last in order to not drop onto the floor. This stores their locations.
         LinkedHashMap<BlockPos, IBlockState> placeLast = new LinkedHashMap<>();
 
-        for (int x = 0; x < plan.width; x++) {
-            for (int y = 0; y < plan.height; y++) {
-                for (int z = 0; z < plan.length; z++) {
+        for (int x = loc.minx; x < loc.maxx; x++) {
+            for (int y = loc.miny; y < loc.maxy; y++) {
+                for (int z = loc.minz; z < loc.maxz; z++) {
                     if (blocksToPlaceLast.contains(blocks[y][z][x].getBlock())) {
-                        placeLast.put(new BlockPos(x + loc.position.getX(), y + loc.position.getY() + plan.depth, z + loc.position.getZ()), blocks[y][z][x]);
+                        placeLast.put(new BlockPos(x, y, z), blocks[y][z][x]);
                     } else {
                         //System.out.println("Placing a " + blocks[y][z][x].getBlock());
-                        world.setBlockState(new BlockPos(x + loc.position.getX(), y + loc.position.getY() + plan.depth, z + loc.position.getZ()), blocks[y][z][x], 2);
+                        world.setBlockState(new BlockPos(x, y, z), blocks[y][z][x], 2);
                     }
                 }
             }
@@ -308,7 +333,15 @@ public class PlanIO {
         }
     }
 
-    public static BuildingPlan loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) {
+    /**
+     * Reads a Building from a schematic NBT tag.
+     *
+     * @param nbt The schematic file.
+     * @param culture The culture of the building.
+     * @param level What level of building we are placing.
+     * @return The created {@link Building} object.
+     */
+    public static Building loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) {
         //Convert Stream to NBTTagCompound
 
         //width = x-axis, height = y-axis, length = z-axis
@@ -378,7 +411,7 @@ public class PlanIO {
             states[i] = blocks[i].getStateFromMeta(data[i]);
         }
 
-        //turn into a 3D block array for use with BuildingPlan
+        //turn into a 3D block array for use with Building
         //in format [y][z][x]! IMPORTANT!
         IBlockState[][][] organized = new IBlockState[height][length][width];
 
@@ -395,11 +428,19 @@ public class PlanIO {
 
         String name = nbt.getString("BuildingName");
 
-        return new BuildingPlan(culture, level)
-                .setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.EAST).setPlan(organized).setLengthWidth(length, width)
+        return new Building(culture, level)
+                .setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.EAST).setActualContents(organized).setLengthWidth(length, width)
                 .setNameAndType(name, new String[]{}, new String[]{});
     }
 
+    /**
+     * Reads an NBT tag from a schematic file.
+     * @param name The name of the building.
+     * @param culture The name of the culture to which the building belongs.
+     * @param packaged Whether the building is contained within our JAR file. If true it will be loaded as a resource,
+     *                 otherwise from the exports folder.
+     * @return The schematic NBT tag - BLANK, NOT NULL, if the tag could not be loaded.
+     */
     public static NBTTagCompound getBuildingTag(final String name, MillCulture culture, final boolean packaged) {
         if (packaged) {
             InputStream x = MillCulture.class.getClassLoader().getResourceAsStream("assets/millenaire/cultures/" + culture.cultureName.toLowerCase() + "/buildings/" + name + ".mlplan");
@@ -425,6 +466,11 @@ public class PlanIO {
         }
     }
 
+    /**
+     * Gets the path to the file with the given name in the exports folder, creating the exports folder if it doesn't exist.
+     * @param name The name of the file to find.
+     * @return The file. May not exist.
+     */
     public static File getBuildingFile(final String name) {
         File f = new File(MinecraftServer.getServer().getDataDirectory().getAbsolutePath() + File.separator + "millenaire" + File.separator + "exports" + File.separator);
         if (!f.exists()) {
@@ -434,16 +480,24 @@ public class PlanIO {
         return new File(f, name + ".mlplan");
     }
 
-    private static boolean valid(short width, short height, short length, short depth, NBTTagCompound tag) {
+    /**
+     * Checks that the given dimensions match those in the given NBT tag. Logs if this is not the case.
+     * @param width The actual width
+     * @param height The actual height
+     * @param length The actual length
+     * @param tag The schematic to check against.
+     * @return True if ALL the dimensions match, else false.
+     */
+    private static boolean dimensionsMatch(short width, short height, short length, NBTTagCompound tag) {
         boolean valid = true;
         if (tag.getShort("Width") != width && tag.getShort("Width") != 0) {
-            System.out.println("Width: Expecting " + tag.getShort("Width") + ". Actual: " + width);
+            System.out.println("Width Mismatch: Expecting " + tag.getShort("Width") + ". Actual: " + width);
             valid = false;
         } else if (tag.getShort("Height") != height && tag.getShort("Height") != 0) {
-            System.out.println("Height: Expecting " + tag.getShort("Height") + ". Actual: " + height);
+            System.out.println("Height Mismatch: Expecting " + tag.getShort("Height") + ". Actual: " + height);
             valid = false;
         } else if (tag.getShort("Length") != length && tag.getShort("Length") != 0) {
-            System.out.println("Length: Expecting " + tag.getShort("Length") + ". Actual: " + length);
+            System.out.println("Length Mismatch: Expecting " + tag.getShort("Length") + ". Actual: " + length);
             valid = false;
         }
         return valid;
@@ -453,23 +507,23 @@ public class PlanIO {
      * Exports the IBlockState[y][z][x] to a file
      *
      * @param blocks the blocks to export
-     * @param width  the width (x-axis)
-     * @param height the height (y-axis)
-     * @param length the length (z-axis)
-     * @param depth  the depth of the build
+     * @param width  the width
+     * @param height the height
+     * @param length the length
+     * @param depth  the depth of the building
      * @param name   the name of the building
-     * @return the file that is outputted to disk
-     * @throws Exception
+     * @return the file that is saved to disk
+     * @throws Exception If something goes wrong, such as a dimension mismatch
      */
-    private static File exportToSchem(IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
+    private static File exportToSchematic(IBlockState[][][] blocks, short width, short height, short length, short depth, String name, int level, EntityPlayer player) throws Exception {
         File f1 = getBuildingFile(name);
 
         NBTTagCompound tag = getBuildingTag(name, null, false);
 
-        if (!valid(width, height, length, depth, tag)) {
+        if (!dimensionsMatch(width, height, length, tag)) {
             PacketSayTranslatedMessage packet = new PacketSayTranslatedMessage("message.error.exporting.dimensions");
             Millenaire.simpleNetworkWrapper.sendTo(packet, (EntityPlayerMP) player);
-            throw new Exception("Ahhh!");
+            return null;
         }
 
         String[] s = new String[width * height * length];

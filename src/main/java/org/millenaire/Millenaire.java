@@ -63,7 +63,7 @@ public class Millenaire {
         MillItems.recipies();
         EntityMillVillager.preinitialize();
 
-        MillCulture.preinitialize();
+        MillCulture.preInitialize();
 
         MillAchievement.preinitialize();
 

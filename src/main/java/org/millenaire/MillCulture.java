@@ -3,8 +3,8 @@ package org.millenaire;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.server.MinecraftServer;
-import org.millenaire.building.BuildingPlan;
-import org.millenaire.building.BuildingProject;
+import org.millenaire.building.Building;
+import org.millenaire.building.BuildingRecord;
 import org.millenaire.building.BuildingTypes;
 import org.millenaire.util.JsonHelper;
 import org.millenaire.util.JsonHelper.VillageTypes;
@@ -15,27 +15,69 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
+/**
+ * Defines a culture
+ */
 public class MillCulture {
+    /**
+     * The norman culture
+     */
     public static MillCulture normanCulture;
+    /**
+     * The hindi culture
+     */
     private static MillCulture hindiCulture;
+    /**
+     * The mayan culture
+     */
     private static MillCulture mayanCulture;
+    /**
+     * The japanese culture
+     */
     private static MillCulture japaneseCulture;
+    /**
+     * The byzantine/ancient roman culture
+     */
     private static MillCulture byzantineCulture;
+
+
+    /**
+     * The name of this culture
+     */
     public final String cultureName;
-    //Entry 0 is male child, entry 1 is female child
+    /**
+     * Entry 0 is male child, entry 1 is female child
+     */
     private VillagerType[] villagerTypes;
+    /**
+     * All the possible types of village this culture may spawn
+     */
     private VillageType[] villageTypes;
-    private BuildingPlan[] loneBuildings;
+    /**
+     * All the possible lone buildings this culture may spawn.
+     */
+    private Building[] loneBuildings;
+    /**
+     * All the things villagers of this culture may say as part of conversation.
+     */
     private String[] vocalizations;
+    /**
+     * A mapping between name type (eg "familyNames" or "nobleFamilyNames", or "maleNames") and all the possible names.
+     */
     private HashMap<String, String[]> nameLists = new HashMap<>();
 
     private MillCulture(String nameIn) {
         cultureName = nameIn;
     }
 
-    //Remember to catch the Exception and handle it when calling getCulture
-    public static MillCulture getCulture(String nameIn) throws Exception {
-        switch (nameIn) {
+    /**
+     * Gets the culture with the given name.
+     * @param nameIn The name of the culture to get
+     * @return The culture, if it's found.
+     * @throws IllegalArgumentException If a culture with the given name isn't found.
+     */
+    public static MillCulture getCulture(String nameIn) throws IllegalArgumentException {
+        switch (nameIn.toLowerCase()) {
             case "norman":
                 return normanCulture;
             case "hindi":
@@ -47,11 +89,14 @@ public class MillCulture {
             case "byzantine":
                 return byzantineCulture;
             default:
-                throw new Exception("getCulture called with incorrect culture.");
+                throw new IllegalArgumentException("getCulture called with incorrect culture \"" + nameIn + "\"!");
         }
     }
 
-    public static void preinitialize() {
+    /**
+     * Called upon PreInitialization
+     */
+    public static void preInitialize() {
         //Norman Initialization
         normanCulture = new MillCulture("norman").addNameList("familyNames", new String[]{"Waldemar", "Vilfrid", "Thorstein", "Tankred", "Svenning", "Sigvald", "Sigmar", "Roland", "Reginald", "Radulf", "Otvard", "Odomar", "Norbert", "Manfred", "Lothar", "Lambert", "Klothar", "Ingmar", "Hubert", "Gildwin", "Gervin", "Gerald", "Froward", "Fredegar", "Falko", "Elfride", "Erwin", "Ditmar", "Didrik", "Bernhard", "Answald", "Adalrik"})
                 .addNameList("nobleFamilyNames", new String[]{"de Bayeux", "de Conteville", "de Mortain", "de Falaise", "de Ryes"})
@@ -95,10 +140,6 @@ public class MillCulture {
                         new VillagerType("normanBandit", "Bandit", 0, normanCulture.nameLists.get("familyNames"), normanCulture.nameLists.get("maleNames"), new String[]{"millenaire:textures/entities/norman/normanBandit0.png", "millenaire:textures/entities/norman/normanBandit1.png"}, false, false, 0),
                         new VillagerType("normanArmoredBandit", "ArmoredBandit", 0, normanCulture.nameLists.get("familyNames"), normanCulture.nameLists.get("maleNames"), new String[]{"millenaire:textures/entities/norman/normanArmoredBandit0.png", "millenaire:textures/entities/norman/normanArmoredBandit1.png"}, false, false, 0)
                 });
-
-		/*normanCulture.setVillageTypes(new VillageType[]{
-				new VillageType("test").setBuildingTypes(new BuildingPlan[]{BuildingProject.normanCommunauteA0}, new BuildingPlan[]{BuildingProject.testBuilding}, new BuildingPlan[]{BuildingProject.testBuilding}).setStartingBuildings(new BuildingPlan[]{BuildingProject.normanCommunauteA0})
-		});*/
 
         //Hindi Initialization
         hindiCulture = new MillCulture("hindi").addNameList("highCasteFamilyNames", new String[]{"Sinha", "Kuwar", "Kuwar", "Mishra", "Pandey", "Jha", "Khatri"})
@@ -261,45 +302,23 @@ public class MillCulture {
                 new VillagerType("byzantinePlayerSoldier", "Stratiotes", 0, byzantineCulture.nameLists.get("familyNames"), byzantineCulture.nameLists.get("maleNames"), new String[]{"millenaire:textures/entities/byzantine/byzantineSoldier0.png"}, false, false, 16),
                 new VillagerType("byzantineWife", "Gynaika", 1, byzantineCulture.nameLists.get("familyNames"), byzantineCulture.nameLists.get("femaleNames"), new String[]{"millenaire:textures/entities/byzantine/byzantineWife0.png", "millenaire:textures/entities/byzantine/byzantineWife1.png", "millenaire:textures/entities/byzantine/byzantineWife2.png"}, false, false, 0)
         });
-		/*
-		final VillageTypes types = new VillageTypes(new VillageType[] {
-			new VillageType("test1").setTier(1,
-				new BuildingProject[] {
-					new BuildingProject("grove2", 0),
-					new BuildingProject("mine1", 0),
-					new BuildingProject("house1", 0),
-					new BuildingProject("house2", 1)
-				}).setTier(2,
-					new BuildingProject[] {
-						new BuildingProject("mine1", 2),
-						new BuildingProject("house1", 2)
-				}).setStartingBuildings(new BuildingProject[] {new BuildingProject("townhall1", 0)}),//.setBuildingTypes(new String[]{"primary1", "primary2"}, new String[]{"secondary1", "secondary2"}, new String[]{"player1"}).setStartingBuildings(new String[] {"townhall1", "grove1", "mine1"}),
-			new VillageType("test2").setTier(1,
-				new BuildingProject[] {
-					new BuildingProject("grove1", 0),
-					new BuildingProject("mine1", 1),
-					new BuildingProject("house1", 1),
-					new BuildingProject("house2", 0)
-				}).setTier(2,
-					new BuildingProject[] {
-						new BuildingProject("mine1", 3),
-						new BuildingProject("house1", 2)
-				}).setStartingBuildings(new BuildingProject[] {new BuildingProject("townhall2", 0)})//.setBuildingTypes(new String[]{"primary1", "primary2"}, new String[]{"secondary1", "secondary2"}, new String[]{"player1", "player2"}).setStartingBuildings(new String[] {"townhall2", "grove1", "grove2", "mine1"})
-		});
-		*/
-        //normanCulture.exportVillages(types);
 
         normanCulture.loadVillageTypes();
     }
 
-    public static VillageType getTypeFromName(String id) {
+    /**
+     * Gets a VillageType by its ID in ANY culture.
+     * @param id The ID of the village type
+     * @return The village type if found IN ANY CULTURE, or null.
+     */
+    public static VillageType findVillageTypeByID(String id) {
         Optional<VillageType> ret;
 
-        if(!(ret = Arrays.stream(normanCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
-            if(!(ret = Arrays.stream(byzantineCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
-                if(!(ret = Arrays.stream(hindiCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
-                    if(!(ret = Arrays.stream(japaneseCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
-                        if(!(ret = Arrays.stream(mayanCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
+        if (!(ret = Arrays.stream(normanCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
+            if (!(ret = Arrays.stream(byzantineCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
+                if (!(ret = Arrays.stream(hindiCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
+                    if (!(ret = Arrays.stream(japaneseCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
+                        if (!(ret = Arrays.stream(mayanCulture.villageTypes).filter(vt -> vt.id.equals(id)).findFirst()).isPresent()) {
                             System.out.println("Failed to find village type with id " + id);
                         }
                     }
@@ -310,41 +329,76 @@ public class MillCulture {
         return ret.orElse(null);
     }
 
+    /**
+     * Adds the given names to the mapping under the given type.
+     * @param title The type of names these are
+     * @param list The names themselves
+     * @return This, for chaining.
+     */
     private MillCulture addNameList(String title, String[] list) {
         this.nameLists.put(title, list);
         return this;
     }
 
+    /**
+     * Sets all the possible village types
+     * @param typeIn An array of village types
+     * @return This, for chaining.
+     */
     public MillCulture setVillageTypes(VillageType[] typeIn) {
         this.villageTypes = typeIn;
         return this;
     }
 
-    public MillCulture setLoneBuildings(BuildingPlan[] loneIn) {
+    /**
+     * Sets all the possible lone buildings.
+     * @param loneIn An array of Buildings
+     * @return This, for chaining.
+     */
+    public MillCulture setLoneBuildings(Building[] loneIn) {
         this.loneBuildings = loneIn;
         return this;
     }
 
+    /**
+     * Gets the list of villager types for this culture
+     * @return An array of VillagerTypes
+     */
     public VillagerType[] getVillagerTypes() {
         return this.villagerTypes;
     }
 
+    /**
+     * Sets the list of villager types for this culture
+     * @param typeIn The types
+     * @return This, for chaining.
+     */
     private MillCulture setVillagerTypes(VillagerType[] typeIn) {
         this.villagerTypes = typeIn;
         return this;
     }
 
-    public VillagerType getVillagerType(String typeIn) {
+    /**
+     * Gets a village type by its ID.
+     * @param id The ID of the desired village type
+     * @return The villager type, or null.
+     */
+    public VillagerType getVillagerTypeByID(String id) {
         for (VillagerType villagerType : villagerTypes) {
-            if (villagerType.id.equalsIgnoreCase(typeIn)) {
+            if (villagerType.id.equalsIgnoreCase(id)) {
                 return villagerType;
             }
         }
 
-        System.err.println("villagerType " + typeIn + " not found in " + cultureName + " culture.");
+        System.err.println("villagerType " + id + " not found in " + cultureName + " culture.");
         return null;
     }
 
+    /**
+     * Gets what type of villager a child should be, based on gender.
+     * @param gender The gender of the villager.
+     * @return The VillagerType for children of this gender.
+     */
     public VillagerType getChildType(int gender) {
         if (gender == 0) {
             return villagerTypes[0];
@@ -355,17 +409,26 @@ public class MillCulture {
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public VillageType getVillageType(String typeIn) {
+    /**
+     * Gets the VillageType with the given ID IN THIS CULTURE ONLY
+     * @param id The ID of the village type
+     * @return The village type if found, else null.
+     */
+    public VillageType getVillageTypeByID(String id) {
         for (VillageType villageType : villageTypes) {
-            if (villageType.id.equalsIgnoreCase(typeIn)) {
+            if (villageType.id.equalsIgnoreCase(id)) {
                 return villageType;
             }
         }
 
-        System.err.println("villageType " + typeIn + " not found in " + cultureName + " culture.");
+        System.err.println("villageType " + id + " not found in " + cultureName + " culture.");
         return null;
     }
 
+    /**
+     * Gets a random village type.
+     * @return A random village type from this culture.
+     */
     public VillageType getRandomVillageType() {
         Random rand = new Random();
         int i = rand.nextInt(villageTypes.length);
@@ -373,23 +436,36 @@ public class MillCulture {
         return villageTypes[i];
     }
 
+    /**
+     * Gets a village name
+     * @return A random village name
+     */
     public String getVillageName() {
-        return "Whoville";
+        return "Whoville"; //TODO Actual Randomness
     }
 
+    /**
+     * Gets a random sentence the VillagerType with the given ID could say
+     * @param vTypeIn The type of villager saying the sentence
+     * @return A random sentence.
+     */
     public String getVocalSentence(String vTypeIn) {
-        return "Hi.  How are ya.";
+        return "Hi.  How are ya."; //TODO Actual Randomness
     }
 
-    public void exportVillages(JsonHelper.VillageTypes villagetypes) {
+    /**
+     * Saves all provided village types for this culture to a file.
+     * @param villageTypes The village types to save
+     */
+    public void exportVillages(JsonHelper.VillageTypes villageTypes) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        //System.out.println(gson.toJson(villagetypes));
+        //System.out.println(gson.toJson(villageTypes));
         File f = new File(MinecraftServer.getServer().getDataDirectory().getAbsolutePath() + File.separator + "millenaire" + File.separator + "exports" + File.separator);
         File f1 = new File(f, "villages.json");
         try {
             f.mkdirs();
             f1.createNewFile();
-            String g = gson.toJson(villagetypes);
+            String g = gson.toJson(villageTypes);
             FileWriter fw = new FileWriter(f1);
             fw.write(g);
             fw.close();
@@ -400,6 +476,9 @@ public class MillCulture {
 
     //public static MillCulture millDefault;
 
+    /**
+     * Reads the village types for this culture from the mod assets into {@link MillCulture#villageTypes}.
+     */
     private void loadVillageTypes() {
         Gson gson = new Gson();
         InputStream is = MillCulture.class.getClassLoader().getResourceAsStream("assets/millenaire/cultures/" + this.cultureName.toLowerCase() + "/villages.json");
@@ -418,8 +497,8 @@ public class MillCulture {
         //public String[] secondaryBuildings;
         //public String[] playerBuildings;
         //First Building in this array should always be the TownHall
-        public BuildingProject[] startingBuildings;
-        private Map<Integer, BuildingProject[]> tiers = new HashMap<>();
+        public BuildingRecord[] startingBuildings;
+        private Map<Integer, BuildingRecord[]> tiers = new HashMap<>();
 
         public VillageType() {
         }
@@ -428,7 +507,7 @@ public class MillCulture {
             id = idIn;
         }
 
-        public VillageType setTier(int tier, BuildingProject[] buildings) {
+        public VillageType setTier(int tier, BuildingRecord[] buildings) {
             tiers.put(tier, buildings);
             return this;
         }
@@ -446,7 +525,7 @@ public class MillCulture {
             return this;
         }
 
-        public VillageType setStartingBuildings(BuildingProject[] startIn) {
+        public VillageType setStartingBuildings(BuildingRecord[] startIn) {
             this.startingBuildings = startIn;
             return this;
         }

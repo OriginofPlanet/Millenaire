@@ -15,26 +15,56 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Stores data for a village
+ */
 public class TileEntityVillageStone extends TileEntity {
     //Control Value.  Changed when using wandSummon, if left as 'biome' when onLoad called, culture decided by biome.
     public String culture = "biome";
+    /**
+     * True if this village should be of a random type, else false.
+     */
     public boolean randomVillage = true;
+    /**
+     * The village this stone is linked to.
+     */
     public Village village;
+    /**
+     * What type of village this stone is linked to
+     */
     public VillageType villageType;
+    /**
+     * The name of the village this stone is linked to, as shown to the player.
+     */
     public String villageName;
-    public boolean shouldGenVillage = true;
+    /**
+     * Whether a village should be generated (true) or already has been (false)
+     */
+    public boolean villageNotGenerated = true;
+    /**
+     * Whether this should explode next tick.
+     */
     public boolean willExplode = false;
     public int testVar = 0;
+    /**
+     * All the villagers in the village
+     */
     private List<EntityMillVillager> currentVillagers = new ArrayList<>();
+    /**
+     * The UUID of the village.
+     */
     private UUID villageID;
 
+    /**
+     * Called by MC when this TE is created (i.e. generated) for the first time.
+     */
     @Override
     public void onLoad() {
-        if(worldObj.isRemote) return;
+        if (worldObj.isRemote) return;
 
-        System.out.println("TEVS created");
+        //System.out.println("TEVS created");
 
-        if(!shouldGenVillage) return;
+        if (!villageNotGenerated) return;
 
         World world = this.getWorld();
         BlockPos pos = this.getPos();
@@ -55,7 +85,7 @@ public class TileEntityVillageStone extends TileEntity {
                     if (randomVillage)
                         villageType = MillCulture.getCulture(culture).getRandomVillageType();
                     else
-                        villageType = MillCulture.getCulture(culture).getVillageType(villageName);
+                        villageType = MillCulture.getCulture(culture).getVillageTypeByID(villageName);
 
                     villageName = villageType.getVillageName();
 
@@ -63,6 +93,7 @@ public class TileEntityVillageStone extends TileEntity {
                     village.setupVillage();
 
                     markDirty();
+                    villageNotGenerated = false;
                 } catch (Exception ex) {
                     System.err.println("Something went catastrophically wrong creating this village");
                     ex.printStackTrace();
@@ -74,14 +105,21 @@ public class TileEntityVillageStone extends TileEntity {
 
     }
 
-    //@SideOnly(Side.SERVER)
+    /**
+     * Creates a villager BUT DOES NOT SPAWN IT IN THE WORLD.
+     *
+     * @param worldIn    The world to spawn the villager in
+     * @param cultureIn  The culture of the villager.
+     * @param villagerID The villager's ID. If 0, a random one is created.
+     * @return The created villager.
+     */
     public EntityMillVillager createVillager(World worldIn, MillCulture cultureIn, int villagerID) {
         VillagerType currentVillagerType;
         int currentGender;
 
         if (villagerID == 0) {
             int balance = 0;
-            villagerID = (int) CommonUtilities.getRandomNonzero();
+            villagerID = (int) CommonUtilities.getRandomNonzero(); //TODO: This is not a random integer but a decimal. Fix?
             boolean checkAgain = false;
 
             for (EntityMillVillager currentVillager : currentVillagers) {
@@ -133,19 +171,30 @@ public class TileEntityVillageStone extends TileEntity {
         return null;
     }
 
+    /**
+     * Called by MC to allow us to read any saved state. Used here to prevent villages being generated where they already
+     * existed.
+     *
+     * @param compound The data saved via {@link TileEntityVillageStone#writeToNBT(NBTTagCompound)}.
+     */
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         System.out.println("TEVS Reading state");
         String uuidRaw;
-        if((uuidRaw = compound.getString("VillageUUID")) != null) {
+        if ((uuidRaw = compound.getString("VillageUUID")) != null) {
             villageID = UUID.fromString(uuidRaw);
-            shouldGenVillage = false;
+            villageNotGenerated = false;
         }
     }
 
+    /**
+     * Called by MC to allow us to save any data. Used to prevent villages spawning again.
+     *
+     * @param compound The data tag we must write to.
+     */
     @Override
     public void writeToNBT(NBTTagCompound compound) {
-        if(village != null)
+        if (village != null)
             compound.setString("VillageUUID", village.getUUID().toString());
     }
 }

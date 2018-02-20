@@ -34,7 +34,7 @@ public class BuildingTypes {
         return buildingCache.get(rl);
     }
 
-    public static BuildingType getTypeFromProject(BuildingProject proj) {
+    public static BuildingType getTypeFromProject(BuildingRecord proj) {
         return buildingCache.get(ResourceLocationUtil.getRL(proj.ID));
     }
 
@@ -55,7 +55,7 @@ public class BuildingTypes {
             identifier = ResourceLocationUtil.getString(cultureandname);
         }
 
-        public BuildingPlan loadBuilding() {
+        public Building loadBuilding() {
             ResourceLocation s = ResourceLocationUtil.getRL(identifier);
             try {
                 return PlanIO.loadSchematic(PlanIO.getBuildingTag(s.getResourcePath(), MillCulture.getCulture(s.getResourceDomain()), true), MillCulture.getCulture(s.getResourceDomain()), 1);

@@ -11,8 +11,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.millenaire.blocks.MillBlocks;
 import org.millenaire.blocks.StoredPosition;
+import org.millenaire.building.Building;
 import org.millenaire.building.BuildingLocation;
-import org.millenaire.building.BuildingPlan;
 import org.millenaire.building.BuildingTypes;
 import org.millenaire.building.PlanIO;
 import org.millenaire.networking.PacketShowBuildPoints;
@@ -76,9 +76,9 @@ public class MillCommand extends CommandBase {
                 String buildingID = args[1].split(":")[1];
                 int level = Integer.parseInt(args[2]);
 
-                BuildingPlan buildingPlan = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
+                Building building = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
 
-                PlanIO.placeBuilding(buildingPlan, new BuildingLocation(buildingPlan, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
+                PlanIO.placeBuilding(building, new BuildingLocation(building, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
             } catch (Exception ignored) {
 
             }

@@ -14,7 +14,7 @@ public class AStarPathing {
     static public class CachedPath {
 
         Point2D[] points = null;
-        long age = 0;
+        long age;
 
         CachedPath() {
             age = System.currentTimeMillis();
@@ -48,9 +48,7 @@ public class AStarPathing {
                     List<Point2D> v3;
                     try {
                         v3 = fillPoints(prevp, p);
-                        for (final Point2D fp : v3) {
-                            v2.add(fp);
-                        }
+                        v2.addAll(v3);
                     } catch (final Exception e) {
                         e.printStackTrace();
                     }
@@ -72,92 +70,60 @@ public class AStarPathing {
             age = System.currentTimeMillis();
         }
 
-        CachedPath(final List<Point2D> v, final CachedPath cp) {
-            points = new Point2D[v.size() + cp.points.length - 1];
-
-            int i = 0;
-            for (final Point2D p : v) {
-                points[i] = p;
-                i++;
-            }
-
-            boolean first = true;
-            for (final Point2D p : cp.points) {
-                if (first) {// already last node of v
-                    first = false;
-                } else {
-                    points[i] = p;
-                    i++;
-                }
-            }
-
-            age = System.currentTimeMillis();
-        }
-
-        private List<Point2D> fillPoints(final Point2D p1, final Point2D p2) throws Exception {
+        private List<Point2D> fillPoints(final Point2D startPoint, final Point2D endPoint) {
 
             final List<Point2D> v = new ArrayList<>();
 
-            final int xdist = p2.x - p1.x;
-            final int zdist = p2.z - p1.z;
+            final int xDist = endPoint.x - startPoint.x;
+            final int zDist = endPoint.z - startPoint.z;
 
-            if (xdist == 0 && zdist == 0) {
+            if (xDist == 0 && zDist == 0) {
                 return v;
             }
 
-            int xsign = 1;
-            int zsign = 1;
+            int xSign = 1;
+            int zSign = 1;
 
-            if (xdist < 0) {
-                xsign = -1;
+            if (xDist < 0) {
+                xSign = -1;
             }
-            if (zdist < 0) {
-                zsign = -1;
+            if (zDist < 0) {
+                zSign = -1;
             }
 
-            int x = p1.x;
-            int z = p1.z;
+            int x = startPoint.x;
+            int z = startPoint.z;
 
-            int xdone = 0;
-            int zdone = 0;
+            int xDone = 0;
+            int zDone = 0;
 
-            // Log.debug(Log.Connections, "canSee: "+p1+" to "+p2);
+            // Log.debug(Log.Connections, "canSee: "+startPoint+" to "+endPoint);
 
-            // Log.debug(Log.Connections, "To travel: "+xdist+", "+zdist);
+            // Log.debug(Log.Connections, "To travel: "+xDist+", "+zDist);
 
-            while (x != p2.x || z != p2.z) {
+            while (x != endPoint.x || z != endPoint.z) {
                 int nx, nz;
-                if (zdone != zdist && (xdist == 0 || zdone * 1.0f / zdist < xdone * 1.0f / xdist)) {
-                    nz = z + zsign;
+                if (zDone != zDist && (xDist == 0 || zDone * 1.0f / zDist < xDone * 1.0f / xDist)) {
+                    nz = z + zSign;
                     nx = x;
-                    zdone += zsign;
-                } else if (xdone != xdist) {
-                    nx = x + xsign;
+                    zDone += zSign;
+                } else if (xDone != xDist) {
+                    nx = x + xSign;
                     nz = z;
-                    xdone += xsign;
+                    xDone += xSign;
                 } else {
-                    throw new IllegalStateException("Error in fillPoints: from " + p1 + " to " + p2 + " did " + xdone + "/" + zdone + " and could find nothing else to do.");
+                    throw new IllegalStateException("Error in fillPoints: from " + startPoint + " to " + endPoint + " did " + xDone + "/" + zDone + " and could find nothing else to do.");
                 }
 
                 x = nx;
                 z = nz;
 
-                if (x != p2.x || z != p2.z) {
+                if (x != endPoint.x || z != endPoint.z) {
                     v.add(new Point2D(nx, nz));
                 }
             }
 
             return v;
-        }
-
-        public String fullString() {
-            String s = "";
-
-            for (final Point2D p : points) {
-                s += p + " ";
-            }
-
-            return s;
         }
 
         Point2D getEnd() {
@@ -185,7 +151,7 @@ public class AStarPathing {
         HashMap<Node, Integer> costs;
         Node from;
         int id, fromDist, toDist, cornerSide, region = 0;
-        boolean temp = false;
+        boolean temp;
 
         Node(final Point2D p, final int pid, final boolean ptemp) {
             pos = p;
@@ -247,7 +213,6 @@ public class AStarPathing {
 
     public class PathingWorker extends Thread {
 
-        private static final int NODE_WARNING_LEVEL = 100;
         private static final int MAX_NODE_VISIT = 1500;
         EntityMillVillager villager;
         int pStartX, pStartZ, pDestX, pDestZ;
@@ -261,12 +226,18 @@ public class AStarPathing {
             this.pDestZ = pDestZ;
         }
 
-        public List<PathPoint> getPathViaNodes() throws Exception {
+        /**
+         * Convenience method to get a path based on the options this PathingWorker was constructed for.
+         * @return A path if one is found, else null.
+         * @throws PathingException If an error occurs, such as the path being impossible.
+         * @throws InterruptedException If the pathfinding thread is interrupted.
+         * @throws IllegalArgumentException If one of the points in the generated path is null.
+         */
+        public List<PathPoint> getPathViaNodes() throws PathingException, InterruptedException, IllegalArgumentException {
             return getPathViaNodes(pStartX, pStartZ, pDestX, pDestZ);
         }
 
-        List<PathPoint> getPathViaNodes(final int pStartX, final int pStartZ, final int pDestX, final int pDestZ) throws Exception {
-
+        List<PathPoint> getPathViaNodes(final int pStartX, final int pStartZ, final int pDestX, final int pDestZ) throws PathingException, InterruptedException, IllegalArgumentException {
             final long currentAge = System.currentTimeMillis();
 
             final int startX = pStartX - geography.mapStartX;
@@ -333,7 +304,7 @@ public class AStarPathing {
             }
 
             if (start.region != end.region) {
-                System.err.println("Start and end nodes in different groups: " + start + "/" + end);
+                //System.err.println("Start and end nodes in different groups: " + start + "/" + end);
                 end.neighbours.clear();
             }
 
@@ -401,7 +372,7 @@ public class AStarPathing {
                                     end = new Node(new Point2D(destX - j, destZ + i), 0, true);
                                 } else if (cpt == 6) {
                                     end = new Node(new Point2D(destX + j, destZ - i), 0, true);
-                                } else if (cpt == 7) {
+                                } else {
                                     end = new Node(new Point2D(destX + j, destZ - i), 0, true);
                                 }
 
@@ -521,10 +492,7 @@ public class AStarPathing {
                 for (final Node n : cn.neighbours) {
                     final Integer cost = cn.costs.get(n);
 
-                    if (closed.containsKey(n)) {
-                        // Log.debug(Log.getPath,
-                        // n+" has already been visited.");
-                    } else {
+                    if (!closed.containsKey(n)) {
                         if (!open.contains(n)) {
                             n.fromDist = cn.fromDist + cost;
                             n.toDist = n.pos.distanceTo(end.pos);
@@ -911,10 +879,7 @@ public class AStarPathing {
         return true;
     }
 
-    public boolean createConnectionsTable(final VillageGeography geography, final BlockPos thStanding) throws Exception {
-
-        long startTime = System.nanoTime();
-        final long totalStartTime = startTime;
+    public void createConnectionsTable(final VillageGeography geography) throws IllegalStateException {
 
         this.geography = geography;
 
@@ -962,15 +927,15 @@ public class AStarPathing {
                     }
                     if (j > 0) {
                         final int ny = geography.topGround[i][j - 1];
-                        final int nspace = geography.spaceAbove[i][j - 1];
+                        final int nSpace = geography.spaceAbove[i][j - 1];
 
                         boolean connected = false;
 
-                        if (ny == y && nspace > 1) {
+                        if (ny == y && nSpace > 1) {
                             connected = true;
-                        } else if (ny == y - 1 && nspace > 2) {
+                        } else if (ny == y - 1 && nSpace > 2) {
                             connected = true;
-                        } else if (ny == y + 1 && nspace > 1 && space > 2) {
+                        } else if (ny == y + 1 && nSpace > 1 && space > 2) {
                             connected = true;
                         }
 
@@ -983,13 +948,9 @@ public class AStarPathing {
             }
         }
 
-        startTime = System.nanoTime();
-
-        System.out.println("Building nodes...");
+        //System.out.println("Building nodes...");
         buildNodes();
-        System.out.println(nodes.size() + " nodes built. ");
-
-        startTime = System.nanoTime();
+        //System.out.println(nodes.size() + " nodes built. ");
 
         for (final Node n : nodes) {
             for (final Node n2 : nodes) {
@@ -1005,11 +966,7 @@ public class AStarPathing {
             }
         }
 
-        startTime = System.nanoTime();
-
-        findRegions(thStanding);
-
-        return true;
+        findRegions();
     }
 
     public PathingWorker createWorkerForPath(final EntityMillVillager villager, final int pStartX, final int pStartZ, final int pDestX, final int pDestZ) {
@@ -1018,7 +975,7 @@ public class AStarPathing {
         return worker;
     }
 
-    private void findRegions(final BlockPos thStanding) throws Exception {
+    private void findRegions() throws IllegalStateException {
 
         int nodesMarked = 0, nodeGroup = 0;
 
@@ -1068,37 +1025,37 @@ public class AStarPathing {
             regions[n.pos.x][n.pos.z] = (byte) n.region;
         }
 
-        boolean spreaddone = true;
+        boolean spreadDone = true;
 
-        while (spreaddone) {
-            spreaddone = false;
+        while (spreadDone) {
+            spreadDone = false;
             for (int i = 0; i < geography.length; i++) {
                 for (int j = 0; j < geography.width; j++) {
                     if (regions[i][j] > 0) {
-                        final byte regionid = regions[i][j];
+                        final byte regionId = regions[i][j];
                         int x = i;
                         while (x > 1 && top[x][j] && regions[x - 1][j] == -1) {
                             x--;
-                            regions[x][j] = regionid;
-                            spreaddone = true;
+                            regions[x][j] = regionId;
+                            spreadDone = true;
                         }
                         x = i;
                         while (x < geography.length - 1 && bottom[x][j] && regions[x + 1][j] == -1) {
                             x++;
-                            regions[x][j] = regionid;
-                            spreaddone = true;
+                            regions[x][j] = regionId;
+                            spreadDone = true;
                         }
                         x = j;
                         while (x > 1 && left[i][x] && regions[i][x - 1] == -1) {
                             x--;
-                            regions[i][x] = regionid;
-                            spreaddone = true;
+                            regions[i][x] = regionId;
+                            spreadDone = true;
                         }
                         x = j;
                         while (x < geography.width - 1 && right[i][x] && regions[i][x + 1] == -1) {
                             x++;
-                            regions[i][x] = regionid;
-                            spreaddone = true;
+                            regions[i][x] = regionId;
+                            spreadDone = true;
                         }
 
                     }
@@ -1113,20 +1070,14 @@ public class AStarPathing {
     }
 
     public boolean isValidPoint(final BlockPos p) {
-
-        if (!isInArea(p)) {
-            return false;
-        }
-
-        return geography.spaceAbove[p.getX() - geography.mapStartX][p.getZ() - geography.mapStartZ] > 1;
-
+        return isInArea(p) && geography.spaceAbove[p.getX() - geography.mapStartX][p.getZ() - geography.mapStartZ] > 1;
     }
 
-    private void storeInCache(final CachedPath path, final Point2D dest) throws Exception {
+    private void storeInCache(final CachedPath path, final Point2D dest) throws IllegalArgumentException {
 
         for (final Point2D p : path.points) {
             if (p == null) {
-                throw new Exception("Null node in path to cache: " + path);
+                throw new IllegalArgumentException("Null node in path to cache: " + path);
             }
         }
 
@@ -1144,7 +1095,7 @@ public class AStarPathing {
 
             for (final Point2D p : cp.points) {
                 if (p == null) {
-                    throw new Exception("Null node in path to cache: " + path);
+                    throw new IllegalArgumentException("Null node in path to cache: " + path);
                 }
             }
 

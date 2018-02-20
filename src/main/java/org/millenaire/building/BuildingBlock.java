@@ -15,6 +15,10 @@ import net.minecraft.world.gen.feature.*;
 import org.millenaire.CommonUtilities;
 import org.millenaire.items.MillItems;
 
+/**
+ * Class that stores either a block, or an action to be performed at this location, used (presumably) when villagers are
+ * building
+ */
 public class BuildingBlock {
     public static final byte OAKSPAWN = 1;
     public static final byte SPRUCESPAWN = 2;
@@ -55,6 +59,11 @@ public class BuildingBlock {
         specialBlock = 0;
     }
 
+    /**
+     * Performs this action in the given world.
+     * @param worldIn The world to perform in
+     * @param onGeneration Whether we are in world generation.
+     */
     public void build(World worldIn, boolean onGeneration) {
         if (specialBlock != PRESERVEGROUNDDEPTH && specialBlock != PRESERVEGROUNDSURFACE && specialBlock != CLEARTREE) {
             if (blockState != null) {
@@ -211,9 +220,5 @@ public class BuildingBlock {
             final TileEntityDispenser dispenser = (TileEntityDispenser) worldIn.getTileEntity(position);
             dispenser.addItemStack(new ItemStack(MillItems.unknownPowder, 2));
         }
-    }
-
-    public void buildPath() {
-        //Make code to build paths
     }
 }

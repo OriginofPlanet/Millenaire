@@ -7,18 +7,36 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.millenaire.blocks.MillBlocks;
 import org.millenaire.building.BuildingLocation;
-import org.millenaire.building.BuildingPlan;
+import org.millenaire.building.Building;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class VillageGeography {
+    /**
+     * The distance from the edge of the village area we take into account.
+     */
     private static final int MAP_MARGIN = 10;
+    /**
+     * The distance from each building taken into account when calculating the changes around a building
+     */
     private static final int BUILDING_MARGIN = 5;
-    private static final int VALIDHEIGHTDIFF = 10;
+    /**
+     * The max difference in Y from the center for an area to be buildable.
+     */
+    private static final int VALID_HEIGHT_DIFF = 10;
 
+    /**
+     * The length of this village
+     */
     public int length = 0;
+    /**
+     * The width of this village.
+     */
     public int width = 0;
+    /**
+     * The coordinates where this area starts in terms of the actual world.
+     */
     public int mapStartX = 0, mapStartZ = 0;
     /**
      * The position of the top block at the given RELATIVE x and z coords
@@ -48,8 +66,17 @@ public class VillageGeography {
      * Anywhere a path is placed is set to true
      */
     public boolean[][] path;
-    public LinkedHashMap<BuildingLocation, BuildingPlan> buildingLocations = new LinkedHashMap<>();
+    /**
+     * The location of any placed buildings and what they are
+     */
+    public LinkedHashMap<BuildingLocation, Building> buildingLocations = new LinkedHashMap<>();
+    /**
+     * The world this village is in
+     */
     public World world;
+    /**
+     * The base Y-Coordinate of this village.
+     */
     private int yBaseline = 0;
     /**
      * The amount of space in a given spot
@@ -67,30 +94,61 @@ public class VillageGeography {
      * Anywhere we have attempted to bridge a gap is set to true
      */
     private boolean[][] topAdjusted;
+    /**
+     * How often we should update chunks
+     */
     private int frequency = 10;
+    /**
+     * The coordinates of the last updated chunk
+     */
     private int lastUpdatedX, lastUpdatedZ;
 
+    /**
+     * How many update attempts there has been since the last actual update, used in conjunction with {@link VillageGeography#frequency}
+     */
     private int updateCounter;
 
     public VillageGeography() {
 
     }
 
+    /**
+     * Returns true if we shouldn't build here because of this block.
+     * @param block The block to check.
+     * @return True if this entire column should be forbidden, else false.
+     */
     private static boolean isForbiddenBlockForConstruction(final Block block) {
         return block == Blocks.water || block == Blocks.flowing_water || block == Blocks.ice || block == Blocks.flowing_lava || block == Blocks.lava || block == Blocks.planks || block == Blocks.cobblestone || block == Blocks.brick_block || block == Blocks.chest || block == Blocks.glass || block == Blocks.stonebrick || block == Blocks.prismarine
                 || block instanceof BlockWall || block instanceof BlockFence || block == MillBlocks.blockDecorativeEarth || block == MillBlocks.blockDecorativeStone || block == MillBlocks.blockDecorativeWood || block == MillBlocks.byzantineTile || block == MillBlocks.byzantineTileSlab || block == MillBlocks.byzantineStoneTile || block == MillBlocks.paperWall || block == MillBlocks.emptySericulture;
     }
 
+    /**
+     * Whether this block is considered ground.
+     * @param b The block to check.
+     * @return True if this is a ground block - i.e. something we should build on.
+     */
     private static boolean isBlockIdGround(final Block b) {
         return b == Blocks.bedrock || b == Blocks.clay || b == Blocks.dirt || b == Blocks.stone || b == Blocks.snow ||
                 b == Blocks.packed_ice || b == Blocks.grass || b == Blocks.gravel || b == Blocks.obsidian ||
                 b == Blocks.sand || b == Blocks.farmland || b == Blocks.mycelium;
     }
 
+    /**
+     * Whether this block interferes with paths.
+     * @param block The block to check.
+     * @return True if an entity cannot move through this block.
+     */
     private static boolean isBlockSolid(Block block) {
         return block.getMaterial().blocksMovement() || block == Blocks.glass || block == Blocks.glass_pane || block instanceof BlockSlab || block instanceof BlockStairs || block instanceof BlockFence || block instanceof BlockWall || block == MillBlocks.paperWall;
     }
 
+    /**
+     * Constructs a map of this area and populates all the two-dimensional arrays such as {@link VillageGeography#canBuild}
+     * @param pstartX The X coord of the start of the area
+     * @param pstartZ The Z coord of the start of the area
+     * @param endX The X coord of the end of the area
+     * @param endZ The Z coord of the end of the area
+     */
     private void createWorldInfo(final int pstartX, final int pstartZ, final int endX, final int endZ) {
         int chunkStartX = pstartX >> 4;
         int chunkStartZ = pstartZ >> 4;
@@ -134,7 +192,13 @@ public class VillageGeography {
         lastUpdatedZ = 0;
     }
 
-    public void registerBuilding(BuildingPlan p, final BuildingLocation bl) {
+    /**
+     * Registers this building in both {@link VillageGeography#buildingLoc} and {@link VillageGeography#buildingLocations},
+     * preventing buildings from being built on top of this one.
+     * @param p Which building is being built here
+     * @param bl The location of the building.
+     */
+    public void registerBuilding(Building p, final BuildingLocation bl) {
         buildingLocations.put(bl, p);
 
         final int lowerX = Math.max(bl.minxMargin - mapStartX, 0);
@@ -149,25 +213,38 @@ public class VillageGeography {
         }
     }
 
+    /**
+     * Queues an update of any chunks in the given area, either by the radius - i.e. distance from the center, or by
+     * ensuring that all the area including and surrounding building locations provided are updated - whichever is larger.
+     *
+     * @param world The world to update from
+     * @param locations A list of any locations you want to update. Can be null.
+     * @param blIP An individual building location you want to update - just convenience for the above with one location. Can be null.
+     * @param center The center to update from.
+     * @param radius The amount of blocks from the center to update, regardless of buildings.
+     * @return True if a new world info was created, or false if the existing one was updated.
+     */
     public boolean update(final World world, final List<BuildingLocation> locations, final BuildingLocation blIP, final BlockPos center, final int radius) {
         this.world = world;
         this.yBaseline = center.getY();
 
         int startX = center.getX(), startZ = center.getZ(), endX = center.getX(), endZ = center.getZ();
 
-        for (final BuildingLocation location : locations) {
-            if (location != null) {
-                if (location.position.getX() - location.length / 2 < startX) {
-                    startX = location.position.getX() - location.length / 2;
-                }
-                if (location.position.getX() + location.length / 2 > endX) {
-                    endX = location.position.getX() + location.length / 2;
-                }
-                if (location.position.getZ() - location.width / 2 < startZ) {
-                    startZ = location.position.getZ() - location.width / 2;
-                }
-                if (location.position.getZ() + location.width / 2 > endZ) {
-                    endZ = location.position.getZ() + location.width / 2;
+        if(locations != null) {
+            for (final BuildingLocation location : locations) {
+                if (location != null) {
+                    if (location.position.getX() - location.length / 2 < startX) {
+                        startX = location.position.getX() - location.length / 2;
+                    }
+                    if (location.position.getX() + location.length / 2 > endX) {
+                        endX = location.position.getX() + location.length / 2;
+                    }
+                    if (location.position.getZ() - location.width / 2 < startZ) {
+                        startZ = location.position.getZ() - location.width / 2;
+                    }
+                    if (location.position.getZ() + location.width / 2 > endZ) {
+                        endZ = location.position.getZ() + location.width / 2;
+                    }
                 }
             }
         }
@@ -208,6 +285,13 @@ public class VillageGeography {
         }
     }
 
+    /**
+     * Updates the info for the chunk at the given BLOCK (NOT CHUNK) coordinates.
+     * Updates only the chunk that contains the given block.
+     *
+     * @param startX The X position of the BLOCK, NOT OF THE CHUNK, to start updating at.
+     * @param startZ The Z position of the BLOCK, NOT OF THE CHUNK, to start updating at.
+     */
     private void updateChunk(final int startX, final int startZ) {
         // We have to test not just for this chunk but the surrounding ones also
         // as we need to do some operations that involve
@@ -245,7 +329,7 @@ public class VillageGeography {
                     System.out.println("Block is Blocked");
                 }
 
-                while(!isBlockIdGround(world.getBlockState(new BlockPos(xInChunk, topBlockYPos, zInChunk)).getBlock())) {
+                while (!isBlockIdGround(world.getBlockState(new BlockPos(xInChunk, topBlockYPos, zInChunk)).getBlock())) {
                     topBlockYPos--;
                 }
 
@@ -328,7 +412,7 @@ public class VillageGeography {
 
                 //If we're not dangerous
                 if (!danger[currentRelativeX][currentRelativeZ] && !buildingLoc[currentRelativeX][currentRelativeZ]) {
-                    if (topBlockYPos - 1 > yBaseline - VALIDHEIGHTDIFF && topBlockYPos - 1 < yBaseline + VALIDHEIGHTDIFF) {
+                    if (topBlockYPos - 1 > yBaseline - VALID_HEIGHT_DIFF && topBlockYPos - 1 < yBaseline + VALID_HEIGHT_DIFF) {
                         //If the block below the top block is in the height range, we can build here
                         canBuild[currentRelativeX][currentRelativeZ] = true;
                     }
@@ -577,6 +661,9 @@ public class VillageGeography {
         }
     }
 
+    /**
+     * Calls updateChunk if the frequency has been met - i.e. only executes some of the time.
+     */
     private void updateNextChunk() {
         updateCounter = (updateCounter + 1) % frequency;
 
@@ -607,6 +694,11 @@ public class VillageGeography {
         }
     }
 
+    /**
+     * Deep clones a two-dimensional short array.
+     * @param source The array to clone
+     * @return A deep clone of the array.
+     */
     public static short[][] shortArrayDeepClone(final short[][] source) {
 
         final short[][] target = new short[source.length][];
@@ -620,6 +712,9 @@ public class VillageGeography {
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+    /**
+     * Background thread that runs the chunk updates.
+     */
     public class UpdateThread extends Thread {
         int x;
         int z;
