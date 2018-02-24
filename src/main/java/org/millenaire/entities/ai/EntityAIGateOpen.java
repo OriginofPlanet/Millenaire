@@ -60,13 +60,13 @@ public class EntityAIGateOpen extends EntityAIBase {
             PathEntity pathentity = pathnavigateground.getPath();
 
             if (pathentity != null && !pathentity.isFinished() && pathnavigateground.getEnterDoors()) {
-                System.out.println("pathfinding check");
+                //System.out.println("pathfinding check");
                 for (int i = 0; i < Math.min(pathentity.getCurrentPathIndex() + 2, pathentity.getCurrentPathLength()); ++i) {
                     PathPoint pathpoint = pathentity.getPathPointFromIndex(i);
                     this.gatePosition = new BlockPos(pathpoint.xCoord, pathpoint.yCoord, pathpoint.zCoord);
 
                     if (this.theEntity.getDistanceSq((double) this.gatePosition.getX(), this.theEntity.posY, (double) this.gatePosition.getZ()) <= 2.25D) {
-                        System.out.println("gate check");
+                        //System.out.println("gate check");
                         this.gateBlock = this.getBlockGate(this.gatePosition);
 
                         if (this.gateBlock != null) {

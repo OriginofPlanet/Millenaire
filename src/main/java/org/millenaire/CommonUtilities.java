@@ -139,15 +139,23 @@ public class CommonUtilities {
      * @return A BlockPos containing the adjusted coordinates.
      */
     public static BlockPos adjustForOrientation(final int x, final int y, final int z, final int xoffset, final int zoffset, final EnumFacing orientation) {
+
+        //West is negative x
+        //North is negative z
+        //East is positive x
+        //South is positive z
+
+        //We add the coordinates so that they extend in the direction of `orientation` and the direction 90 degrees clockwise (i.e. to the right)
+
         BlockPos pos = new BlockPos(x, y, z);
         if (orientation == EnumFacing.SOUTH) {
-            pos = new BlockPos(x + xoffset, y, z + zoffset);
+            pos = new BlockPos(x - xoffset, y, z + zoffset);
         } else if (orientation == EnumFacing.WEST) {
-            pos = new BlockPos(x + zoffset, y, z - xoffset);
-        } else if (orientation == EnumFacing.NORTH) {
             pos = new BlockPos(x - xoffset, y, z - zoffset);
+        } else if (orientation == EnumFacing.NORTH) {
+            pos = new BlockPos(x + xoffset, y, z - zoffset);
         } else if (orientation == EnumFacing.EAST) {
-            pos = new BlockPos(x - zoffset, y, z + xoffset);
+            pos = new BlockPos(x + xoffset, y, z + zoffset);
         }
 
         return pos;

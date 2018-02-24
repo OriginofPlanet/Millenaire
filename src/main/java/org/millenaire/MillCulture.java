@@ -533,5 +533,10 @@ public class MillCulture {
         public String getVillageName() {
             return id;
         }
+
+        @Override
+        public String toString() {
+            return "Village Type (" + id + ", " + startingBuildings.length + " starting buildings)";
+        }
     }
 }

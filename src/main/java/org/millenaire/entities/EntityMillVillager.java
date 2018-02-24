@@ -96,6 +96,7 @@ public class EntityMillVillager extends EntityCreature implements IAStarPathedEn
         this.tasks.addTask(7, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 0.5F));
         this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityMillVillager.class, 6.0F));
         this.tasks.addTask(9, new EntityAIWander(this, 0.6D));
+        this.tasks.addTask(10, new EntityAIPanic(this, 0.6D));
     }
 
     @Override
@@ -123,7 +124,6 @@ public class EntityMillVillager extends EntityCreature implements IAStarPathedEn
 
     public EntityMillVillager setTypeAndGender(VillagerType typeIn, int genderIn) {
         this.type = typeIn;
-        System.out.println("Setting type to " + typeIn.id + "!");
         this.dataWatcher.updateObject(GENDER, genderIn);
         this.dataWatcher.updateObject(TEXTURE, type.getTexture());
         return this;

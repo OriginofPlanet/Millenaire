@@ -4,15 +4,14 @@ import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -25,6 +24,8 @@ import org.millenaire.gui.MillGuiHandler;
 import org.millenaire.items.MillItems;
 import org.millenaire.networking.*;
 import org.millenaire.proxy.CommonProxy;
+import org.millenaire.village.Village;
+import org.millenaire.village.VillageTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,6 @@ public class Millenaire {
         }
 
 
-
         simpleNetworkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel("MillChannel");
         simpleNetworkWrapper.registerMessage(MillPacket.PacketHandlerOnServer.class, MillPacket.class, 0, Side.SERVER);
         simpleNetworkWrapper.registerMessage(PacketImportBuilding.Handler.class, PacketImportBuilding.class, 1, Side.SERVER);
@@ -106,7 +106,7 @@ public class Millenaire {
 
     private void setForbiddenBlocks() {
         String parsing = MillConfig.forbiddenBlocks.substring(11);
-        forbiddenBlocks = new ArrayList<Block>();
+        forbiddenBlocks = new ArrayList<>();
         for (final String name : parsing.split(", |,")) {
             if (Block.blockRegistry.containsKey(new ResourceLocation(name))) {
                 forbiddenBlocks.add(Block.blockRegistry.getObject(new ResourceLocation(name)));
@@ -117,5 +117,15 @@ public class Millenaire {
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new MillCommand());
+    }
+
+    @EventHandler
+    public void serverLoaded(FMLServerStartedEvent event) {
+        for (WorldServer world : DimensionManager.getWorlds()) {
+            for (Village v : VillageTracker.get(world).getVillages()) {
+                if(v.geography == null)
+                    v.readDataFromTE();
+            }
+        }
     }
 }

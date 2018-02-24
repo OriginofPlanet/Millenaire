@@ -58,7 +58,7 @@ public class BuildingTypes {
         public Building loadBuilding() {
             ResourceLocation s = ResourceLocationUtil.getRL(identifier);
             try {
-                return PlanIO.loadSchematic(PlanIO.getBuildingTag(s.getResourcePath(), MillCulture.getCulture(s.getResourceDomain()), true), MillCulture.getCulture(s.getResourceDomain()), 1);
+                return PlanIO.loadSchematic(PlanIO.getBuildingTag(s.getResourcePath(), MillCulture.getCulture(s.getResourceDomain()), true), MillCulture.getCulture(s.getResourceDomain()), 1, identifier);
             } catch (Exception e) {
                 e.printStackTrace();
             }

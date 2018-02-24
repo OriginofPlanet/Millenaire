@@ -17,13 +17,13 @@ import java.util.List;
  */
 public class BuildingLocation {
     /**
-     * Contains the specified block coordinates
+     * Contains the relative coordinates for the corner positions of this building.
      */
-    public int minx, maxx, minz, maxz, miny, maxy;
+    public int minX, maxX, minZ, maxZ, minY, maxY;
     /**
-     * Contains the coordinates including the required bulding-to-building space.
+     * Contains the relative coordinates for the corner positions of this building including the required bulding-to-building space.
      */
-    public int minxMargin, maxxMargin, minyMargin, maxyMargin, minzMargin, maxzMargin;
+    public int minXMargin, maxXMargin, minYMargin, maxYMargin, minZMargin, maxZMargin;
     /**
      * How far above the ground this building is (can be negative if in the ground)
      */
@@ -32,7 +32,6 @@ public class BuildingLocation {
      * The dimensions of the building.
      */
     public int length, height, width;
-
     /**
      * Which way the building is facing.
      */
@@ -133,22 +132,34 @@ public class BuildingLocation {
      * Generates the x, y, and z coordinates for this location based on the dimensions, start pos, depth, and orientation.
      */
     private void computeMargins() {
-        minx = position.getX();
-        miny = position.getY() + depth;
-        minz = position.getZ();
+        minX = position.getX();
+        minY = position.getY() + depth;
+        minZ = position.getZ();
 
         BlockPos p = CommonUtilities.adjustForOrientation(position, width, length, orientation);
 
-        maxx = p.getX();
-        maxy = miny + height;
-        maxz = p.getZ();
+        maxX = p.getX();
+        maxY = minY + height;
+        maxZ = p.getZ();
 
-        minxMargin = minx - MillConfig.minBuildingDistance;
-        minzMargin = minz - MillConfig.minBuildingDistance;
-        minyMargin = miny - 3;
-        maxyMargin = maxy + 1;
-        maxxMargin = maxx + MillConfig.minBuildingDistance;
-        maxzMargin = maxz + MillConfig.minBuildingDistance;
+        if(maxX < minX) {
+            int temp = maxX;
+            maxX = minX;
+            minX = temp;
+        }
+
+        if(maxZ < minZ) {
+            int temp = maxZ;
+            maxZ = minZ;
+            minZ = temp;
+        }
+
+        minXMargin = minX - MillConfig.minBuildingDistance;
+        minZMargin = minZ - MillConfig.minBuildingDistance;
+        minYMargin = minY - 3;
+        maxYMargin = maxY + 1;
+        maxXMargin = maxX + MillConfig.minBuildingDistance;
+        maxZMargin = maxZ + MillConfig.minBuildingDistance;
     }
 
 

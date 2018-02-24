@@ -14,11 +14,11 @@ import java.util.List;
 
 public class MillPathNavigate extends PathNavigateGround {
 
-    public static final Object[] lock = new Object[]{};
+    private static final Object[] pathingLock = new Object[]{};
 
     public EntityMillVillager villager;
     private int pathRange = 256;
-    private BlockPos lastPos = new BlockPos(0, 0, 0);
+    private boolean needsRegenConnections = true;
 
     public MillPathNavigate(EntityLiving entitylivingIn, World worldIn) {
         super(entitylivingIn, worldIn);
@@ -31,31 +31,33 @@ public class MillPathNavigate extends PathNavigateGround {
     }
 
     public void invalidateConnections() {
-        lastPos = new BlockPos(0, 0, 0);
+        needsRegenConnections = true;
     }
 
     @Override
     public PathEntity getPathToPos(BlockPos pos) {
         if (!villager.useNewPathingAtThisPoint) return super.getPathToPos(pos);
 
+        //System.out.println("Using A* Pathing to get to " + pos + "");
         try {
-            BlockPos newPos = villager.getPosition();
-
-            synchronized (lock) {
-                if (lastPos.getX() != newPos.getX() || lastPos.getZ() != newPos.getZ() || lastPos.getY() != newPos.getY())
+            synchronized (pathingLock) {
+                if (needsRegenConnections)
                     villager.pathing.createConnectionsTable(villager.village.geography);
 
-                lastPos = newPos;
+                needsRegenConnections = false;
 
                 AStarPathing.PathingWorker workerForPath = villager.pathing.createWorkerForPath(villager, villager.getPosition().getX(), villager.getPosition().getZ(), pos.getX(), pos.getZ());
 
-
                 List<PathPoint> pathViaNodes = workerForPath.getPathViaNodes();
 
-                if (pathViaNodes == null) return null;
+                if (pathViaNodes == null) {
+                    //System.out.println("Null path returned");
+                    return null;
+                }
 
                 PathPoint[] points = pathViaNodes.toArray(new PathPoint[pathViaNodes.size()]);
 
+                //System.out.println("Path found");
                 return new AS_PathEntity(points);
             }
         } catch (AStarPathing.PathingException e) {
@@ -63,9 +65,9 @@ public class MillPathNavigate extends PathNavigateGround {
                 System.out.println(e.getMessage());
             }
             return null;
-        } catch(StackOverflowError ignored ) {
-            //Geniunely, the stack overflows at org.millenaire.pathing.AStarPathing.buildPointsNode(AStarPathing.java:644)
-            //It happens, apparantly when pathfinding is not possible in a very specific way.
+        } catch (StackOverflowError ignored) {
+            //Genuinely, the stack overflows at org.millenaire.pathing.AStarPathing.buildPointsNode(AStarPathing.java:644)
+            //It happens, apparently when pathfinding is not possible in a very specific way.
             //Meh. Suppress it.
             System.out.println("(Suppressed a multi-hundred line StackOverflow. Pathfinding was impossible)");
             return null;

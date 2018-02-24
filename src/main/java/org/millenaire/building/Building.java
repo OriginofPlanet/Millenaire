@@ -12,8 +12,9 @@ import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import org.millenaire.CommonUtilities;
+import org.millenaire.MillConfig;
 import org.millenaire.MillCulture;
-import org.millenaire.VillageGeography;
+import org.millenaire.village.VillageGeography;
 import org.millenaire.blocks.*;
 import org.millenaire.pathing.MillPathNavigate;
 
@@ -91,6 +92,14 @@ public class Building {
      */
     public String nativeName;
     /**
+     * The ID for the project of this building
+     */
+    public String ID;
+    /**
+     * What level building this is
+     */
+    public int level;
+    /**
      * All valid male villager types
      */
     public String[] maleVillagerType;
@@ -117,11 +126,12 @@ public class Building {
     /**
      * All the blocks in this building.
      */
-    IBlockState[][][] blocksInBuilding;
+    public IBlockState[][][] blocksInBuilding;
 
-    public Building(MillCulture cultureIn, int level) {
-
-        //computeCost();
+    public Building(MillCulture cultureIn, int level, String ID) {
+        this.ID = ID;
+        this.level = level;
+        computeCost();
     }
 
     public Building(int level, int pathLevelIn, Building parent) {
@@ -141,6 +151,8 @@ public class Building {
         maleVillagerType = parent.maleVillagerType;
         femaleVillagerType = parent.femaleVillagerType;
         pathWidth = parent.pathWidth;
+        ID = parent.ID;
+        this.level = level;
 
         pathLevel = pathLevelIn;
         if (pathLevel != parent.pathLevel) {
@@ -267,40 +279,40 @@ public class Building {
      * @param geo              The geography of the village this building is in, used to determine if the terrain is suitable.
      * @param pathing          An instance of {@link MillPathNavigate}, for determining whether a location is reachable
      * @param center           The central location to search around.
-     * @param radiusMultiplier A multiplier on the min and max distances from the central location.
+     * @param maxRadius        When multiplied by {@link Building#maxDistance}, gives the max radius from the center pos.
      * @param random           A random
      * @param orientation      Which way this building is or should be facing.
-     * @return A {@link BuildingLocation}, which contains a location if a valid placement was found, or doesn't if one wasn't.
+     * @return A {@link BuildingLocation} if a valid placement was found, or null if one wasn't.
      */
-    public BuildingLocation findBuildingLocation(VillageGeography geo, MillPathNavigate pathing, BlockPos center, int radiusMultiplier, Random random, EnumFacing orientation) {
-        final int ci = center.getX() - geo.mapStartX;
-        final int cj = center.getZ() - geo.mapStartZ;
+    public BuildingLocation findBuildingLocation(VillageGeography geo, MillPathNavigate pathing, BlockPos center, int maxRadius, Random random, EnumFacing orientation) {
+        final int relativeCenterX = center.getX() - geo.mapStartX;
+        final int relativeCenterZ = center.getZ() - geo.mapStartZ;
 
-        int radius = (int) (radiusMultiplier * minDistance);
-        radiusMultiplier = (int) (radiusMultiplier * maxDistance);
+        int radius = (int) (maxRadius * minDistance);
+        maxRadius = (int) (maxRadius * maxDistance);
 
-        for (int i = 0; i < geo.length; i++) {
-            for (int j = 0; j < geo.width; j++) {
-                geo.buildTested[i][j] = false;
+        for (int x = 0; x < geo.length; x++) {
+            for (int z = 0; z < geo.width; z++) {
+                geo.buildTested[x][z] = false;
             }
         }
 
-        while (radius < radiusMultiplier) {
-            final int minxX = Math.max(0, ci - radius);
-            final int maxX = Math.min(geo.length - 1, ci + radius);
-            final int minZ = Math.max(0, cj - radius);
-            final int maxZ = Math.min(geo.width - 1, cj + radius);
+        while (radius < maxRadius) {
+            final int minxX = Math.max(0, relativeCenterX - radius);
+            final int maxX = Math.min(geo.length - 1, relativeCenterX + radius);
+            final int minZ = Math.max(0, relativeCenterZ - radius);
+            final int maxZ = Math.min(geo.width - 1, relativeCenterZ + radius);
 
             //noinspection Duplicates
-            for (int i = minxX; i < maxX; i++) {
-                if (cj - radius == minZ) {
-                    final LocationReturn lr = testLocation(geo, center, i, minZ, orientation, pathing);
+            for (int x = minxX; x < maxX; x++) {
+                if (relativeCenterZ - radius == minZ) {
+                    final LocationReturn lr = testLocation(geo, center, x, minZ, orientation, pathing);
 
                     if (lr.location != null)
                         return lr.location;
                 }
-                if (cj + radius == maxZ) {
-                    final LocationReturn lr = testLocation(geo, center, i, minZ, orientation, pathing);
+                if (relativeCenterZ + radius == maxZ) {
+                    final LocationReturn lr = testLocation(geo, center, x, minZ, orientation, pathing);
 
                     if (lr.location != null) {
                         return lr.location;
@@ -310,14 +322,14 @@ public class Building {
 
             //noinspection Duplicates
             for (int j = minZ; j < maxZ; j++) {
-                if (ci - radius == minxX) {
+                if (relativeCenterX - radius == minxX) {
                     final LocationReturn lr = testLocation(geo, center, j, minZ, orientation, pathing);
 
                     if (lr.location != null) {
                         return lr.location;
                     }
                 }
-                if (ci + radius == maxX) {
+                if (relativeCenterX + radius == maxX) {
                     final LocationReturn lr = testLocation(geo, center, j, minZ, orientation, pathing);
 
                     if (lr.location != null) {
@@ -329,7 +341,7 @@ public class Building {
             radius++;
         }
 
-        System.out.println("building search unsuccessful");
+        //System.out.println("building search unsuccessful");
         return null;
     }
 
@@ -621,33 +633,34 @@ public class Building {
 
     /**
      * Checks if we can build in the specified location.
+     *
      * @param geography The village geography, used to check terrain.
-     * @param center The center of the village
-     * @param x The x coord to check
-     * @param z The z coord to check
-     * @param facing Which way this building is facing.
-     * @param pathing A {@link MillPathNavigate} instance, used to check that the given location is reachable.
+     * @param center    The center of the village
+     * @param cornerX   The X coord of one corner to check
+     * @param cornerZ   The Z coord of one corner to check
+     * @param facing    Which way this building is facing.
+     * @param pathing   A {@link MillPathNavigate} instance, used to check that the given location is reachable.
      * @return A LocationReturn with a location if a valid placement if found, or one with an error code and the coordinates of the block that caused the error otherwise.
      */
-    private LocationReturn testLocation(VillageGeography geography, BlockPos center, int x, int z, EnumFacing facing, MillPathNavigate pathing) {
+    private LocationReturn testLocation(VillageGeography geography, BlockPos center, int cornerX, int cornerZ, EnumFacing facing, MillPathNavigate pathing) {
         EnumFacing orientation;
 
         pathing.setSearchRange(128);
 
-        final int relativeX = x + geography.mapStartX - center.getX();
-        final int relativeZ = z + geography.mapStartZ - center.getZ();
+        final int cornerRelativeX = cornerX + geography.mapStartX - center.getX();
+        final int cornerRelativeZ = cornerZ + geography.mapStartZ - center.getZ();
 
-        geography.buildTested[x][z] = true;
+        geography.buildTested[cornerX][cornerZ] = true;
 
         if (facing == null || facing.getIndex() < 2) {
-            if (relativeX * relativeX > relativeZ * relativeZ) {
-                if (relativeX > 0) {
+            if (cornerRelativeX * cornerRelativeX > cornerRelativeZ * cornerRelativeZ) {
+                if (cornerRelativeX > 0) {
                     orientation = EnumFacing.NORTH;
                 } else {
                     orientation = EnumFacing.SOUTH;
                 }
             } else {
-                if (relativeZ > 0) {
+                if (cornerRelativeZ > 0) {
                     orientation = EnumFacing.EAST;
                 } else {
                     orientation = EnumFacing.WEST;
@@ -659,92 +672,64 @@ public class Building {
 
         orientation = EnumFacing.getFront((orientation.getHorizontalIndex() + buildingOrientation.getHorizontalIndex()) % 4);
 
-        int xwidth;
-        int zwidth;
+        BlockPos oppositeCorner = CommonUtilities.adjustForOrientation(cornerX, 0, cornerZ, width, length, orientation);
 
-        if (orientation == EnumFacing.NORTH || orientation == EnumFacing.SOUTH) {
-            xwidth = length + areaToClear * 2 + 2;
-            zwidth = width + areaToClear * 2 + 2;
-        } else {
-            xwidth = width + areaToClear * 2 + 2;
-            zwidth = length + areaToClear * 2 + 2;
+        int minX = cornerX;
+        int minZ = cornerZ;
+        int maxX = oppositeCorner.getX();
+        int maxZ = oppositeCorner.getZ();
+
+        if(minX > maxX) {
+            int temp = maxX;
+            maxX = minX;
+            minX = temp;
         }
 
-        int altitudeTotal = 0;
-        int nbPoints = 0;
-        int nbError = 0;
-
-        int allowedErrors = 10;
-        boolean hugeBuilding = false;
-
-        if (xwidth * zwidth > 6000) {
-            allowedErrors = 1500;
-            hugeBuilding = true;
-        } else if (xwidth * zwidth > 200) {
-            allowedErrors = xwidth * zwidth / 20;
+        if(minZ > maxZ) {
+            int temp = maxZ;
+            maxZ = minZ;
+            minZ = temp;
         }
+
+        minX -= MillConfig.minBuildingDistance;
+        minZ -= MillConfig.minBuildingDistance;
+        maxX += MillConfig.minBuildingDistance;
+        maxZ += MillConfig.minBuildingDistance;
 
         boolean reachable = false;
 
-        for (int i = 0; i <= xwidth; i++) {
-            for (int j = 0; j <= zwidth; j++) {
-                int ci, cj;
-                ci = x + i;
-                cj = z + j;
+        for (int xPos = minX; xPos <= maxX; xPos++) {
+            for (int zPos = minZ; zPos <= maxZ; zPos++) {
 
-
-                if (ci < 0 || cj < 0 || ci >= geography.length || cj >= geography.width) {
-                    BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                if (xPos < 0 || zPos < 0 || xPos >= geography.length || zPos >= geography.width) {
+                    BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
                     return new LocationReturn(LocationReturn.OUTSIDE_RADIUS, p);
                 }
 
-                if (geography.buildingLoc[ci][cj]) {
-                    if (nbError > allowedErrors) {
-                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                if (geography.buildingLoc[xPos][zPos]) {
+                    final BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
-                        return new LocationReturn(LocationReturn.LOCATION_CLASH, p);
-                    } else {
-                        nbError += 5;
-                    }
-                } else if (geography.buildingForbidden[ci][cj]) {
-                    if (!hugeBuilding || nbError > allowedErrors) {
-                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                    return new LocationReturn(LocationReturn.LOCATION_CLASH, p);
+                } else if (geography.buildingForbidden[xPos][zPos]) {
+                    final BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
-                        return new LocationReturn(LocationReturn.CONSTRUCTION_FORBIDDEN, p);
-                    } else {
-                        nbError++;
-                    }
-                } else if (geography.danger[ci][cj]) {
-                    if (nbError > allowedErrors) {
-                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                    return new LocationReturn(LocationReturn.CONSTRUCTION_FORBIDDEN, p);
+                } else if (geography.danger[xPos][zPos]) {
+                    final BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
-                        return new LocationReturn(LocationReturn.DANGER, p);
-                    } else {
-                        nbError++;
-                    }
-                } else if (!geography.canBuild[ci][cj]) {
-                    if (nbError > allowedErrors) {
-                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                    return new LocationReturn(LocationReturn.DANGER, p);
+                } else if (!geography.canBuild[xPos][zPos]) {
+                    final BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
-                        return new LocationReturn(LocationReturn.WRONG_ALTITUDE, p);
-                    } else {
-                        nbError++;
-                    }
-                } else if (geography.water[ci][cj]) {
-                    if (nbError > allowedErrors) {
-                        final BlockPos p = new BlockPos(ci + geography.mapStartX, 64, cj + geography.mapStartZ);
+                    return new LocationReturn(LocationReturn.WRONG_ALTITUDE, p);
+                } else if (geography.water[xPos][zPos]) {
+                    final BlockPos p = new BlockPos(xPos + geography.mapStartX, 64, zPos + geography.mapStartZ);
 
-                        return new LocationReturn(LocationReturn.NOT_REACHABLE, p);
-                    } else {
-                        nbError++;
-                    }
+                    return new LocationReturn(LocationReturn.WATER, p);
                 }
 
-                reachable = !pathing.tryMoveToXYZ(ci, geography.world.getHeight(new BlockPos(ci, 10, cj)).getY(), cj, 0.5D);
-
-                altitudeTotal += geography.topGround[ci][cj];
-                nbPoints++;
+                reachable = !pathing.tryMoveToXYZ(xPos, geography.world.getHeight(new BlockPos(xPos, 10, zPos)).getY(), zPos, 0.5D);
             }
         }
 
@@ -752,18 +737,38 @@ public class Building {
             return new LocationReturn(LocationReturn.NOT_REACHABLE, center);
         }
 
-        final int altitude = (int) (1 + altitudeTotal * 1.0f / nbPoints);
 
         //Adjust for trees + plants
         World world = geography.world;
-        BlockPos highestY = new BlockPos(x + geography.mapStartX, altitude, z + geography.mapStartZ);
 
+        final int altitude = world.getHeight(new BlockPos(cornerX + geography.mapStartX, 10, cornerZ + geography.mapStartZ)).getY();
+
+        BlockPos highestY = new BlockPos(cornerX + geography.mapStartX, altitude, cornerZ + geography.mapStartZ);
+
+        //If the highest block is a tree or plant we want to be below it.
         Block b = world.getBlockState(highestY).getBlock();
         while (b == Blocks.leaves || b == Blocks.leaves2 || b == Blocks.log || b == Blocks.log2 || b == Blocks.vine
                 || b == Blocks.brown_mushroom_block || b == Blocks.red_mushroom_block || b == Blocks.tallgrass
-                || b == Blocks.double_plant) {
+                || b == Blocks.double_plant || b == Blocks.red_flower || b == Blocks.red_flower || b == Blocks.reeds
+                || !b.isNormalCube()) {
             highestY = highestY.subtract(new Vec3i(0, 1, 0));
             b = world.getBlockState(highestY).getBlock();
+
+            //Used for e.g. the gap under leaves when not at the trunk
+            while (b == Blocks.air) {
+                highestY = highestY.subtract(new Vec3i(0, 1, 0));
+                b = world.getBlockState(highestY).getBlock();
+            }
+        }
+
+        //If the highest block (or the one above it, i.e. we are at the bottom of an ocean) is a fluid we want to be above it.
+        Block b2 = world.getBlockState(highestY.up()).getBlock();
+        if (b2 == Blocks.water || b == Blocks.flowing_water || b == Blocks.lava || b == Blocks.flowing_lava) {
+            b = b2;
+            while (b == Blocks.water || b == Blocks.flowing_water || b == Blocks.lava || b == Blocks.flowing_lava) {
+                highestY = highestY.up();
+                b = world.getBlockState(highestY).getBlock();
+            }
         }
 
         final BuildingLocation l = new BuildingLocation(this, highestY, orientation);
@@ -773,16 +778,16 @@ public class Building {
 
     /**
      * Returns an array of all special points and blocks in this building.
-     * @param worldIn The world to be reading from
+     *
+     * @param worldIn  The world to be reading from
      * @param location The location of the building
-     * @param villageGeneration True if we are in WorldGen, else false.
      * @return An array of {@link BuildingBlock BuildingBlocks}
      */
-    public BuildingBlock[] getBuildingPoints(World worldIn, BuildingLocation location, boolean villageGeneration) {
+    public BuildingBlock[] getBuildingPoints(World worldIn, BuildingLocation location) {
         final int x = location.position.getX();
         final int y = location.position.getY();
         final int z = location.position.getZ();
-        List<BuildingBlock> bblocks = new ArrayList<>();
+        List<BuildingBlock> buildingBlocks = new ArrayList<>();
 
         EnumFacing orientation = location.orientation;
 
@@ -815,10 +820,10 @@ public class Building {
                         if (i >= offset - 1) {
                             // for each block away from building, one extra height allowed
                             final BlockPos p = CommonUtilities.adjustForOrientation(x, y + i, z, j - lengthOffset, ak - widthOffset, orientation);
-                            bblocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARGROUND));
+                            buildingBlocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARGROUND));
                         } else {
                             final BlockPos p = CommonUtilities.adjustForOrientation(x, y + i, z, j - lengthOffset, k - widthOffset, orientation);
-                            bblocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARTREE));
+                            buildingBlocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARTREE));
                         }
                     }
                 }
@@ -849,13 +854,13 @@ public class Building {
 
                         if (-i > offset) {
                             final BlockPos p = CommonUtilities.adjustForOrientation(x, y + i, z, j - lengthOffset, k - widthOffset, orientation);
-                            bblocks.add(new BuildingBlock(null, p, BuildingBlock.PRESERVEGROUNDDEPTH));
+                            buildingBlocks.add(new BuildingBlock(null, p, BuildingBlock.PRESERVEGROUNDDEPTH));
                         } else if (-i == offset) {
                             final BlockPos p = CommonUtilities.adjustForOrientation(x, y + i, z, j - lengthOffset, k - widthOffset, orientation);
-                            bblocks.add(new BuildingBlock(null, p, BuildingBlock.PRESERVEGROUNDSURFACE));
+                            buildingBlocks.add(new BuildingBlock(null, p, BuildingBlock.PRESERVEGROUNDSURFACE));
                         } else {
                             final BlockPos p = CommonUtilities.adjustForOrientation(x, y + i, z, j - lengthOffset, k - widthOffset, orientation);
-                            bblocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARTREE));
+                            buildingBlocks.add(new BuildingBlock(null, p, BuildingBlock.CLEARTREE));
                         }
                     }
                 }
@@ -873,7 +878,7 @@ public class Building {
                     BlockPos p = CommonUtilities.adjustForOrientation(x, y + i + depth, z, j - lengthOffset, ak - widthOffset, orientation);
 
                     if (state.getBlock() == Blocks.air) {
-                        bblocks.add(new BuildingBlock(state, p));
+                        buildingBlocks.add(new BuildingBlock(state, p));
                     }
                 }
             }
@@ -930,7 +935,7 @@ public class Building {
                             state = Blocks.dirt.getDefaultState();
                         }
 
-                        bblocks.add(new BuildingBlock(state, p));
+                        buildingBlocks.add(new BuildingBlock(state, p));
                     }
                 }
             }
@@ -981,26 +986,26 @@ public class Building {
                     }
 
                     if (state.getBlock() != null && !firstPass(state)) {
-                        bblocks.add(new BuildingBlock(state, p));
+                        buildingBlocks.add(new BuildingBlock(state, p));
                     }
                 }
             }
         }
 
-        final HashMap<BlockPos, BuildingBlock> bbmap = new HashMap<BlockPos, BuildingBlock>();
+        final HashMap<BlockPos, BuildingBlock> buildingBlockMap = new HashMap<>();
 
-        final boolean[] toDelete = new boolean[bblocks.size()];
+        final boolean[] toDelete = new boolean[buildingBlocks.size()];
 
-        for (int i = 0; i < bblocks.size(); i++) {
-            final BuildingBlock bb = bblocks.get(i);
-            Block block = bb.blockState != null ? bb.blockState.getBlock() : null;
-            IBlockState state = bb.blockState;
-            int special = bb.specialBlock;
+        for (int i = 0; i < buildingBlocks.size(); i++) {
+            final BuildingBlock bb = buildingBlocks.get(i);
+            Block block;
+            IBlockState state;
+            int special;
 
-            if (bbmap.containsKey(bb.position)) {
-                block = bbmap.get(bb.position).blockState != null ? bbmap.get(bb.position).blockState.getBlock() : null;
-                state = bbmap.get(bb.position).blockState;
-                special = bbmap.get(bb.position).specialBlock;
+            if (buildingBlockMap.containsKey(bb.position)) {
+                block = buildingBlockMap.get(bb.position).blockState != null ? buildingBlockMap.get(bb.position).blockState.getBlock() : null;
+                state = buildingBlockMap.get(bb.position).blockState;
+                special = buildingBlockMap.get(bb.position).specialBlock;
             } else {
                 block = worldIn.getBlockState(bb.position).getBlock();
                 state = worldIn.getBlockState(bb.position);
@@ -1020,21 +1025,21 @@ public class Building {
             } else if (bb.specialBlock == BuildingBlock.PRESERVEGROUNDSURFACE && CommonUtilities.getValidGroundBlock(block, true) == block) {
                 toDelete[i] = true;
             } else {
-                bbmap.put(bb.position, bb);
+                buildingBlockMap.put(bb.position, bb);
                 toDelete[i] = false;
             }
         }
 
         for (int i = toDelete.length - 1; i >= 0; i--) {
             if (toDelete[i]) {
-                bblocks.remove(i);
+                buildingBlocks.remove(i);
             }
         }
 
-        BuildingBlock[] abblocks = new BuildingBlock[bblocks.size()];
+        BuildingBlock[] abblocks = new BuildingBlock[buildingBlocks.size()];
 
-        for (int i = 0; i < bblocks.size(); i++) {
-            abblocks[i] = bblocks.get(i);
+        for (int i = 0; i < buildingBlocks.size(); i++) {
+            abblocks[i] = buildingBlocks.get(i);
         }
 
         return abblocks;
@@ -1042,6 +1047,7 @@ public class Building {
 
     /**
      * Returns true if this is a valid block.
+     *
      * @param state The block to check
      * @return True if this is a solid cube (or one of the millenaire decorative blocks)
      */
@@ -1055,8 +1061,9 @@ public class Building {
 
     /**
      * Determines whether the given block is one of the special positions, and if so adds it to the provided BuildingLocation
-     * @param state The block to check
-     * @param pos The position of the block
+     *
+     * @param state    The block to check
+     * @param pos      The position of the block
      * @param location The BuildingLocation to add any special locations to.
      */
     private void setReferencePositions(IBlockState state, BlockPos pos, BuildingLocation location) {
@@ -1095,7 +1102,8 @@ public class Building {
         static final int CONSTRUCTION_FORBIDDEN = 3;
         static final int WRONG_ALTITUDE = 4;
         static final int DANGER = 5;
-        static final int NOT_REACHABLE = 4;
+        static final int NOT_REACHABLE = 6;
+        static final int WATER = 7;
 
         BuildingLocation location;
         int errorCode;

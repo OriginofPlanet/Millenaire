@@ -135,7 +135,7 @@ public class StoredPosition extends Block {
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return ((EnumType) state.getValue(VARIANT)).getMetadata();
+        return state.getValue(VARIANT).getMetadata();
     }
 
     @Override
@@ -145,7 +145,7 @@ public class StoredPosition extends Block {
 
     //////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-    public static enum EnumType implements IStringSerializable {
+    public enum EnumType implements IStringSerializable {
         TRADEPOS(0, "tradePos"),
         SOURCEPOS(1, "sourcePos"),
         PATHPOS(2, "pathPos"),

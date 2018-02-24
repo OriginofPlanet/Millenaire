@@ -1,18 +1,24 @@
 package org.millenaire.entities;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 import org.millenaire.CommonUtilities;
 import org.millenaire.MillCulture;
 import org.millenaire.MillCulture.VillageType;
 import org.millenaire.VillagerType;
 import org.millenaire.blocks.BlockVillageStone;
+import org.millenaire.building.Building;
+import org.millenaire.building.BuildingLocation;
 import org.millenaire.village.Village;
+import org.millenaire.village.VillageTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -54,6 +60,15 @@ public class TileEntityVillageStone extends TileEntity {
      * The UUID of the village.
      */
     private UUID villageID;
+    /**
+     * True if we need to read from the village tracker once we get a world. Because minecraft loads us from NBT
+     * BEFORE we actually get put into the world.
+     */
+    private boolean needsReadOnGetWorld = false;
+    /**
+     * Contains all the buildings loaded from NBT and populated into the village when {@link Village#readDataFromTE()} is called
+     */
+    public NBTTagList buildings;
 
     /**
      * Called by MC when this TE is created (i.e. generated) for the first time.
@@ -62,7 +77,7 @@ public class TileEntityVillageStone extends TileEntity {
     public void onLoad() {
         if (worldObj.isRemote) return;
 
-        //System.out.println("TEVS created");
+        //System.out.println("TEVS at " + this.getPos() + " created.");
 
         if (!villageNotGenerated) return;
 
@@ -89,7 +104,9 @@ public class TileEntityVillageStone extends TileEntity {
 
                     villageName = villageType.getVillageName();
 
-                    village = Village.createVillage(this.getPos(), world, villageType, MillCulture.getCulture(culture), villageName);
+                    //System.out.println("TEVS at " + getPos() + " creating village...");
+
+                    village = Village.createVillage(getPos(), world, villageType, MillCulture.getCulture(culture), villageName);
                     village.setupVillage();
 
                     markDirty();
@@ -171,6 +188,16 @@ public class TileEntityVillageStone extends TileEntity {
         return null;
     }
 
+    @Override
+    public void setWorldObj(World worldIn) {
+        super.setWorldObj(worldIn);
+        if (needsReadOnGetWorld) {
+            village = VillageTracker.get(worldObj).getVillageByUUID(villageID);
+            needsReadOnGetWorld = false;
+        }
+    }
+
+
     /**
      * Called by MC to allow us to read any saved state. Used here to prevent villages being generated where they already
      * existed.
@@ -179,11 +206,18 @@ public class TileEntityVillageStone extends TileEntity {
      */
     @Override
     public void readFromNBT(NBTTagCompound compound) {
-        System.out.println("TEVS Reading state");
+        super.readFromNBT(compound);
+        //System.out.println("TEVS Reading state");
         String uuidRaw;
         if ((uuidRaw = compound.getString("VillageUUID")) != null) {
             villageID = UUID.fromString(uuidRaw);
+            villageType = MillCulture.findVillageTypeByID(compound.getString("Type"));
+            culture = compound.getString("Culture");
+            villageName = compound.getString("Name");
             villageNotGenerated = false;
+            needsReadOnGetWorld = true;
+
+            buildings = compound.getTagList("Buildings", Constants.NBT.TAG_COMPOUND);
         }
     }
 
@@ -194,7 +228,26 @@ public class TileEntityVillageStone extends TileEntity {
      */
     @Override
     public void writeToNBT(NBTTagCompound compound) {
-        if (village != null)
+        super.writeToNBT(compound);
+        //System.out.println("TEVS Writing State");
+        if (village != null) {
             compound.setString("VillageUUID", village.getUUID().toString());
+            compound.setString("Type", villageType.id);
+            compound.setString("Culture", culture);
+            compound.setString("Name", villageName);
+
+            NBTTagList buildings = new NBTTagList();
+
+            for (Map.Entry<BuildingLocation, Building> entry : village.geography.buildingLocations.entrySet()) {
+                NBTTagCompound tag = new NBTTagCompound();
+                tag.setString("ID", entry.getValue().ID);
+                tag.setInteger("Level", entry.getValue().level);
+                tag.setLong("StartingPos", entry.getKey().position.toLong());
+                tag.setString("Orientation", entry.getKey().orientation.getName());
+                buildings.appendTag(tag);
+            }
+
+            compound.setTag("Buildings", buildings);
+        }
     }
 }

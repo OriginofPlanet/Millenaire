@@ -8,7 +8,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import org.millenaire.MillConfig;
-import org.millenaire.VillageTracker;
+import org.millenaire.village.VillageTracker;
 import org.millenaire.blocks.MillBlocks;
 
 import java.util.HashSet;
@@ -127,9 +127,7 @@ public class VillageGenerator implements IWorldGenerator {
 
         // check if other villages are too close
         if (!VillageTracker.get(world).isTooCloseToOtherVillage(villageCenter, MillConfig.minVillageDistance)) {
-            BlockPos nPos = world.getTopSolidOrLiquidBlock(villageCenter);
-
-            nPos.subtract(new Vec3i(0, 20, 0)); //Take away 20 blocks so it doesn't interfere with pathfinding or such
+            BlockPos nPos = new BlockPos(villageCenter.getX(), 10, villageCenter.getZ());
 
             System.out.println("Attempting to generate a village at or near " + nPos.getX() + ", " + nPos.getZ());
             VillageTracker.get(world).registerVillagePos(nPos);

@@ -16,6 +16,8 @@ import org.millenaire.building.BuildingLocation;
 import org.millenaire.building.BuildingTypes;
 import org.millenaire.building.PlanIO;
 import org.millenaire.networking.PacketShowBuildPoints;
+import org.millenaire.village.Village;
+import org.millenaire.village.VillageTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,13 +77,52 @@ public class MillCommand extends CommandBase {
                 String culture = args[1].split(":")[0];
                 String buildingID = args[1].split(":")[1];
                 int level = Integer.parseInt(args[2]);
+                EnumFacing direction = EnumFacing.EAST;
+                boolean flatten = false;
 
-                Building building = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level);
+                if (args.length > 3) {
+                    direction = EnumFacing.byName(args[3]);
+                    if (direction == EnumFacing.DOWN || direction == EnumFacing.UP) return;
+                }
+                if (args.length > 4) {
+                    flatten = Boolean.parseBoolean(args[4]);
+                }
 
-                PlanIO.placeBuilding(building, new BuildingLocation(building, sender.getPosition(), EnumFacing.EAST), sender.getEntityWorld());
-            } catch (Exception ignored) {
+                Building building = PlanIO.loadSchematic(PlanIO.getBuildingTag(buildingID, MillCulture.getCulture(culture), true), MillCulture.getCulture(culture), level, args[1]);
 
+                if(building == null) {
+                    sender.addChatMessage(new ChatComponentText("Building (or building level) not found."));
+                    return;
+                }
+
+                if (flatten) {
+                    Village v = VillageTracker.get(sender.getEntityWorld()).getVillageAt(sender.getPosition());
+                    if(v == null) {
+                        sender.addChatMessage(new ChatComponentText("Terrain flattening can only be used within the bounds of a village."));
+                        return;
+                    }
+
+                    sender.addChatMessage(new ChatComponentText("Flattening terrain..."));
+                    PlanIO.flattenTerrainForBuilding(building, new BuildingLocation(building, sender.getPosition(), direction),
+                            v.geography);
+                }
+
+                sender.addChatMessage(new ChatComponentText("Spawning a level " + level + " " + buildingID + " facing " + direction.getName()));
+                PlanIO.placeBuilding(building, new BuildingLocation(building, sender.getPosition(), direction), sender.getEntityWorld());
+            } catch (Exception e) {
+                sender.addChatMessage(new ChatComponentText(e.toString()));
+                e.printStackTrace();
             }
+        } else if(args[0].equalsIgnoreCase("top")) {
+            Village v = VillageTracker.get(sender.getEntityWorld()).getVillageAt(sender.getPosition());
+            if(v == null) {
+                sender.addChatMessage(new ChatComponentText("Must be in a village"));
+                return;
+            }
+
+            sender.addChatMessage(new ChatComponentText(v.geography.topGround
+                    [sender.getPosition().getX() - v.geography.mapStartX]
+                    [sender.getPosition().getZ() - v.geography.mapStartZ] + ""));
         }
     }
 
@@ -98,7 +139,7 @@ public class MillCommand extends CommandBase {
 
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-        return getListOfStringsMatchingLastWord(args, "village", "loneBuildings", "showBuildPoints");
+        return getListOfStringsMatchingLastWord(args, "village", "loneBuildings", "showBuildPoints", "spawn", "top");
     }
 
     @Override

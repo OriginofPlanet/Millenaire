@@ -14,13 +14,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.BlockFluidBase;
 import org.millenaire.MillCulture;
 import org.millenaire.Millenaire;
-import org.millenaire.VillageGeography;
+import org.millenaire.village.VillageGeography;
 import org.millenaire.networking.PacketSayTranslatedMessage;
 
 import java.io.*;
@@ -205,7 +204,7 @@ public class PlanIO {
             }
             FileInputStream fis = new FileInputStream(schem);
 
-            Building plan = loadSchematic(CompressedStreamTools.readCompressed(fis), MillCulture.normanCulture, level);
+            Building plan = loadSchematic(CompressedStreamTools.readCompressed(fis), MillCulture.normanCulture, level, name);
 
             placeBuilding(plan, new BuildingLocation(plan, signPos, EnumFacing.EAST), world);
         } catch (IOException e) {
@@ -224,71 +223,91 @@ public class PlanIO {
      */
     public static void flattenTerrainForBuilding(Building building, BuildingLocation loc, VillageGeography geo) {
         //System.out.println("Flattening Terrain");
-        int ylevel = loc.position.getY();
+        int buildingYPos = loc.position.getY();
 
         World world = geo.world;
 
-        int margin = 3; //TODO: Tweak?
+        for (int xPos = loc.minXMargin; xPos <= loc.maxXMargin; xPos++) {
+            for (int zPos = loc.minZMargin; zPos <= loc.maxZMargin; zPos++) {
+                int targetY = buildingYPos;
+                BlockPos highestY = world.getHeight(new BlockPos(xPos, buildingYPos, zPos));
 
-        BlockPos corner1 = loc.position.subtract(new Vec3i(margin, 0, margin));
-        BlockPos corner2 = loc.position.add(building.width + margin, 0, building.length + margin);
-
-        //for (int xPos = corner1.getX(); xPos <= corner2.getX(); xPos++) {
-        for (int xPos = loc.minxMargin; xPos <= loc.maxxMargin; xPos++) {
-            //for (int zPos = corner1.getZ(); zPos <= corner2.getZ(); zPos++) {
-            for (int zPos = loc.minzMargin; zPos <= loc.maxzMargin; zPos++) {
-                BlockPos highestY = world.getHeight(new BlockPos(xPos, ylevel, zPos));
-
+                //Get to the bottom of any pools of liquid
                 while(world.getBlockState(highestY).getBlock() instanceof BlockFluidBase
                         || world.getBlockState(highestY).getBlock() instanceof BlockLiquid) {
-                    highestY.down();
+                    highestY = highestY.down();
                 }
 
-                IBlockState topBlock = world.getBiomeGenForCoords(highestY).topBlock;
-                IBlockState fillerBlock = world.getBiomeGenForCoords(highestY).fillerBlock.getBlock() == Blocks.sand ? Blocks.sandstone.getDefaultState() : world.getBiomeGenForCoords(highestY).fillerBlock;
-
-                /*if (geo.buildingLoc[xPos - geo.mapStartX][zPos - geo.mapStartZ]) {
-                    //Skip flattening if it would overlap
-                    continue;
-                }*/
-
-                //System.out.println("Flattening at " + xPos + ", " + zPos);
-
-                //Find highest actual surface block, to see if we need to block up.
+                //Find actual highest block - i.e. not leaves, water, grass, or anything else such
                 Block b = world.getBlockState(highestY).getBlock();
                 while (b == Blocks.water || b == Blocks.flowing_water || b == Blocks.leaves || b == Blocks.leaves2
-                        || b == Blocks.log || b == Blocks.log2) {
-                    highestY = highestY.subtract(new Vec3i(0, 1, 0));
+                        || b == Blocks.log || b == Blocks.log2 || b == Blocks.air || b == Blocks.vine || b == Blocks.cocoa
+                        || b == Blocks.melon_block || b == Blocks.pumpkin || b == Blocks.snow_layer || b == Blocks.tallgrass) {
+                    highestY = highestY.down();
                     b = world.getBlockState(highestY).getBlock();
                 }
 
-                //System.out.println("Highest actual y is at " + highestY + ", target y is " + ylevel);
+                //Remove a couple blocks from the outer layer in attempt to smooth terrain
+                if(highestY.getY() != targetY) {
+                    if (xPos < loc.minX - 1) {
+                        if (highestY.getY() > targetY)
+                            targetY += 1;
+                        else
+                            targetY -= 1;
+                    }
+                    if (xPos > loc.maxX + 1) {
+                        if (highestY.getY() > targetY)
+                            targetY += 1;
+                        else
+                            targetY -= 1;
+                    }
+                    if (zPos < loc.minZ - 1) {
+                        if (highestY.getY() > targetY)
+                            targetY += 1;
+                        else
+                            targetY -= 1;
+                    }
+                    if (zPos > loc.maxZ + 1) {
+                        if (highestY.getY() > targetY)
+                            targetY += 1;
+                        else
+                            targetY -= 1;
+                    }
+                }
+
+                //Get the top and filler block for this biome
+                IBlockState topBlock = world.getBiomeGenForCoords(highestY).topBlock;
+                IBlockState fillerBlock = world.getBiomeGenForCoords(highestY).fillerBlock.getBlock() == Blocks.sand ? Blocks.sandstone.getDefaultState() : world.getBiomeGenForCoords(highestY).fillerBlock;
+
+                //System.out.println("Flattening at " + xPos + ", " + zPos);
+
+                //System.out.println("Highest actual y is at " + highestY + ", target y is " + buildingYPos);
 
                 //Do we need to block up? If so, do so.
-                if (highestY.getY() < ylevel - 1) {
-                    for (int yPos = highestY.getY(); yPos <= ylevel - 2; yPos++) {
+                if (highestY.getY() < targetY - 1) {
+                    for (int yPos = highestY.getY(); yPos <= targetY - 2; yPos++) {
                         //System.out.println("Building up at level " + yPos);
                         world.setBlockState(new BlockPos(xPos, yPos, zPos), fillerBlock);
                     }
                 }
 
                 //Now find the genuine highest block at this point and break down if we need to - e.g. to remove trees.
-                highestY = world.getHeight(new BlockPos(xPos, ylevel, zPos));
+                highestY = world.getHeight(new BlockPos(xPos, buildingYPos, zPos));
 
-                if (highestY.getY() > ylevel) {
-                    for (int yPos = ylevel - 1; yPos <= highestY.getY(); yPos++) {
+                if (highestY.getY() > targetY) {
+                    for (int yPos = targetY; yPos <= highestY.getY(); yPos++) {
                         //System.out.println("Digging down at level " + yPos);
                         world.setBlockState(new BlockPos(xPos, yPos, zPos), Blocks.air.getDefaultState());
                     }
                 }
 
-                //System.out.println("Flattening: Setting top block (" + topBlock.getBlock() + ") at " + (ylevel - 1));
+                //System.out.println("Flattening: Setting top block (" + topBlock.getBlock() + ") at " + (buildingYPos - 1));
                 //Finish the flattening for the actual level we're targeting
-                world.setBlockState(new BlockPos(xPos, ylevel - 1, zPos), topBlock);
+                world.setBlockState(new BlockPos(xPos, targetY - 1, zPos), topBlock);
 
-                //System.out.println("Creating foundation below building at level " + (ylevel + building.depth - 1) + " out of " + fillerBlock.getBlock());
+                //System.out.println("Creating foundation below building at level " + (buildingYPos + building.depth - 1) + " out of " + fillerBlock.getBlock());
                 //Ensure we have grass under anything we build to prevent gravity-affected blocks from falling.
-                world.setBlockState(new BlockPos(xPos, ylevel + building.depth - 1, zPos), fillerBlock);
+                world.setBlockState(new BlockPos(xPos, buildingYPos + building.depth - 1, zPos), fillerBlock);
             }
 
         }
@@ -314,14 +333,18 @@ public class PlanIO {
         //Some blocks must be placed last in order to not drop onto the floor. This stores their locations.
         LinkedHashMap<BlockPos, IBlockState> placeLast = new LinkedHashMap<>();
 
-        for (int x = loc.minx; x < loc.maxx; x++) {
-            for (int y = loc.miny; y < loc.maxy; y++) {
-                for (int z = loc.minz; z < loc.maxz; z++) {
-                    if (blocksToPlaceLast.contains(blocks[y][z][x].getBlock())) {
-                        placeLast.put(new BlockPos(x, y, z), blocks[y][z][x]);
+        for (int x = loc.minX; x < loc.maxX; x++) {
+            for (int y = loc.minY; y < loc.maxY; y++) {
+                for (int z = loc.minZ; z < loc.maxZ; z++) {
+                    int relativeX = x - loc.minX;
+                    int relativeZ = z - loc.minZ;
+                    int relativeY = y - loc.minY;
+
+                    if (blocksToPlaceLast.contains(blocks[relativeY][relativeZ][relativeX].getBlock())) {
+                        placeLast.put(new BlockPos(x, y, z), blocks[relativeY][relativeZ][relativeX]);
                     } else {
                         //System.out.println("Placing a " + blocks[y][z][x].getBlock());
-                        world.setBlockState(new BlockPos(x, y, z), blocks[y][z][x], 2);
+                        world.setBlockState(new BlockPos(x, y, z), blocks[relativeY][relativeZ][relativeX], 2);
                     }
                 }
             }
@@ -339,9 +362,10 @@ public class PlanIO {
      * @param nbt The schematic file.
      * @param culture The culture of the building.
      * @param level What level of building we are placing.
+     * @param ID
      * @return The created {@link Building} object.
      */
-    public static Building loadSchematic(NBTTagCompound nbt, MillCulture culture, int level) {
+    public static Building loadSchematic(NBTTagCompound nbt, MillCulture culture, int level, String ID) {
         //Convert Stream to NBTTagCompound
 
         //width = x-axis, height = y-axis, length = z-axis
@@ -423,14 +447,15 @@ public class PlanIO {
             }
         }
 
-        //load milleniare extra data
+        //load millenaire extra data
         short depth = list.getCompoundTagAt(0).getShort("StartLevel");
 
         String name = nbt.getString("BuildingName");
 
-        return new Building(culture, level)
+        return new Building(culture, level, ID)
                 .setHeightDepth(height, depth).setDistance(0, 5).setOrientation(EnumFacing.EAST).setActualContents(organized).setLengthWidth(length, width)
-                .setNameAndType(name, new String[]{}, new String[]{});
+                .setNameAndType(name, new String[]{}, new String[]{})
+                .setArea(1);
     }
 
     /**
