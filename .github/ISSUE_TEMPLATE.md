@@ -1,5 +1,5 @@
 <!-- 
-  THIS ISSUE TRACKER IS NOT FOR VERSION 1.12.2 OF THE MOD. PLEASE GO TO [THE FORUMS](http://millenaire.org/forum/) SUBMIT ANY ISSUES FOR 1.12.2.
+  This issue tracker is not for the 1.12.2 port of the mod. Please go to [the forums](http://millenaire.org/forum/) to submit any issues for the 1.12.2 port.
   Please ensure that when submitting a bug report that you are using a version above 1.8.9. 
     1.7.10 is no longer supported.
   If you need help with installation or usage, please contact us on our Discord instead.
